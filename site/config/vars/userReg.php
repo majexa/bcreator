@@ -1,0 +1,5 @@
+<?php
+
+return [
+  'nameEnable' => true
+];

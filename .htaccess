@@ -1,0 +1,11 @@
+DirectoryIndex index.php
+
+RewriteEngine on 
+RewriteBase /
+
+RewriteCond %{REQUEST_FILENAME} !-f 
+RewriteRule ^(.*)$ index.php [QSA]
+
+<FilesMatch  ".(gif|jpg|png|bmp|css|js|ico)$">
+  RewriteEngine off
+</FilesMatch>

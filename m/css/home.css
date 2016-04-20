@@ -1,0 +1,12 @@
+.apeform {
+border: 1px solid #ccc;
+margin: 10px;
+padding: 10px;
+width: 200px;
+float: left;
+}
+.apeform input[type=text],
+.apeform input[type=password],
+.apeform input[type=submit]{
+width: 100%;
+}
