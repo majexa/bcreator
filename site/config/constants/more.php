@@ -2,4 +2,4 @@
 
 if (!defined('SITE_DOMAIN')) define('SITE_DOMAIN', 'bmaker.majexa.ru');
 
-define('TEMPLATE_DEBUG', true);
+if (!defined('BUILD_MODE')) define('BUILD_MODE', false);
