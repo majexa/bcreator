@@ -1,0 +1,103 @@
+.bepopup, .bMulti {
+    /*min-height: 250px;*/
+    width: 650px;
+}
+
+
+.bepopup, .bMulti {
+    /*min-height: 250px;*/
+}
+
+.bepopup, #popup2, .bMulti {
+    background-color: #fff;
+    border-radius: 10px 10px 10px 10px;
+    box-shadow: 0 0 25px 5px #999;
+    color: #111;
+    display: none;
+    min-width: 450px;
+    padding: 25px;
+}
+
+.buttonX.b-close, .buttonX.bClose {
+    border-radius: 7px 7px 7px 7px;
+    box-shadow: none;
+    font: bold 131% sans-serif;
+    padding: 0 6px 2px;
+    position: absolute;
+    right: -7px;
+    top: -7px;
+}
+
+.buttonX {
+    background-color: #2b91af;
+    border-radius: 10px;
+    box-shadow: 0 2px 3px rgba(0,0,0,0.3);
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+}
+
+
+.bepopup .bunton {
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto 0 auto;
+    width: 202px !important;
+    height: 37px !important;
+    background: transparent url('/public/images/buttons/g1.png') no-repeat !important;
+    font-size: 18px;
+    line-height: 38px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    box-shadow: none;
+}
+
+.buntonEx {
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 20px auto 0 auto;
+    width: 202px !important;
+    height: 37px !important;
+    background: transparent url('/public/images/buttons/g1.png') no-repeat !important;
+    font-size: 18px;
+    line-height: 38px;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    box-shadow: none;
+}
+
+
+.bepopup .buttonProcessing {
+    background: white url('/public/images/ajax-loader.gif') center center no-repeat !important;
+    border: none !important;
+    color: white !important;
+    font-size: 1px !important;
+    text-align: left !important;
+    background-size: contain !important;
+    cursor: default !important;
+}
+
+.clear, .clr {
+    float: none;
+    clear: both;
+    width: 100%;
+    display: block;
+}
+
+.bgray {
+    border: 1px solid #e0e0e0 !important;
+}
+
+.bred {
+    border: 1px solid red;
+}
+

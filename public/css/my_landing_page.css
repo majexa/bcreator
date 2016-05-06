@@ -1,0 +1,260 @@
+@font-face {
+	font-family: 'Droid Sans';
+	src: url(/public/fonts/DroidSans.ttf);
+}
+
+.content {
+	background: url(/public/images/images_new/background3.png) no-repeat top left;
+	background-size: cover;
+}
+
+.content .title_block {
+	font-family: 'Proxima Nova Semibold';
+	color: #313131;
+	font-size: 45px;
+	padding: 90px 0 35px 0;
+	text-align: center;
+}
+
+.content .subtitle {
+	font-family: 'Proxima Nova Semibold';
+	font-size: 19px;
+	color: #000000;
+	margin: auto;
+	text-align: center;
+	line-height: 30px;
+}
+
+@media(min-width: 320px) {
+	.content .subtitle {
+		width: 100%;
+	}
+}
+
+@media(min-width: 1030px) {
+	.content .subtitle {
+		width: 915px;
+	}
+}
+
+.content .button {
+	text-align: center;
+	padding: 42px 0 67px;
+}
+
+.content .button .link {
+	display: inline-block;
+	color: #FFFFFF;
+	text-decoration: none;
+	font-size: 20px;
+	font-family: 'Proxima Nova Bold';
+	border-style: solid;
+	border-width: 3px;
+	border-color: rgb(10, 14, 103);
+	border-radius: 16px;
+	padding: 18.5px 54.5px;
+	background-image: -moz-linear-gradient( -90deg, rgb(38,110,228) 0%, rgb(18,64,143) 7%, rgb(0,90,238) 58%, rgb(18,64,143) 100%);
+	background-image: -webkit-linear-gradient( -90deg, rgb(38,110,228) 0%, rgb(18,64,143) 7%, rgb(0,90,238) 58%, rgb(18,64,143) 100%);
+	background-image: -ms-linear-gradient( -90deg, rgb(38,110,228) 0%, rgb(18,64,143) 7%, rgb(0,90,238) 58%, rgb(18,64,143) 100%);
+}
+
+.content .button .link .fa {
+	font-size: 22px;
+	margin: 0 10px 0 0;
+}
+
+.content .banner {
+	float: left;
+	width: 125px;
+        margin: 0 0 40px 0;
+}
+
+.content .banner a {
+	display: block;
+}
+
+.content .banner a:first-child {
+	margin: 0 0 40px 0;
+}
+
+.content .table {
+	float: left;
+	width: 950px;
+}
+
+.content .table table {
+	width: 848px;
+	margin: auto;
+}
+
+.content .table table thead tr td {
+	background: #353535;
+	border-right: 1px solid #5D5D5D;
+	color: #FFFFFF;
+	font-family: 'Proxima Nova';
+	font-size: 16px;
+	padding: 13px 13px 12px 16px;
+}
+
+.content .table table.x-grid-table tbody tr td {
+	font-family: 'Proxima Nova Light';
+	font-size: 16px;
+	color: #353535;
+	padding: 9px 13px 8px 14px;
+	border-right: 1px solid;
+}
+
+.content .table table tbody tr td a {
+	color: #353535;
+	text-decoration: none;
+}
+
+.content .table table tbody tr:nth-child(odd) td {
+	background: #FAFAFA;
+	border-right-color: #E8E8E8;
+}
+
+.content .table table tbody tr:nth-child(even) td {
+	background: #EAEAEA;
+	border-right-color: #D8D8D8;
+}
+
+.content .table table tbody tr td.actions .link .fa {
+	margin-left: 3px;
+}
+
+.content .table table tbody tr td.actions .link:nth-child(1) {
+	margin-right: 13px;
+}
+
+.content .table table tr td:first-child {
+	width: 234px;
+}
+
+.content .table table tr td:nth-child(2) {
+	text-align: center;
+	width: 383px;
+}
+
+.content .table table tr td:last-child {
+	border-right: none;
+}
+
+.content .table .pagination {
+	width: 100%;
+	display: block;
+	padding: 72px 0 44px;
+	text-align: center;
+}
+
+.content .table .pagination .prev,
+.content .table .pagination .next {
+	display: inline-block;
+}
+
+.content .table .pagination .prev a,
+.content .table .pagination .next a {
+	font-size: 20px;
+	font-family: 'Lato';
+	text-decoration: none;
+	font-weight: 700;
+}
+
+.content .table .pagination .prev a .fa {
+	margin: 0 8px 0 0;
+}
+
+.content .table .pagination .next a .fa {
+	margin: 0 0 0 8px;
+}
+
+.content .table .pagination .pages {
+	display: inline-block;
+	margin: 0 14px;
+}
+
+.content .table .pagination .pages .page {
+	display: inline-block;
+	margin: 0 0 0 6px;
+}
+
+.content .table .pagination .pages .page a {
+	width: 28px;
+	display: block;
+	height: 28px;
+	background: #FFFFFF;
+	text-align: center;
+	line-height: 30px;
+	color: #707070;
+	font-family: 'Droid Sans';
+	font-weight: 700;
+	border: 1px solid #DDDDDD;
+	border-radius: 3px;
+	text-decoration: none;
+}
+
+.content .table .pagination .pages .page.active a,
+.content .table .pagination .pages .page:hover a {
+	background: #BA0B06;
+	border-color: #D5C2B4;
+	color: #FFFFFF;
+}
+
+.content .table .ban {
+	width: 100%;
+	text-align: center;
+	padding: 40px 0 59px 0;
+}
+
+@media(min-width: 320px) {
+	.content .banner {
+		display: none;
+	}
+
+	.content .table {
+		float: none;
+		width: 100%;
+		margin: auto;
+	}
+
+	.content .table table {
+		width: 100%;
+	}
+
+	.content .table table tr td {
+		width: auto !important;
+	}
+}
+
+@media(min-width: 1030px) {
+	.content .banner {
+		display: none;
+	}
+
+	.content .table {
+		width: 950px;
+	}
+
+	.content .table table {
+		width: 848px;
+		margin: auto;
+	}
+
+	.content .table table tr td:first-child {
+		width: 234px;
+	}
+
+	.content .table table tr td:nth-child(2) {
+		width: 383px;
+	}
+}
+
+@media(min-width: 1230px) {
+	.content .banner {
+		display: block;
+	}
+
+	.content .table {
+		float: left;
+	}
+}

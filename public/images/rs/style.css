@@ -1,0 +1,43 @@
+img.miniEdit {
+    margin-right: -12px;
+    position: relative;
+    left: -24px;
+    top: 4px;
+
+}
+
+img.miniPdf {
+    margin-right: -8px;
+    position: relative;
+    left: -23px;
+    top: 4px;
+}
+
+img.miniSheet {
+    margin-right: -12px;
+    position: relative;
+    left: -25px;
+    top: 4px;
+}
+
+img.miniDelete {
+    margin-right: -12px;
+    position: relative;
+    left: -25px;
+    top: 4px;
+}
+
+img.miniXls {
+    margin-right: -15px;
+    position: relative;
+    left: -25px;
+    top: 4px;
+
+}
+
+img.buttonPdf {
+    margin-right: -12px;
+    position: relative;
+    left: -23px;
+    top: 4px;
+}
