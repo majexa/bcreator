@@ -1,0 +1,32 @@
+.dialog {
+background: #fff;
+padding: 30px;
+border-radius: 10px;
+
+}
+.dialog-shade {
+border: 0;
+left: 0;
+top: 0;
+position: fixed;
+right: 0;
+bottom: 0;
+background: #000;
+opacity: 0.5;
+z-index: 10;
+}
+.goright {
+float: right;
+}
+.image-button {
+cursor: pointer;
+margin-left: 10px;
+}
+.dialog-title {
+font-weight: bold;
+}
+.dialog-message {
+padding: 20px 0;
+}
+.dialog-footer {
+}
