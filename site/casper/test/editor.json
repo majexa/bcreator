@@ -1,4 +1,6 @@
 [
-  ["~thenUrl", "cpanel/1"],
-  ["~thenUrl", "pageBlock/11/json_cufonSettings/54"]
+  ["~thenUrl", ""],
+  ["~thenUrl", "cpanel/11"],
+  //["~thenUrl", "pageBlock/11/json_cufonSettings/54"],
+  ["~thenClick", ".layers .item .edit"]
 ]

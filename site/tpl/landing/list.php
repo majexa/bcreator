@@ -27,30 +27,14 @@
   }
 </style>
 
+<link rel="stylesheet" href="/public/css/my_landing_page.css" type="text/css"/>
+<div class="button">
+  <a href="/list/create" class="link"><span class="fa fa-files-o"></span>Create New Banner</a>
+</div>
+
 <div class="bannersList">
   <? foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', Auth::get('id')) as $v) { ?>
     <a href="/cpanel/<?= $v['id'] ?>"><span>Banner ID=<?= $v['id'] ?><br>(<?= $v['size'] ?>)</span></a>
   <? } ?>
 </div>
 
-<div class="bootstrap-button">
-  <a href="#" id="create" class="btn btn-submit">Create New</a>
-</div>
-
-<script>
-  var create = function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/newBanner',
-      width: 200,
-      onSubmitSuccess: function(r) {
-        window.location = '/cpanel/' + r.id;
-      }
-    });
-    return false;
-  };
-  create();
-  //$('create').addEvent('click', create);
-  <? if ($d['params'][1] == 'create') { ?>
-  create();
-  <? } ?>
-</script>

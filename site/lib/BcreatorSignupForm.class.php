@@ -7,25 +7,31 @@ class BcreatorSignupForm extends Form {
       [
         'title' => 'First Name',
         'name' => 'firstName',
-        'required' => true
+        'required' => true,
+        'autocomplete' => 'off'
       ],
       [
         'title' => 'Last Name',
         'name' => 'lastName',
-        'required' => true
+        'required' => true,
+        'autocomplete' => 'off'
       ],
       [
         'title' => 'E-mail',
         'name' => 'email',
-        'required' => true
-      ],
-      [
-        'title' => 'Discount Code',
-        'name' => 'discountCode',
         'required' => true,
-        'help' => 'Get your discount code from anyone of our partners:
-<a href="http://jeremyRush.co.uk" target="_blank">JeremyRush.co.uk</a>'
+        'autocomplete' => 'off'
       ],
+//      [
+//        'title' => 'Discount Code',
+//        'name' => 'discountCode',
+//        'required' => true,
+//        'help' => 'Get your discount code from anyone of our partners:
+//<a href="http://jeremyRush.co.uk" target="_blank">JeremyRush.co.uk</a>'
+//      ],
+    ], [
+      'placeholders' => true,
+      'submitTitle' => 'SUBMIT NOW'
     ]);
   }
 
@@ -42,23 +48,24 @@ class BcreatorSignupForm extends Form {
   }
 
   protected function _update(array $data) {
-    $data['pass'] = Misc::randString(8, true);
-    $userId = DbModelCore::create('users', [
+    $pass = Misc::randString(8, true);
+    DbModelCore::create('users', [
       'email' => $data['email'],
-      'name' => $data['firstName'].' '.$data['lastName']
+      'name' => $data['firstName'].' '.$data['lastName'],
+      'pass' => $pass,
+      'active' => true
     ]);
     $host = SITE_DOMAIN;
     $title = SITE_TITLE;
     (new SendEmail)->send($data['email'], "Welcome to $title!", <<<HTML
 <p>Dear member!<br>
-<br>Your login details to Landing Page Creator:</p>
+<br>Your login details to $title:</p>
 <p>Login: {$data['email']}<br>
-Password: {$data['pass']}</p>
+Password: $pass</p>
 <p>Stay tuned!<br>
 <a href=\"http://$host/\">$title</a></p>
 HTML
- );
-    Auth::loginById($userId);
+    );
   }
 
 }

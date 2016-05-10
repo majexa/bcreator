@@ -131,7 +131,8 @@ text-transform: none;
 .col-md-4 select {
 width: 100%;
 font-family: "Proxima Nova";
-font-size: 16px;
+font-size: 18px;
+padding: 4px 0;
 }
 button {
 overflow: visible;

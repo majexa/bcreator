@@ -1,28 +1,31 @@
 <div class="banner full">
   <div class="block">
-    <div class="form">
-      <form action="" id="f2" method="POST">
-        <div class="logo"><img src="/public/images/images_new/logo_2.png" alt=""></div>
-
-        <div class="title">
-          <div class="blue">Get 100<span class="percent">%</span> free access today</div>
-          <div class="gray">and start building your landing pages within minutes!</div>
-        </div>
-
-        <input type="text" id="form-fname" name="firstName" class="required" placeholder="Name" autocomplete="off">
-        <input type="text" id="form-lname" name="lastName" class="required" placeholder="Last Name" autocomplete="off">
-        <input type="text" id="form-email1" name="email" class="email required" placeholder="Email Address"
-               autocomplete="off">
-
-        <input type="hidden" name="cmd" value="_s-xclick">
-        <input type="hidden" name="hosted_button_id" id="hosted_button_id" value="VPZ4LZQZYU5KG">
-        <input type="hidden" name="on0" value="EasyLandingPagecreator.com">
-        <input type="hidden" name="os0" id="os0" maxlength="200">
-
-        <input type="button" id="sugnup-button" value="SUBMIT NOW">
-      </form>
+    <div class="form apeform">
+      <div class="logo"><img src="/public/images/images_new/logo_2.png" alt=""></div>
+      <div class="title">
+        <div class="blue">Get 100<span class="percent">%</span> free access today</div>
+        <div class="gray">and start building your banners within minutes!</div>
+      </div>
+      <?= $d['signUpForm'] ?>
     </div>
-
+    <script>
+      new Ngn.Form(document.getElement('.apeform form'), {
+        ajaxSubmit: true,
+        ajaxSubmitUrl: '/?a=json_freeTrial',
+        onComplete: function(r) {
+          new Ngn.Dialog.Alert({
+            fixed: true,
+            message: r.msg
+          });
+        },
+        onFailed: function(r) {
+          new Ngn.Dialog.Alert({
+            fixed: true,
+            message: r.msg
+          });
+        }
+      });
+    </script>
     <div class="clearfix"></div>
   </div>
 </div>
@@ -57,8 +60,8 @@
 
 <div class="responsive full">
   <div class="block">
-    <div class="title">Create Landing Pages and <br/> Start Converting Customers</div>
-    <div class="text">Our landing page creator is extremely easy to use. You can create high-converting
+    <div class="title">Create Banners and <br/> Start Converting Customers</div>
+    <div class="text">Our banner creator is extremely easy to use. You can create high-converting
       landing pages with a few clicks of your mouse and without knowing any programing.
       All pages are fully compatible with iPhones, iPads and Android devices, so you can
       rest assured that everybody will navigate your pages.
@@ -133,16 +136,6 @@
       <div class="button">
         <a href="https://www.jvzoo.com/b/0/183117/1" class="link">SIGNUP NOW</a>
       </div>
-    </div>
-
-    <div class="right">
-      <div class="video">
-
-        <iframe src="https://player.vimeo.com/video/?autoplay=1&amp;title=0&amp;byline=0&amp;portrait=0" width="527"
-                height="360" frameborder="0" webkitallowfullscreen="" mozallowfullscreen="" allowfullscreen=""></iframe>
-      </div>
-
-      <div class="clearfix"></div>
     </div>
 
     <div class="clearfix"></div>
