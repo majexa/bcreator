@@ -8,6 +8,7 @@ class CtrlBcreatorSignin extends CtrlBcreatorLanding {
       return;
     }
     $form = BcreatorCore::extendForm(new AuthForm);
+    $form->fields->fields['authPass']['help'] = '<a href="/resetPassword" class="reset-pass">Reset Password</a>';
     if ($form->isSubmittedAndValid()) {
       $this->redirect('/profile');
     }
