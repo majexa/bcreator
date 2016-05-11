@@ -1,4 +1,4 @@
-s:125457:"
+s:125521:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -206,7 +206,7 @@ Ngn.Form = new Class({
       var cls = eInput.get('multiple') ? 'multiUpload' : 'upload';
       var eInputValidator = new Element('input', {
         type: 'hidden'
-        //name: eInput.get('name') + '_helper',
+        // name: eInput.get('name') + '_helper',
       }).inject(eInput, 'after');
       var fileSaved = eInput.getParent('.element').getElement('.fileSaved');
       if (!fileSaved) eInputValidator.addClass(eInput.hasClass('required') ? 'validate-' + cls + '-required' : 'validate-' + cls);
@@ -340,6 +340,8 @@ Ngn.Form = new Class({
     new Ngn.Request.JSON({
       url: this.options.ajaxSubmitUrl || this.eForm.get('action'),
       onComplete: function(r) {
+        this.disable(false);
+        this.submiting = false;
         if (r && r.form) {
           this.fireEvent('failed', r);
           return;
