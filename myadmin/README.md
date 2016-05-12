@@ -1,0 +1,1 @@
+myadmin - это php myadmin для инсталяции в Ngn Env
