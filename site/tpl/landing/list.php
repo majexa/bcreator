@@ -25,16 +25,50 @@
   .dialog {
     background: #fff;
   }
+  .grid {
+    margin: auto;
+  }
+  .grid th {
+    background: #353535;
+    color: #fff;
+    border-right: 1px solid #5d5d5d;
+  }
+  .grid td, .grid th {
+    padding: 5px 10px;
+  }
+  .grid td {
+    border-right: 1px solid #e8e8e8;
+  }
+  .grid tr:nth-child(odd) {
+    background: #eaeaea;
+  }
 </style>
+
+<div class="subtitle">
+  Create your own banners, Build, publish.
+  Try Banner Creator for free Check out features
+</div>
 
 <link rel="stylesheet" href="/public/css/my_landing_page.css" type="text/css"/>
 <div class="button">
   <a href="/list/create" class="link"><span class="fa fa-files-o"></span>Create New Banner</a>
 </div>
 
-<div class="bannersList">
+<table class="grid">
+  <tr>
+    <th>Title</th>
+    <th>Size</th>
+    <th></th>
+    <th></th>
+  </tr>
   <? foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', Auth::get('id')) as $v) { ?>
-    <a href="/cpanel/<?= $v['id'] ?>"><span>Banner ID=<?= $v['id'] ?><br>(<?= $v['size'] ?>)</span></a>
+    <tr>
+      <td>Banner ID=<?= $v['id'] ?></td>
+      <td><?= $v['size'] ?></td>
+      <td><a href="/cpanel/<?= $v['id'] ?>">Edit</a></td>
+      <td><a href="/list/delete/<?= $v['id'] ?>">Delete</a></td>
+    </tr>
   <? } ?>
-</div>
+</table>
+
 
