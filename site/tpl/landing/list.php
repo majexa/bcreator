@@ -91,8 +91,8 @@
           Need to render
         <? } ?>
       </td>
-      <td><a href="/cpanel/<?= $v['id'] ?>" target="_blank">Edit</a></td>
-      <td><a href="/list/delete/<?= $v['id'] ?>">Delete</a></td>
+      <td><a href="/cpanel/<?= $v['id'] ?>" target="_blank"><img role="button" alt="" src="/public/images/images_new/edit.png" class="x-action-col-icon x-action-col-0"></a></td>
+      <td><a href="/list/delete/<?= $v['id'] ?>"><img role="button" alt="" src="/public/images/images_new/delete.png" class="x-action-col-icon x-action-col-1"></a></td>
     </tr>
   <? } ?>
   </table>
