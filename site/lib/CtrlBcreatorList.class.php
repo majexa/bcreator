@@ -7,6 +7,10 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
       header('Location: /');
       return;
     }
+    $this->d['banners'] = [];
+    foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', Auth::get('id')) as $v) {
+      $this->d['banners'][] = new BcBanner($v);
+    }
     $this->d['innerTpl'] = 'landing/list';
     $this->d['menu'][2]['active'] = true;
   }
@@ -44,6 +48,14 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
   function action_deleteConfirmed() {
     db()->query('DELETE FROM bcBanners WHERE id=?d AND userId=?d', $this->req->param(2), Auth::get('id'));
     $this->redirect('/list');
+  }
+
+  function action_download() {
+    $banner = new BcBanner(db()->selectRow('SELECT * FROM bcBanners WHERE id=?d AND userId=?d', $this->req->param(2), Auth::get('id')));
+    Misc::checkEmpty($banner['downloadFile']);
+    header('Content-Type: application/image');
+    header('Content-Disposition: attachment;filename="'.basename($banner['downloadFile']).'"');
+    readfile($banner['downloadFile']);
   }
 
 }

@@ -60,13 +60,21 @@
     <th>Size</th>
     <th></th>
     <th></th>
+    <th></th>
   </tr>
-  <? foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', Auth::get('id')) as $v) { ?>
+  <? foreach ($d['banners'] as $v) { ?>
     <tr>
       <td>Banner ID=<?= $v['id'] ?></td>
       <td><?= $v['size'] ?></td>
-      <td><a href="/cpanel/<?= $v['id'] ?>">Edit</a></td>
+      <td><a href="/cpanel/<?= $v['id'] ?>" target="_blank">Edit</a></td>
       <td><a href="/list/delete/<?= $v['id'] ?>">Delete</a></td>
+      <td>
+        <? if ($v['downloadLink']) { ?>
+          <a href="<?= $v['downloadLink'] ?>">Download</a>
+        <? } else { ?>
+          Need to render
+        <? } ?>
+      </td>
     </tr>
   <? } ?>
 </table>
