@@ -14,7 +14,8 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
       'clipart',
       'fromTemplate',
       'settings',
-      'render'
+      'render',
+      'download'
     ] as $plugin) {
       Sflm::frontend('js')->addPath('sd/js/plugins/'.$plugin.'.js');
     }
