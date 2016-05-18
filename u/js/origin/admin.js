@@ -3792,113 +3792,6 @@ if (!window.addEventListener){
 /*
 ---
 
-name: DOMReady
-
-description: Contains the custom event domready.
-
-license: MIT-style license.
-
-requires: [Browser, Element, Element.Event]
-
-provides: [DOMReady, DomReady]
-
-...
-*/
-
-(function(window, document){
-
-var ready,
-	loaded,
-	checks = [],
-	shouldPoll,
-	timer,
-	testElement = document.createElement('div');
-
-var domready = function(){
-	clearTimeout(timer);
-	if (!ready){
-		Browser.loaded = ready = true;
-		document.removeListener('DOMContentLoaded', domready).removeListener('readystatechange', check);
-		document.fireEvent('domready');
-		window.fireEvent('domready');
-	}
-	// cleanup scope vars
-	document = window = testElement = null;
-};
-
-var check = function(){
-	for (var i = checks.length; i--;) if (checks[i]()){
-		domready();
-		return true;
-	}
-	return false;
-};
-
-var poll = function(){
-	clearTimeout(timer);
-	if (!check()) timer = setTimeout(poll, 10);
-};
-
-document.addListener('DOMContentLoaded', domready);
-
-/*<ltIE8>*/
-// doScroll technique by Diego Perini http://javascript.nwbox.com/IEContentLoaded/
-// testElement.doScroll() throws when the DOM is not ready, only in the top window
-var doScrollWorks = function(){
-	try {
-		testElement.doScroll();
-		return true;
-	} catch (e){}
-	return false;
-};
-// If doScroll works already, it can't be used to determine domready
-//   e.g. in an iframe
-if (testElement.doScroll && !doScrollWorks()){
-	checks.push(doScrollWorks);
-	shouldPoll = true;
-}
-/*</ltIE8>*/
-
-if (document.readyState) checks.push(function(){
-	var state = document.readyState;
-	return (state == 'loaded' || state == 'complete');
-});
-
-if ('onreadystatechange' in document) document.addListener('readystatechange', check);
-else shouldPoll = true;
-
-if (shouldPoll) poll();
-
-Element.Events.domready = {
-	onAdd: function(fn){
-		if (ready) fn.call(this);
-	}
-};
-
-// Make sure that domready fires before load
-Element.Events.load = {
-	base: 'load',
-	onAdd: function(fn){
-		if (loaded && this == window) fn.call(this);
-	},
-	condition: function(){
-		if (this == window){
-			domready();
-			delete Element.Events.load;
-		}
-		return true;
-	}
-};
-
-// This is based on the custom load event
-window.addEvent('load', function(){
-	loaded = true;
-});
-
-})(window, document);
-/*
----
-
 name: Class
 
 description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
@@ -7668,256 +7561,6 @@ Element.implement({
 /*
 ---
 
-script: Sortables.js
-
-name: Sortables
-
-description: Class for creating a drag and drop sorting interface for lists of items.
-
-license: MIT-style license
-
-authors:
-  - Tom Occhino
-
-requires:
-  - Core/Fx.Morph
-  - Drag.Move
-
-provides: [Sortables]
-
-...
-*/
-(function(){
-
-var Sortables = this.Sortables = new Class({
-
-	Implements: [Events, Options],
-
-	options: {/*
-		onSort: function(element, clone){},
-		onStart: function(element, clone){},
-		onComplete: function(element){},*/
-		opacity: 1,
-		clone: false,
-		revert: false,
-		handle: false,
-		dragOptions: {},
-		unDraggableTags: ['button', 'input', 'a', 'textarea', 'select', 'option']
-	},
-
-	initialize: function(lists, options){
-		this.setOptions(options);
-
-		this.elements = [];
-		this.lists = [];
-		this.idle = true;
-
-		this.addLists($$(document.id(lists) || lists));
-
-		if (!this.options.clone) this.options.revert = false;
-		if (this.options.revert) this.effect = new Fx.Morph(null, Object.merge({
-			duration: 250,
-			link: 'cancel'
-		}, this.options.revert));
-	},
-
-	attach: function(){
-		this.addLists(this.lists);
-		return this;
-	},
-
-	detach: function(){
-		this.lists = this.removeLists(this.lists);
-		return this;
-	},
-
-	addItems: function(){
-		Array.flatten(arguments).each(function(element){
-			this.elements.push(element);
-			var start = element.retrieve('sortables:start', function(event){
-				this.start.call(this, event, element);
-			}.bind(this));
-			(this.options.handle ? element.getElement(this.options.handle) || element : element).addEvent('mousedown', start);
-		}, this);
-		return this;
-	},
-
-	addLists: function(){
-		Array.flatten(arguments).each(function(list){
-			this.lists.include(list);
-			this.addItems(list.getChildren());
-		}, this);
-		return this;
-	},
-
-	removeItems: function(){
-		return $$(Array.flatten(arguments).map(function(element){
-			this.elements.erase(element);
-			var start = element.retrieve('sortables:start');
-			(this.options.handle ? element.getElement(this.options.handle) || element : element).removeEvent('mousedown', start);
-
-			return element;
-		}, this));
-	},
-
-	removeLists: function(){
-		return $$(Array.flatten(arguments).map(function(list){
-			this.lists.erase(list);
-			this.removeItems(list.getChildren());
-
-			return list;
-		}, this));
-	},
-
-	getDroppableCoordinates: function(element){
-		var offsetParent = element.getOffsetParent();
-		var position = element.getPosition(offsetParent);
-		var scroll = {
-			w: window.getScroll(),
-			offsetParent: offsetParent.getScroll()
-		};
-		position.x += scroll.offsetParent.x;
-		position.y += scroll.offsetParent.y;
-
-		if (offsetParent.getStyle('position') == 'fixed'){
-			position.x -= scroll.w.x;
-			position.y -= scroll.w.y;
-		}
-
-		return position;
-	},
-
-	getClone: function(event, element){
-		if (!this.options.clone) return new Element(element.tagName).inject(document.body);
-		if (typeOf(this.options.clone) == 'function') return this.options.clone.call(this, event, element, this.list);
-		var clone = element.clone(true).setStyles({
-			margin: 0,
-			position: 'absolute',
-			visibility: 'hidden',
-			width: element.getStyle('width')
-		}).addEvent('mousedown', function(event){
-			element.fireEvent('mousedown', event);
-		});
-		//prevent the duplicated radio inputs from unchecking the real one
-		if (clone.get('html').test('radio')){
-			clone.getElements('input[type=radio]').each(function(input, i){
-				input.set('name', 'clone_' + i);
-				if (input.get('checked')) element.getElements('input[type=radio]')[i].set('checked', true);
-			});
-		}
-
-		return clone.inject(this.list).setPosition(this.getDroppableCoordinates(this.element));
-	},
-
-	getDroppables: function(){
-		var droppables = this.list.getChildren().erase(this.clone).erase(this.element);
-		if (!this.options.constrain) droppables.append(this.lists).erase(this.list);
-		return droppables;
-	},
-
-	insert: function(dragging, element){
-		var where = 'inside';
-		if (this.lists.contains(element)){
-			this.list = element;
-			this.drag.droppables = this.getDroppables();
-		} else {
-			where = this.element.getAllPrevious().contains(element) ? 'before' : 'after';
-		}
-		this.element.inject(element, where);
-		this.fireEvent('sort', [this.element, this.clone]);
-	},
-
-	start: function(event, element){
-		if (
-			!this.idle ||
-			event.rightClick ||
-			(!this.options.handle && this.options.unDraggableTags.contains(event.target.get('tag')))
-		) return;
-
-		this.idle = false;
-		this.element = element;
-		this.opacity = element.getStyle('opacity');
-		this.list = element.getParent();
-		this.clone = this.getClone(event, element);
-
-		this.drag = new Drag.Move(this.clone, Object.merge({
-			
-			droppables: this.getDroppables()
-		}, this.options.dragOptions)).addEvents({
-			onSnap: function(){
-				event.stop();
-				this.clone.setStyle('visibility', 'visible');
-				this.element.setStyle('opacity', this.options.opacity || 0);
-				this.fireEvent('start', [this.element, this.clone]);
-			}.bind(this),
-			onEnter: this.insert.bind(this),
-			onCancel: this.end.bind(this),
-			onComplete: this.end.bind(this)
-		});
-
-		this.clone.inject(this.element, 'before');
-		this.drag.start(event);
-	},
-
-	end: function(){
-		this.drag.detach();
-		this.element.setStyle('opacity', this.opacity);
-		var self = this;
-		if (this.effect){
-			var dim = this.element.getStyles('width', 'height'),
-				clone = this.clone,
-				pos = clone.computePosition(this.getDroppableCoordinates(clone));
-
-			var destroy = function(){
-				this.removeEvent('cancel', destroy);
-				clone.destroy();
-				self.reset();
-			};
-
-			this.effect.element = clone;
-			this.effect.start({
-				top: pos.top,
-				left: pos.left,
-				width: dim.width,
-				height: dim.height,
-				opacity: 0.25
-			}).addEvent('cancel', destroy).chain(destroy);
-		} else {
-			this.clone.destroy();
-			self.reset();
-		}
-
-	},
-
-	reset: function(){
-		this.idle = true;
-		this.fireEvent('complete', this.element);
-	},
-
-	serialize: function(){
-		var params = Array.link(arguments, {
-			modifier: Type.isFunction,
-			index: function(obj){
-				return obj != null;
-			}
-		});
-		var serial = this.lists.map(function(list){
-			return list.getChildren().map(params.modifier || function(element){
-				return element.get('id');
-			}, this);
-		}, this);
-
-		var index = params.index;
-		if (this.lists.length == 1) index = 0;
-		return (index || index === 0) && index >= 0 && index < this.lists.length ? serial[index] : serial;
-	}
-
-});
-
-})();
-/*
----
-
 name: Element.Delegation
 
 description: Extends the Element native object to include the delegate method for more efficient event management.
@@ -10619,31 +10262,240 @@ Swiff.remote = function(obj, fn){
 };
 
 })();
-
-/*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
- * Copyright (c) 2009 Simo Kinnunen.
- * Licensed under the MIT license.
- *
- * @version 1.09i
- */
-var Cufon=(function(){var m=function(){return m.replace.apply(null,arguments)};var x=m.DOM={ready:(function(){var C=false,E={loaded:1,complete:1};var B=[],D=function(){if(C){return}C=true;for(var F;F=B.shift();F()){}};if(document.addEventListener){document.addEventListener("DOMContentLoaded",D,false);window.addEventListener("pageshow",D,false)}if(!window.opera&&document.readyState){(function(){E[document.readyState]?D():setTimeout(arguments.callee,10)})()}if(document.readyState&&document.createStyleSheet){(function(){try{document.body.doScroll("left");D()}catch(F){setTimeout(arguments.callee,1)}})()}q(window,"load",D);return function(F){if(!arguments.length){D()}else{C?F():B.push(F)}}})(),root:function(){return document.documentElement||document.body}};var n=m.CSS={Size:function(C,B){this.value=parseFloat(C);this.unit=String(C).match(/[a-z%]*$/)[0]||"px";this.convert=function(D){return D/B*this.value};this.convertFrom=function(D){return D/this.value*B};this.toString=function(){return this.value+this.unit}},addClass:function(C,B){var D=C.className;C.className=D+(D&&" ")+B;return C},color:j(function(C){var B={};B.color=C.replace(/^rgba\((.*?),\s*([\d.]+)\)/,function(E,D,F){B.opacity=parseFloat(F);return"rgb("+D+")"});return B}),fontStretch:j(function(B){if(typeof B=="number"){return B}if(/%$/.test(B)){return parseFloat(B)/100}return{"ultra-condensed":0.5,"extra-condensed":0.625,condensed:0.75,"semi-condensed":0.875,"semi-expanded":1.125,expanded:1.25,"extra-expanded":1.5,"ultra-expanded":2}[B]||1}),getStyle:function(C){var B=document.defaultView;if(B&&B.getComputedStyle){return new a(B.getComputedStyle(C,null))}if(C.currentStyle){return new a(C.currentStyle)}return new a(C.style)},gradient:j(function(F){var G={id:F,type:F.match(/^-([a-z]+)-gradient\(/)[1],stops:[]},C=F.substr(F.indexOf("(")).match(/([\d.]+=)?(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)/ig);for(var E=0,B=C.length,D;E<B;++E){D=C[E].split("=",2).reverse();G.stops.push([D[1]||E/(B-1),D[0]])}return G}),quotedList:j(function(E){var D=[],C=/\s*((["'])([\s\S]*?[^\\])\2|[^,]+)\s*/g,B;while(B=C.exec(E)){D.push(B[3]||B[1])}return D}),recognizesMedia:j(function(G){var E=document.createElement("style"),D,C,B;E.type="text/css";E.media=G;try{E.appendChild(document.createTextNode("/**/"))}catch(F){}C=g("head")[0];C.insertBefore(E,C.firstChild);D=(E.sheet||E.styleSheet);B=D&&!D.disabled;C.removeChild(E);return B}),removeClass:function(D,C){var B=RegExp("(?:^|\\s+)"+C+"(?=\\s|$)","g");D.className=D.className.replace(B,"");return D},supports:function(D,C){var B=document.createElement("span").style;if(B[D]===undefined){return false}B[D]=C;return B[D]===C},textAlign:function(E,D,B,C){if(D.get("textAlign")=="right"){if(B>0){E=" "+E}}else{if(B<C-1){E+=" "}}return E},textShadow:j(function(F){if(F=="none"){return null}var E=[],G={},B,C=0;var D=/(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)|(-?[\d.]+[a-z%]*)|,/ig;while(B=D.exec(F)){if(B[0]==","){E.push(G);G={};C=0}else{if(B[1]){G.color=B[1]}else{G[["offX","offY","blur"][C++]]=B[2]}}}E.push(G);return E}),textTransform:(function(){var B={uppercase:function(C){return C.toUpperCase()},lowercase:function(C){return C.toLowerCase()},capitalize:function(C){return C.replace(/\b./g,function(D){return D.toUpperCase()})}};return function(E,D){var C=B[D.get("textTransform")];return C?C(E):E}})(),whiteSpace:(function(){var D={inline:1,"inline-block":1,"run-in":1};var C=/^\s+/,B=/\s+$/;return function(H,F,G,E){if(E){if(E.nodeName.toLowerCase()=="br"){H=H.replace(C,"")}}if(D[F.get("display")]){return H}if(!G.previousSibling){H=H.replace(C,"")}if(!G.nextSibling){H=H.replace(B,"")}return H}})()};n.ready=(function(){var B=!n.recognizesMedia("all"),E=false;var D=[],H=function(){B=true;for(var K;K=D.shift();K()){}};var I=g("link"),J=g("style");function C(K){return K.disabled||G(K.sheet,K.media||"screen")}function G(M,P){if(!n.recognizesMedia(P||"all")){return true}if(!M||M.disabled){return false}try{var Q=M.cssRules,O;if(Q){search:for(var L=0,K=Q.length;O=Q[L],L<K;++L){switch(O.type){case 2:break;case 3:if(!G(O.styleSheet,O.media.mediaText)){return false}break;default:break search}}}}catch(N){}return true}function F(){if(document.createStyleSheet){return true}var L,K;for(K=0;L=I[K];++K){if(L.rel.toLowerCase()=="stylesheet"&&!C(L)){return false}}for(K=0;L=J[K];++K){if(!C(L)){return false}}return true}x.ready(function(){if(!E){E=n.getStyle(document.body).isUsable()}if(B||(E&&F())){H()}else{setTimeout(arguments.callee,10)}});return function(K){if(B){K()}else{D.push(K)}}})();function s(D){var C=this.face=D.face,B={"\u0020":1,"\u00a0":1,"\u3000":1};this.glyphs=D.glyphs;this.w=D.w;this.baseSize=parseInt(C["units-per-em"],10);this.family=C["font-family"].toLowerCase();this.weight=C["font-weight"];this.style=C["font-style"]||"normal";this.viewBox=(function(){var F=C.bbox.split(/\s+/);var E={minX:parseInt(F[0],10),minY:parseInt(F[1],10),maxX:parseInt(F[2],10),maxY:parseInt(F[3],10)};E.width=E.maxX-E.minX;E.height=E.maxY-E.minY;E.toString=function(){return[this.minX,this.minY,this.width,this.height].join(" ")};return E})();this.ascent=-parseInt(C.ascent,10);this.descent=-parseInt(C.descent,10);this.height=-this.ascent+this.descent;this.spacing=function(L,N,E){var O=this.glyphs,M,K,G,P=[],F=0,J=-1,I=-1,H;while(H=L[++J]){M=O[H]||this.missingGlyph;if(!M){continue}if(K){F-=G=K[H]||0;P[I]-=G}F+=P[++I]=~~(M.w||this.w)+N+(B[H]?E:0);K=M.k}P.total=F;return P}}function f(){var C={},B={oblique:"italic",italic:"oblique"};this.add=function(D){(C[D.style]||(C[D.style]={}))[D.weight]=D};this.get=function(H,I){var G=C[H]||C[B[H]]||C.normal||C.italic||C.oblique;if(!G){return null}I={normal:400,bold:700}[I]||parseInt(I,10);if(G[I]){return G[I]}var E={1:1,99:0}[I%100],K=[],F,D;if(E===undefined){E=I>400}if(I==500){I=400}for(var J in G){if(!k(G,J)){continue}J=parseInt(J,10);if(!F||J<F){F=J}if(!D||J>D){D=J}K.push(J)}if(I<F){I=F}if(I>D){I=D}K.sort(function(M,L){return(E?(M>=I&&L>=I)?M<L:M>L:(M<=I&&L<=I)?M>L:M<L)?-1:1});return G[K[0]]}}function r(){function D(F,G){if(F.contains){return F.contains(G)}return F.compareDocumentPosition(G)&16}function B(G){var F=G.relatedTarget;if(!F||D(this,F)){return}C(this,G.type=="mouseover")}function E(F){C(this,F.type=="mouseenter")}function C(F,G){setTimeout(function(){var H=d.get(F).options;m.replace(F,G?h(H,H.hover):H,true)},10)}this.attach=function(F){if(F.onmouseenter===undefined){q(F,"mouseover",B);q(F,"mouseout",B)}else{q(F,"mouseenter",E);q(F,"mouseleave",E)}}}function u(){var C=[],D={};function B(H){var E=[],G;for(var F=0;G=H[F];++F){E[F]=C[D[G]]}return E}this.add=function(F,E){D[F]=C.push(E)-1};this.repeat=function(){var E=arguments.length?B(arguments):C,F;for(var G=0;F=E[G++];){m.replace(F[0],F[1],true)}}}function A(){var D={},B=0;function C(E){return E.cufid||(E.cufid=++B)}this.get=function(E){var F=C(E);return D[F]||(D[F]={})}}function a(B){var D={},C={};this.extend=function(E){for(var F in E){if(k(E,F)){D[F]=E[F]}}return this};this.get=function(E){return D[E]!=undefined?D[E]:B[E]};this.getSize=function(F,E){return C[F]||(C[F]=new n.Size(this.get(F),E))};this.isUsable=function(){return !!B}}function q(C,B,D){if(C.addEventListener){C.addEventListener(B,D,false)}else{if(C.attachEvent){C.attachEvent("on"+B,function(){return D.call(C,window.event)})}}}function v(C,B){var D=d.get(C);if(D.options){return C}if(B.hover&&B.hoverables[C.nodeName.toLowerCase()]){b.attach(C)}D.options=B;return C}function j(B){var C={};return function(D){if(!k(C,D)){C[D]=B.apply(null,arguments)}return C[D]}}function c(F,E){var B=n.quotedList(E.get("fontFamily").toLowerCase()),D;for(var C=0;D=B[C];++C){if(i[D]){return i[D].get(E.get("fontStyle"),E.get("fontWeight"))}}return null}function g(B){return document.getElementsByTagName(B)}function k(C,B){return C.hasOwnProperty(B)}function h(){var C={},B,F;for(var E=0,D=arguments.length;B=arguments[E],E<D;++E){for(F in B){if(k(B,F)){C[F]=B[F]}}}return C}function o(E,M,C,N,F,D){var K=document.createDocumentFragment(),H;if(M===""){return K}var L=N.separate;var I=M.split(p[L]),B=(L=="words");if(B&&t){if(/^\s/.test(M)){I.unshift("")}if(/\s$/.test(M)){I.push("")}}for(var J=0,G=I.length;J<G;++J){H=z[N.engine](E,B?n.textAlign(I[J],C,J,G):I[J],C,N,F,D,J<G-1);if(H){K.appendChild(H)}}return K}function l(D,M){var C=D.nodeName.toLowerCase();if(M.ignore[C]){return}var E=!M.textless[C];var B=n.getStyle(v(D,M)).extend(M);var F=c(D,B),G,K,I,H,L,J;if(!F){return}for(G=D.firstChild;G;G=I){K=G.nodeType;I=G.nextSibling;if(E&&K==3){if(H){H.appendData(G.data);D.removeChild(G)}else{H=G}if(I){continue}}if(H){D.replaceChild(o(F,n.whiteSpace(H.data,B,H,J),B,M,G,D),H);H=null}if(K==1){if(G.firstChild){if(G.nodeName.toLowerCase()=="cufon"){z[M.engine](F,null,B,M,G,D)}else{arguments.callee(G,M)}}J=G}}}var t=" ".split(/\s+/).length==0;var d=new A();var b=new r();var y=new u();var e=false;var z={},i={},w={autoDetect:false,engine:null,forceHitArea:false,hover:false,hoverables:{a:true},ignore:{applet:1,canvas:1,col:1,colgroup:1,head:1,iframe:1,map:1,optgroup:1,option:1,script:1,select:1,style:1,textarea:1,title:1,pre:1},printable:true,selector:(window.Sizzle||(window.jQuery&&function(B){return jQuery(B)})||(window.dojo&&dojo.query)||(window.Ext&&Ext.query)||(window.YAHOO&&YAHOO.util&&YAHOO.util.Selector&&YAHOO.util.Selector.query)||(window.$$&&function(B){return $$(B)})||(window.$&&function(B){return $(B)})||(document.querySelectorAll&&function(B){return document.querySelectorAll(B)})||g),separate:"words",textless:{dl:1,html:1,ol:1,table:1,tbody:1,thead:1,tfoot:1,tr:1,ul:1},textShadow:"none"};var p={words:/\s/.test("\u00a0")?/[^\S\u00a0]+/:/\s+/,characters:"",none:/^/};m.now=function(){x.ready();return m};m.refresh=function(){y.repeat.apply(y,arguments);return m};m.registerEngine=function(C,B){if(!B){return m}z[C]=B;return m.set("engine",C)};m.registerFont=function(D){if(!D){return m}var B=new s(D),C=B.family;if(!i[C]){i[C]=new f()}i[C].add(B);return m.set("fontFamily",'"'+C+'"')};m.replace=function(D,C,B){C=h(w,C);if(!C.engine){return m}if(!e){n.addClass(x.root(),"cufon-active cufon-loading");n.ready(function(){n.addClass(n.removeClass(x.root(),"cufon-loading"),"cufon-ready")});e=true}if(C.hover){C.forceHitArea=true}if(C.autoDetect){delete C.fontFamily}if(typeof C.textShadow=="string"){C.textShadow=n.textShadow(C.textShadow)}if(typeof C.color=="string"&&/^-/.test(C.color)){C.textGradient=n.gradient(C.color)}else{delete C.textGradient}if(!B){y.add(D,arguments)}if(D.nodeType||typeof D=="string"){D=[D]}n.ready(function(){for(var F=0,E=D.length;F<E;++F){var G=D[F];if(typeof G=="string"){m.replace(C.selector(G),C,true)}else{l(G,C)}}});return m};m.set=function(B,C){w[B]=C;return m};return m})();Cufon.registerEngine("vml",(function(){var e=document.namespaces;if(!e){return}e.add("cvml","urn:schemas-microsoft-com:vml");e=null;var b=document.createElement("cvml:shape");b.style.behavior="url(#default#VML)";if(!b.coordsize){return}b=null;var h=(document.documentMode||0)<8;document.write(('<style type="text/css">cufoncanvas{text-indent:0;}@media screen{cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}cufoncanvas{position:absolute;text-align:left;}cufon{display:inline-block;position:relative;vertical-align:'+(h?"middle":"text-bottom")+";}cufon cufontext{position:absolute;left:-10000in;font-size:1px;}a cufon{cursor:pointer}}@media print{cufon cufoncanvas{display:none;}}</style>").replace(/;/g,"!important;"));function c(i,j){return a(i,/(?:em|ex|%)$|^[a-z-]+$/i.test(j)?"1em":j)}function a(l,m){if(m==="0"){return 0}if(/px$/i.test(m)){return parseFloat(m)}var k=l.style.left,j=l.runtimeStyle.left;l.runtimeStyle.left=l.currentStyle.left;l.style.left=m.replace("%","em");var i=l.style.pixelLeft;l.style.left=k;l.runtimeStyle.left=j;return i}function f(l,k,j,n){var i="computed"+n,m=k[i];if(isNaN(m)){m=k.get(n);k[i]=m=(m=="normal")?0:~~j.convertFrom(a(l,m))}return m}var g={};function d(p){var q=p.id;if(!g[q]){var n=p.stops,o=document.createElement("cvml:fill"),i=[];o.type="gradient";o.angle=180;o.focus="0";o.method="sigma";o.color=n[0][1];for(var m=1,l=n.length-1;m<l;++m){i.push(n[m][0]*100+"% "+n[m][1])}o.colors=i.join(",");o.color2=n[l][1];g[q]=o}return g[q]}return function(ac,G,Y,C,K,ad,W){var n=(G===null);if(n){G=K.alt}var I=ac.viewBox;var p=Y.computedFontSize||(Y.computedFontSize=new Cufon.CSS.Size(c(ad,Y.get("fontSize"))+"px",ac.baseSize));var y,q;if(n){y=K;q=K.firstChild}else{y=document.createElement("cufon");y.className="cufon cufon-vml";y.alt=G;q=document.createElement("cufoncanvas");y.appendChild(q);if(C.printable){var Z=document.createElement("cufontext");Z.appendChild(document.createTextNode(G));y.appendChild(Z)}if(!W){y.appendChild(document.createElement("cvml:shape"))}}var ai=y.style;var R=q.style;var l=p.convert(I.height),af=Math.ceil(l);var V=af/l;var P=V*Cufon.CSS.fontStretch(Y.get("fontStretch"));var U=I.minX,T=I.minY;R.height=af;R.top=Math.round(p.convert(T-ac.ascent));R.left=Math.round(p.convert(U));ai.height=p.convert(ac.height)+"px";var F=Y.get("color");var ag=Cufon.CSS.textTransform(G,Y).split("");var L=ac.spacing(ag,f(ad,Y,p,"letterSpacing"),f(ad,Y,p,"wordSpacing"));if(!L.length){return null}var k=L.total;var x=-U+k+(I.width-L[L.length-1]);var ah=p.convert(x*P),X=Math.round(ah);var O=x+","+I.height,m;var J="r"+O+"ns";var u=C.textGradient&&d(C.textGradient);var o=ac.glyphs,S=0;var H=C.textShadow;var ab=-1,aa=0,w;while(w=ag[++ab]){var D=o[ag[ab]]||ac.missingGlyph,v;if(!D){continue}if(n){v=q.childNodes[aa];while(v.firstChild){v.removeChild(v.firstChild)}}else{v=document.createElement("cvml:shape");q.appendChild(v)}v.stroked="f";v.coordsize=O;v.coordorigin=m=(U-S)+","+T;v.path=(D.d?"m"+D.d+"xe":"")+"m"+m+J;v.fillcolor=F;if(u){v.appendChild(u.cloneNode(false))}var ae=v.style;ae.width=X;ae.height=af;if(H){var s=H[0],r=H[1];var B=Cufon.CSS.color(s.color),z;var N=document.createElement("cvml:shadow");N.on="t";N.color=B.color;N.offset=s.offX+","+s.offY;if(r){z=Cufon.CSS.color(r.color);N.type="double";N.color2=z.color;N.offset2=r.offX+","+r.offY}N.opacity=B.opacity||(z&&z.opacity)||1;v.appendChild(N)}S+=L[aa++]}var M=v.nextSibling,t,A;if(C.forceHitArea){if(!M){M=document.createElement("cvml:rect");M.stroked="f";M.className="cufon-vml-cover";t=document.createElement("cvml:fill");t.opacity=0;M.appendChild(t);q.appendChild(M)}A=M.style;A.width=X;A.height=af}else{if(M){q.removeChild(M)}}ai.width=Math.max(Math.ceil(p.convert(k*P)),0);if(h){var Q=Y.computedYAdjust;if(Q===undefined){var E=Y.get("lineHeight");if(E=="normal"){E="1em"}else{if(!isNaN(E)){E+="em"}}Y.computedYAdjust=Q=0.5*(a(ad,E)-parseFloat(ai.height))}if(Q){ai.marginTop=Math.ceil(Q)+"px";ai.marginBottom=Q+"px"}}return y}})());Cufon.registerEngine("canvas",(function(){var b=document.createElement("canvas");if(!b||!b.getContext||!b.getContext.apply){return}b=null;var a=Cufon.CSS.supports("display","inline-block");var e=!a&&(document.compatMode=="BackCompat"||/frameset|transitional/i.test(document.doctype.publicId));var f=document.createElement("style");f.type="text/css";f.appendChild(document.createTextNode(("cufon{text-indent:0;}@media screen,projection{cufon{display:inline;display:inline-block;position:relative;vertical-align:middle;"+(e?"":"font-size:1px;line-height:1px;")+"}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}"+(a?"cufon canvas{position:relative;}":"cufon canvas{position:absolute;}")+"}@media print{cufon{padding:0;}cufon canvas{display:none;}}").replace(/;/g,"!important;")));document.getElementsByTagName("head")[0].appendChild(f);function d(p,h){var n=0,m=0;var g=[],o=/([mrvxe])([^a-z]*)/g,k;generate:for(var j=0;k=o.exec(p);++j){var l=k[2].split(",");switch(k[1]){case"v":g[j]={m:"bezierCurveTo",a:[n+~~l[0],m+~~l[1],n+~~l[2],m+~~l[3],n+=~~l[4],m+=~~l[5]]};break;case"r":g[j]={m:"lineTo",a:[n+=~~l[0],m+=~~l[1]]};break;case"m":g[j]={m:"moveTo",a:[n=~~l[0],m=~~l[1]]};break;case"x":g[j]={m:"closePath"};break;case"e":break generate}h[g[j].m].apply(h,g[j].a)}return g}function c(m,k){for(var j=0,h=m.length;j<h;++j){var g=m[j];k[g.m].apply(k,g.a)}}return function(V,w,P,t,C,W){var k=(w===null);if(k){w=C.getAttribute("alt")}var A=V.viewBox;var m=P.getSize("fontSize",V.baseSize);var B=0,O=0,N=0,u=0;var z=t.textShadow,L=[];if(z){for(var U=z.length;U--;){var F=z[U];var K=m.convertFrom(parseFloat(F.offX));var I=m.convertFrom(parseFloat(F.offY));L[U]=[K,I];if(I<B){B=I}if(K>O){O=K}if(I>N){N=I}if(K<u){u=K}}}var Z=Cufon.CSS.textTransform(w,P).split("");var E=V.spacing(Z,~~m.convertFrom(parseFloat(P.get("letterSpacing"))||0),~~m.convertFrom(parseFloat(P.get("wordSpacing"))||0));if(!E.length){return null}var h=E.total;O+=A.width-E[E.length-1];u+=A.minX;var s,n;if(k){s=C;n=C.firstChild}else{s=document.createElement("cufon");s.className="cufon cufon-canvas";s.setAttribute("alt",w);n=document.createElement("canvas");s.appendChild(n);if(t.printable){var S=document.createElement("cufontext");S.appendChild(document.createTextNode(w));s.appendChild(S)}}var aa=s.style;var H=n.style;var j=m.convert(A.height);var Y=Math.ceil(j);var M=Y/j;var G=M*Cufon.CSS.fontStretch(P.get("fontStretch"));var J=h*G;var Q=Math.ceil(m.convert(J+O-u));var o=Math.ceil(m.convert(A.height-B+N));n.width=Q;n.height=o;H.width=Q+"px";H.height=o+"px";B+=A.minY;H.top=Math.round(m.convert(B-V.ascent))+"px";H.left=Math.round(m.convert(u))+"px";var r=Math.max(Math.ceil(m.convert(J)),0)+"px";if(a){aa.width=r;aa.height=m.convert(V.height)+"px"}else{aa.paddingLeft=r;aa.paddingBottom=(m.convert(V.height)-1)+"px"}var X=n.getContext("2d"),D=j/A.height;X.scale(D,D*M);X.translate(-u,-B);X.save();function T(){var x=V.glyphs,ab,l=-1,g=-1,y;X.scale(G,1);while(y=Z[++l]){var ab=x[Z[l]]||V.missingGlyph;if(!ab){continue}if(ab.d){X.beginPath();if(ab.code){c(ab.code,X)}else{ab.code=d("m"+ab.d,X)}X.fill()}X.translate(E[++g],0)}X.restore()}if(z){for(var U=z.length;U--;){var F=z[U];X.save();X.fillStyle=F.color;X.translate.apply(X,L[U]);T()}}var q=t.textGradient;if(q){var v=q.stops,p=X.createLinearGradient(0,A.minY,0,A.maxY);for(var U=0,R=v.length;U<R;++U){p.addColorStop.apply(p,v[U])}X.fillStyle=p}else{X.fillStyle=P.get("color")}T();return s}})());
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.js|--*/
-Ngn.toObj = function(s, value) {
-  var a = s.split('.');
-  for (var i = 0; i < a.length; i++) {
-    var ss = a.slice(0, i + 1).join('.');
-    eval('var def = ' + ss + ' === undefined');
-    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
-  }
-  if (value) eval(s + ' = value');
+---
+name: Table
+description: LUA-Style table implementation.
+license: MIT-style license
+authors:
+  - Valerio Proietti
+requires: [Core/Array]
+provides: [Table]
+...
+*/
+
+(function(){
+
+var Table = this.Table = function(){
+
+	this.length = 0;
+	var keys = [],
+		values = [];
+
+	this.set = function(key, value){
+		var index = keys.indexOf(key);
+		if (index == -1){
+			var length = keys.length;
+			keys[length] = key;
+			values[length] = value;
+			this.length++;
+		} else {
+			values[index] = value;
+		}
+		return this;
+	};
+
+	this.get = function(key){
+		var index = keys.indexOf(key);
+		return (index == -1) ? null : values[index];
+	};
+
+	this.erase = function(key){
+		var index = keys.indexOf(key);
+		if (index != -1){
+			this.length--;
+			keys.splice(index, 1);
+			return values.splice(index, 1)[0];
+		}
+		return null;
+	};
+
+	this.each = this.forEach = function(fn, bind){
+		for (var i = 0, l = this.length; i < l; i++) fn.call(bind, keys[i], values[i], this);
+	};
+
 };
 
-if (!Ngn.tpls) Ngn.tpls = {};
+if (this.Type) new Type('Table', Table);
 
-/*--|/home/user/ngn-env/bc/scripts/js/base.php|--*/
-Ngn.toObj('Ngn.sd.baseUrl', 'http://bcreator.majexa.ru');
+})();
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/cp/Ngn.cp.js|--*/
+Ngn.cp = {
+  init: function() {
+    if (Browser.ie) {
+      alert('Броузер Internet Explorer не боддерживается Панелью управления.');
+      window.location = '/';
+      return;
+    }
+    this.initConfirms();
+    this.initSaveAndReturn();
+    //this.repairEmptyTds();
+    this.initTooltips();
+    //this.initHelp();
+    this.initFormBases();
+    this.colorizeSelects();
+    //new Ngn.HidebleBar('bottom', 'down');
+    //new Ngn.HidebleBar.H('header', 'up');
+    //Ngn.Lightbox.add(document.getElements('a.lightbox'));
+  },
+  initHelp: function() {
+    $$('a[class=help]').each(function(el){
+      el.addEvent('click', function() {
+        new Ngn.Dialog.Alert({
+          force: true,
+          title: el.get('text'),
+          url: el.get('href')
+        });
+        return false;
+      })
+    });
+    //
+  },
+  initTooltips: function() {
+    new Ngn.Tips('.tools a,.tooltips a,.tooltip');
+  },
+  repairEmptyTds: function() {
+    $('itemsTable').getElements('td').each(function(eTd, i) {
+      if (eTd.get('html').trim() == '') 
+        eTd.set('html', '&nbsp;');
+    });
+  },
+  submitTitles: null,
+  formSubmitTimeout: 600000,
+  forms: {},
+  addSubmitEvent: function(eForm) {
+    var id = eForm.get('id');
+    if (!id) {
+      //c('Form with no id can not be initialized.');
+      return;
+    }
+    if (this.forms[id]) {
+      // If already exists
+      return;
+    }
+    
+    this.forms[id] = eForm;
+    eForm.addEvent('submit', function(e) {
+      // Проверяем валидность если существуют валидационные функции
+      if (this.validations[id]) {
+        if (!this.validations[id]()) {
+          e.preventDefault();
+          return;
+        }
+      }
+      // Инициализируем возврат формы в активное положение
+      this.returnSubmitTimeout.delay(this.formSubmitTimeout, this, eForm);
+      // Делаем все INPUT элементы формы неактивными
+      /*
+      eForm.getElements('input').each(function(el, i) {
+        el.setProperty('disabled', true);
+      });
+      */
+      
+      
+      // Меняем названия кнопок на герундий
+      eForm.getElements('input[type=submit]').each(function(btn, i) {
+        btn.setProperty('disabled', true);
+        var title = this.submitTitles[btn.get('value')];
+        if (title) btn.set('value', title + '...');
+      }.bind(this));
+      
+      ///c('submitting');
+      
+    }.bind(this));
+  },
+  validations: {},
+  addFormValidation: function(eForm, validation) {
+    var id = eForm.get('id');
+    if (!id) // ID not defined in form tag
+      return;
+    this.validations[id] = validation;
+  },
+  removeFormValidations: function(eForm) {
+    var id = eForm.get('id');
+    if (!id) // ID not defined in form tag
+      return;
+    this.validations[id] = null;
+  },
+  returnSubmitTimeout: function(eForm) {
+    alert('Нет ответа от сервера. Попробуйте отправить форму повторно.');
+    this.returnSubmitTitles(eForm);
+  },
+  returnSubmitTitles: function(eForm) {
+    if (!this.submitTitles) alert('this.submitTitles not defined');
+    /*
+    eForm.getElements('input').each(function(el, i) {
+      el.setProperty('disabled', false);
+    });
+    */
+    eForm.getElements('input[type=submit]').each(function(btn, i) {
+      btn.setProperty('disabled', false);
+      var newTitles = {};
+      for (k in this.submitTitles)
+        newTitles[this.submitTitles[k]] = k;
+      var title = newTitles[btn.get('value').replace('...', '')];
+      if (title) btn.set('value', title);
+    }.bind(this));
+  },
+  initConfirms: function() {
+    // Добавляем диалоговое окно подтверждения операции для ссылок с классом
+    // "confirm"
+    document.getElements('a[class~=confirm]').each(function(a, i) {
+      a.addEvent('click', function(e){
+        e.preventDefault();
+        var title = this.get('text');
+        if (!title) title = this.get('title');
+        if (confirm(
+          (title ? 'Вы действительно хотите ' + title.toLowerCase() : 'Вы уверены') + '?'))
+          window.location = this.href;
+      });
+    });
+  },
+  initSaveAndReturn: function() {
+    var eSaveAndReturn = $('saveAndReturn');
+    if (eSaveAndReturn) {
+      eSaveAndReturn.addEvent('change', function(){
+        Cookie.write('saveAndReturn', eSaveAndReturn.get('checked') ? 1 : 0);
+      });
+      eSaveAndReturn.set('checked', Cookie.read('saveAndReturn') == 1 ? true : false);
+    }
+  },
+  
+  initFormBases: function() {
+    var div = document.getElement('.apeform');
+    if (!div) return;
+    if (div.hasClass('forceDefaultInit')) return;
+    var eForm = div.getElement('form');
+    if (!eForm) throw new Error('.apeform tag has no form');
+    Ngn.Form.factory(eForm);
+  },
+  
+  colors: ['#FFFACE', '#FFE8CE', '#FFCEEA', '#EFCEFF', '#CFCEFF', '#CEEFFF', '#CEFFEE', '#CEFFD0', '#E8FFCE'],
+  
+  colorizeSelects: function() {
+    var i = 0;
+    $$('select').each(function(eSelect){
+      eSelect.getElements('option').each(function(eOption, n){
+        eOption.setStyle('background-color', this.colors[i]);
+        i++;
+        if (i == this.colors.length) i = 0;
+      }.bind(this));
+    }.bind(this));
+  },
+  
+  getMainAreaHeight: function() {
+    var b1 = $('bottom') ? $('bottom').getParent().getSize().y : 0;
+    var b2 = $('bottom') ? $('bottom').getSize().y : 0;
+    return window.getSize().y
+      - (b1 == 0 ? 0 : b2)
+      - ($('top').getParent().getSize().y == 0 ? 0 : $('top').getSize().y);
+  }
+
+};
+
+
+Ngn.cp.modules = {};
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.RequiredOptions.js|--*/
 Ngn.RequiredOptions = new Class({
   Extends: Options,
@@ -12323,180 +12175,43 @@ Ngn.Dotter = new Class({
   }
 
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
-Ngn.Dialog.RequestFormBase = new Class({
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Alert.js|--*/
+Ngn.Dialog.Alert = new Class({
   Extends: Ngn.Dialog,
 
   options: {
-    okDestroy: false,
-    jsonRequest: true,
-    autoSave: false,
-    getFormData: function() {
-      return Ngn.Frm.toObj(this.form.eForm);
-    },
-    onFormResponse: Function.from(),
-    onFormRequest: Function.from(),
-    onSubmitSuccess: Function.from()
+    noPadding: false,
+    title: false
   },
 
-  initialize: function(options) {
-    options = options || {};
-    options.ok = this.submit.bind(this);
-    if (options.submitUrl == undefined) {
-      if (options.jsonSubmit == undefined) options.jsonSubmit = false;
-      options.submitUrl = options.url;
-    }
-    this.parent(options);
-    this.toggle('ok', false);
-    this.iframeUpload = true;
-    window.addEvent('keypress', function(e) {
-      if (e.key != 'enter' || e.target.get('tag') == 'textarea') return;
-      e.preventDefault();
-      this.submit();
-    }.bind(this));
-  },
-
-  form: null,
-  response: null,
-
-  urlResponse: function(r) {
-    this.parent(r);
-    this.response = r;
-    if (r.submitTitle) this.setOkText(r.submitTitle);
-    if (r.jsOptions) {
-      if (r.jsOptions.onOkClose)
-        this.addEvent('okClose', r.jsOptions.onOkClose);
-    }
-    this.setMessage(r.form, false);
-    this.form = Ngn.Form.factory(this.message.getElement('form'), {
-      ajaxSubmit: true,
-      ajaxSubmitUrl: this.options.submitUrl,
-      disableInit: true
+  initialize: function(_opts) {
+    var opts = Object.merge(_opts, {
+      cancel: false,
+      titleClose: false,
+      bindBuildMessageFunction: true
     });
-    this.form.options.dialog = this; // Важно передавать объект Диалога в объект
-    // Формы после выполнения конструктура, иначе объект
-    // Даилога не будет содержать созданого объекта Формы
-    this.form.init();
-    this.fireEvent('formResponse');
-    this.form.addEvent('submit', function(r) {
-      this.fireEvent('formRequest');
-      this.loading(true);
-    }.bind(this));
-    this.form.addEvent('failed', function(r) {
-      this.urlResponse(r);
-      this.loading(false);
-    }.bind(this));
-    this.form.addEvent('complete', function(r) {
-      this.response = r;
-      this.okClose();
-      this.fireEvent('submitSuccess', r);
-    }.bind(this));
-    this.resizeByCols();
-    if (this.options.autoSave) {
-      new Ngn.Frm.Saver(this.form.eForm, {
-        url: this.options.submitUrl,
-        jsonRequest: true
-      });
-    }
-    this.initEvents();
-    this.formInit();
-    this.initPosition();
+    this.parent(opts);
   },
 
-  // abstract
-  initEvents: function() {
-  },
-
-  resizeByCols: function() {
-    var cols = this.form.eForm.getElements('.type_col');
-    if (!cols.length) return;
-    //var maxY = 0;
-    var ys = [];
-    var x = 0;
-    for (var i = 0; i < cols.length; i++) {
-      ys[i] = cols[i].getSize().y;
-      x += cols[i].getSize().x;
-    }
-    //for (var i=0; i<cols.length; i++) cols[i].setStyle('height', ys.max() + 'px');
-    this.dialog.setStyle('width', (x + 12) + 'px');
-  },
-
-  formInit: function() {
-  },
-
-  submit: function() {
-    this._submit();
-  },
-
-  finishClose: function() {
-    this.parent();
-    // если в последнем респонзе есть ссылка не следующую форму
-    if (this.isOkClose && this.response.nextFormUrl) {
-      var opt = {};
-      if (this.response.nextFormOptions) opt = Object.merge(opt, this.response.nextFormOptions);
-      opt.url = this.response.nextFormUrl;
-      new Ngn.Dialog.RequestForm(opt);
-    }
+  buildMessage: function(msg) {
+    var message_box = new Element('div');
+    new Element('div', {'class': 'icon-button alert-icon goleft'}).inject(message_box);
+    new Element('div', {'class': 'mav-alert-msg goleft', 'html': msg}).inject(message_box);
+    new Element('div', {'class': 'clear'}).inject(message_box);
+    return message_box;
   }
-
-  // abstract
-  //_submit: {}
-
 });
 
-Ngn.Dialog.Form = new Class({
-  Extends: Ngn.Dialog.RequestFormBase,
-
-  options: {
-    onSubmit: Function.from()
-  },
-
-  _submit: function() {
-    this.fireEvent('submit', this.options.getFormData.bind(this)());
-    this.okClose();
-  }
-
-});
-
-Ngn.Dialog.RequestForm = new Class({
-  Extends: Ngn.Dialog.RequestFormBase,
-
-  options: {
-    autoSave: false,
-    formEvents: false
-    //cacheRequest: false
-  },
-
-  _submit: function() {
-    this.form.submit();
-  },
-
-  initEvents: function() {
-    if (!this.options.formEvents) return;
-    var obj = this;
-    for (var i = 0; i < this.options.formEvents.length; i++) {
-      var evnt = this.options.formEvents[i];
-      this.message.getElement('[name=' + evnt.fieldName + ']').addEvent(evnt.fieldEvent, function() {
-        obj.fireEvent(evnt.formEvent, this.get('value'));
-      });
-    }
-  }
-
-});
-
-Ngn.Dialog.RequestForm.Static = new Class({
-  Extends: Ngn.Dialog.RequestForm,
-
-  // options: {
-  //   staticResponse: {
-  //     title: text
-  //     submitTitle: text
-  //     form: html
-  //   }
-  // }
-
-  initFormResponse: function() {
-    this.urlResponse(Ngn.json.process(this.options.staticResponse));
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Tips.js|--*/
+Ngn.Tips = new Class({
+  Extends: Tips,
+  
+  toElement: function() {
+    // by masted
+    var lastTip = document.getElement('.'+this.options.className);
+    if (lastTip) lastTip.dispose();
+    // --------------
+    return this.parent();
   }
 
 });
@@ -14866,33 +14581,6 @@ Ngn.IframeFormRequest.JSON = new Class({
   }
   
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Alert.js|--*/
-Ngn.Dialog.Alert = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    noPadding: false,
-    title: false
-  },
-
-  initialize: function(_opts) {
-    var opts = Object.merge(_opts, {
-      cancel: false,
-      titleClose: false,
-      bindBuildMessageFunction: true
-    });
-    this.parent(opts);
-  },
-
-  buildMessage: function(msg) {
-    var message_box = new Element('div');
-    new Element('div', {'class': 'icon-button alert-icon goleft'}).inject(message_box);
-    new Element('div', {'class': 'mav-alert-msg goleft', 'html': msg}).inject(message_box);
-    new Element('div', {'class': 'clear'}).inject(message_box);
-    return message_box;
-  }
-});
-
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Error.js|--*/
 Ngn.Dialog.Error = new Class({
   Extends: Ngn.Dialog.Alert,
@@ -14909,6 +14597,280 @@ Ngn.Dialog.Error = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/cp/Ngn.cp.TwoPanels.js|--*/
+Ngn.cp.TwoPanels = new Class({
+  Implements: [Options],
+  
+  options: {
+    storeId: 'twoPanels',
+    leftExcludeEls: [],
+    rightExcludeEls: [],
+    addLeftWrapper: true,
+    addRightWrapper: true,
+    dragOptions: {}
+  },
+  
+  initialize: function(eLeft, eRight, eHandler, options) {
+    this.setOptions(options);
+    this.eLeft = eLeft;
+    this.eRight = eRight;
+    this.eHandler = eHandler;
+    if (this.options.addLeftWrapper) this.eLeft = Ngn.addWrapper(this.eLeft, 'panelWrapper');
+    if (this.options.addRightWrapper) this.eRight = Ngn.addWrapper(this.eRight, 'panelWrapper');
+    this.options.dragOptions.onDrag = this.resize.bind(this);
+    Ngn.hHandler(this.eHandler, this.eLeft, this.options.storeId, this.options.dragOptions);
+    this.handlerW = this.eHandler.getSize().x;
+    // Элементы, высоты которых нужно вычитать не успевают отрендериться, поэтому ставим задержку
+    (function() {
+      this.init();
+    }).delay(100, this);
+  },
+  
+  leftMinusH: 0,
+  //rightMinusH: 0,
+  
+  init: function() {
+    window.addEvent('resize', this.resize.bind(this));
+    this.resize();
+  },
+
+  getLeftMinusHeight: function() {
+    var h = 0;
+    for (i=0; i<this.options.leftExcludeEls.length; i++)
+      h += this.options.leftExcludeEls[i].getSize().y;
+    return h;
+  },
+
+  getRightMinusHeight: function() {
+    var h = 0;
+    for (i=0; i<this.options.rightExcludeEls.length; i++)
+      h += this.options.rightExcludeEls[i].getSize().y;
+    return h;
+  },
+  
+  resize: function() {
+    if (this.resizeTid) clearTimeout(this.resizeTid);
+    this.resizeTid = this._resize.delay(10, this);
+  },
+
+  _resize: function() {
+    this.eRight.setStyle('width', (window.getSize().x - (this.eHandler.getPosition().x + this.handlerW)) + 'px');
+    var maH = Ngn.cp.getMainAreaHeight();
+    this.eLeft.setStyle('height', (maH - this.getLeftMinusHeight()) + 'px');
+    this.eRight.setStyle('height', (maH - this.getRightMinusHeight()) + 'px');
+    this.eHandler.setStyle('height', maH + 'px');
+  }
+  
+});
+
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/cp/Ngn.cp.ddFieldType.js|--*/
+Ngn.cp.ddFieldType = {};
+Ngn.cp.ddFieldType.types = {};
+
+Ngn.cp.ddFieldType.Properties = new Class({
+
+  initialize: function(eForm, name) {
+    var init = function(type) {
+      var changingTypes = ['required', 'defaultDisallow', 'system', 'notList', 'filterable'];
+      for (var i = 0; i < changingTypes.length; i++) {
+        var eRow = eForm.getElement('.row_' + changingTypes[i]);
+        if (!eRow) continue;
+        eRow.setStyle('display', 'block').getElements('input,select').set('disabled', false);
+      }
+      if (Ngn.cp.ddFieldType.types[type].disable) {
+        var disable = Ngn.cp.ddFieldType.types[type].disable;
+        for (i in disable) {
+          var eRow = eForm.getElement('.row_' + disable[i]);
+          if (!eRow) continue;
+          eRow.setStyle('display', 'none').getElements('input,select').set('disabled', true);
+        }
+      }
+    }
+    Ngn.Frm.addEvent('change', name, init);
+    init(Ngn.Frm.getValueByName(name));
+    var selType = Ngn.Frm.getValueByName(name);
+    if (Ngn.cp.ddFieldType.types[selType].virtual) init(selType);
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
+Ngn.Dialog.RequestFormBase = new Class({
+  Extends: Ngn.Dialog,
+
+  options: {
+    okDestroy: false,
+    jsonRequest: true,
+    autoSave: false,
+    getFormData: function() {
+      return Ngn.Frm.toObj(this.form.eForm);
+    },
+    onFormResponse: Function.from(),
+    onFormRequest: Function.from(),
+    onSubmitSuccess: Function.from()
+  },
+
+  initialize: function(options) {
+    options = options || {};
+    options.ok = this.submit.bind(this);
+    if (options.submitUrl == undefined) {
+      if (options.jsonSubmit == undefined) options.jsonSubmit = false;
+      options.submitUrl = options.url;
+    }
+    this.parent(options);
+    this.toggle('ok', false);
+    this.iframeUpload = true;
+    window.addEvent('keypress', function(e) {
+      if (e.key != 'enter' || e.target.get('tag') == 'textarea') return;
+      e.preventDefault();
+      this.submit();
+    }.bind(this));
+  },
+
+  form: null,
+  response: null,
+
+  urlResponse: function(r) {
+    this.parent(r);
+    this.response = r;
+    if (r.submitTitle) this.setOkText(r.submitTitle);
+    if (r.jsOptions) {
+      if (r.jsOptions.onOkClose)
+        this.addEvent('okClose', r.jsOptions.onOkClose);
+    }
+    this.setMessage(r.form, false);
+    this.form = Ngn.Form.factory(this.message.getElement('form'), {
+      ajaxSubmit: true,
+      ajaxSubmitUrl: this.options.submitUrl,
+      disableInit: true
+    });
+    this.form.options.dialog = this; // Важно передавать объект Диалога в объект
+    // Формы после выполнения конструктура, иначе объект
+    // Даилога не будет содержать созданого объекта Формы
+    this.form.init();
+    this.fireEvent('formResponse');
+    this.form.addEvent('submit', function(r) {
+      this.fireEvent('formRequest');
+      this.loading(true);
+    }.bind(this));
+    this.form.addEvent('failed', function(r) {
+      this.urlResponse(r);
+      this.loading(false);
+    }.bind(this));
+    this.form.addEvent('complete', function(r) {
+      this.response = r;
+      this.okClose();
+      this.fireEvent('submitSuccess', r);
+    }.bind(this));
+    this.resizeByCols();
+    if (this.options.autoSave) {
+      new Ngn.Frm.Saver(this.form.eForm, {
+        url: this.options.submitUrl,
+        jsonRequest: true
+      });
+    }
+    this.initEvents();
+    this.formInit();
+    this.initPosition();
+  },
+
+  // abstract
+  initEvents: function() {
+  },
+
+  resizeByCols: function() {
+    var cols = this.form.eForm.getElements('.type_col');
+    if (!cols.length) return;
+    //var maxY = 0;
+    var ys = [];
+    var x = 0;
+    for (var i = 0; i < cols.length; i++) {
+      ys[i] = cols[i].getSize().y;
+      x += cols[i].getSize().x;
+    }
+    //for (var i=0; i<cols.length; i++) cols[i].setStyle('height', ys.max() + 'px');
+    this.dialog.setStyle('width', (x + 12) + 'px');
+  },
+
+  formInit: function() {
+  },
+
+  submit: function() {
+    this._submit();
+  },
+
+  finishClose: function() {
+    this.parent();
+    // если в последнем респонзе есть ссылка не следующую форму
+    if (this.isOkClose && this.response.nextFormUrl) {
+      var opt = {};
+      if (this.response.nextFormOptions) opt = Object.merge(opt, this.response.nextFormOptions);
+      opt.url = this.response.nextFormUrl;
+      new Ngn.Dialog.RequestForm(opt);
+    }
+  }
+
+  // abstract
+  //_submit: {}
+
+});
+
+Ngn.Dialog.Form = new Class({
+  Extends: Ngn.Dialog.RequestFormBase,
+
+  options: {
+    onSubmit: Function.from()
+  },
+
+  _submit: function() {
+    this.fireEvent('submit', this.options.getFormData.bind(this)());
+    this.okClose();
+  }
+
+});
+
+Ngn.Dialog.RequestForm = new Class({
+  Extends: Ngn.Dialog.RequestFormBase,
+
+  options: {
+    autoSave: false,
+    formEvents: false
+    //cacheRequest: false
+  },
+
+  _submit: function() {
+    this.form.submit();
+  },
+
+  initEvents: function() {
+    if (!this.options.formEvents) return;
+    var obj = this;
+    for (var i = 0; i < this.options.formEvents.length; i++) {
+      var evnt = this.options.formEvents[i];
+      this.message.getElement('[name=' + evnt.fieldName + ']').addEvent(evnt.fieldEvent, function() {
+        obj.fireEvent(evnt.formEvent, this.get('value'));
+      });
+    }
+  }
+
+});
+
+Ngn.Dialog.RequestForm.Static = new Class({
+  Extends: Ngn.Dialog.RequestForm,
+
+  // options: {
+  //   staticResponse: {
+  //     title: text
+  //     submitTitle: text
+  //     form: html
+  //   }
+  // }
+
+  initFormResponse: function() {
+    this.urlResponse(Ngn.json.process(this.options.staticResponse));
+  }
+
+});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.Saver.js|--*/
 Ngn.Frm.SaverBase = new Class({
   Implements: [Options],
@@ -14974,3860 +14936,26 @@ Ngn.Frm.Saver = new Class({
   }
   
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.js|--*/
-/**
- *
- * <div id="mainElement">
- *   <div class="rowElement">
- *     <input type="" name="k[0]" value="gg" size="40" id="k[0]i" />
- *     <input type="" name="v[0]" value="gggg" size="40" id="v[0]i" />
- *     <div class="drag"></div>
- *     <a href="#" class="smIcons delete bordered"><i></i></a>
- *     <div class="clear"><!-- --></div>
- *   </div>
- *   <div class="element">
- *     ...
- *   </div>
- *   <a href="#" class="add">Добавить</a>
- * </div>
- *
- */
-Ngn.FieldSet = new Class({
-  Implements: [Options, Events],
-
-  options: {
-    fields: [],
-    data: [],
-    rowElementSelector: 'div[class~=rowElement]',
-    elementContainerSelector: '.element',
-    cleanOnCloneSelector: '.type_image .iconsSet',
-    addRowBtnSelector: 'a[class~=add]',
-    deleteBtnSelector: 'a[class~=delete]',
-    dragBoxSelector: 'div[class=dragBox]',
-    removeExceptFirstRow: 'p.label',
-    moveElementToRowStyles: ['border-bottom', 'padding-left'],
-    addTitle: 'Добавить',
-    cleanupTitle: 'Очистить поля строки',
-    deleteTitle: 'Удалить строку',
-    addRowNumber: false
-  },
-
-  changed: false,
-  eSampleRow: null,
-  buttons: [], // array of Ngn.Btn objects
-
-  toggleDisabled: function(flag) {
-    for (var i = 0; i < this.buttons.length; i++) {
-      this.buttons[i].toggleDisabled(flag);
-    }
-  },
-
-  getContainer: function() {
-    var eContainer = Elements.from('<div class="fieldSet"></div>')[0];
-    if (!this.options.data) this.options.data = [false];
-    var n = this.options.data.length;
-    var eRowProto = Elements.from('<div class="rowElement"><div class="drag"></div><div class="clear"><!-- --></div></div>')[0];
-    for (var j = 0; j < n; j++) {
-      var eRow = eRowProto.clone();
-      eRow.store('n', j + 1);
-      for (var i = 0; i < this.options.fields.length; i++) {
-        var el = new Element('div', {'class': 'element'});
-        new Element('input', {
-          name: this.options.fields[i].name + '[' + j + ']',
-          value: this.options.data[j] ? this.options.data[j].name : ''
-        }).inject(el);
-        el.inject(eRow, 'top');
-      }
-      eRow.inject(eContainer);
-    }
-    return eContainer.inject(this.eParent);
-  },
-
-  initialize: function(eParent, options) {
-    this.eParent = eParent;
-    this.setOptions(options);
-    this.eContainer = this.getContainer();
-    this.eAddRow = this.eContainer.getElement(this.options.addRowBtnSelector);
-    if (!this.eAddRow) {
-      var eBottomBtns = new Element('div', {'class': 'bottomBtns'}).inject(this.eContainer, 'bottom');
-      this.eAddRow = Ngn.Btn.btn1(this.options.addTitle, 'btn add dgray').inject(eBottomBtns);
-      Elements.from('<div class="heightFix"></div>')[0].inject(this.eContainer, 'bottom');
-    }
-    this.buttons.push(new Ngn.Btn(this.eAddRow, function(btn) {
-      this.buttons.push(btn);
-      this.addRow();
-    }.bind(this)));
-    this.initRows();
-    //this.initSorting();
-    this.checkDeleteButtons();
-  },
-
-  /*
-   inputsEmpty: function(container) {
-   var elements = container.getElements('input')
-   for (var i = 0; i < elements.length; i++) {
-   if (elements[i].get('value')) return false;
-   }
-   return true;
-   },
-   */
-
-  initRows: function() {
-    if (!this.options.rowElementSelector) {
-      this.eContainer.getElements('input').each(function(eInput) {
-        var eRowDiv = new Element('div', {'class': 'genRow'})
-        eRowDiv.inject(eInput, 'after');
-        eInput.inject(eRowDiv);
-      });
-      this.options.rowElementSelector = 'div[class=genRow]';
-    }
-    // Переносим стили элементов в стили контейнеров элементов, а у элементов их удаляем
-    this.esRows = this.eContainer.getElements(this.options.rowElementSelector);
-    for (var i = 0; i < this.esRows.length; i++) {
-      new Element('div', {'class': 'rowBtns smIcons'}).inject(this.esRows[i]); // контейнер для кнопок
-    }
-    this.eSampleRow = this.esRows[0].clone();
-    this.eSampleRow.getElements(this.options.cleanOnCloneSelector).dispose();
-    this.createCleanupButton(this.esRows[0]);
-    this.removeTrash(this.eSampleRow);
-    for (var i = 0; i < this.esRows.length; i++) {
-      if (this.options.addRowNumber) this.addRowNumber(this.esRows[i]);
-      this.moveStyles(this.esRows[i]);
-    }
-    return;
-    if (this.esRows.length > 0) {
-      for (var i = 1; i < this.esRows.length; i++) {
-        this.removeTrash(this.esRows[i]);
-        this.createDeleteButton(this.esRows[i]);
-      }
-    }
-  },
-
-  firstIndex: function(name) {
-    return name.replace(/[^[]+\[(\d)+\].*/, '$1').toInt();
-  },
-
-  addRowNumber: function(eRow) {
-    var index = this.firstIndex(eRow.getElement(Ngn.Frm.selector).get('name'));
-    new Element('span', {
-      html: index + ' — ',
-      'class': 'rowNumber'
-    }).inject(eRow.getElement('.field-wrapper'), 'top');
-  },
-
-  moveStyles: function(eRow) {
-    return;
-    var style;
-    esEls = eRow.getElements(this.options.elementContainerSelector);
-    for (var j = 0; j < this.options.moveElementToRowStyles.length; j++) {
-      style = this.options.moveElementToRowStyles[j];
-      eRow.setStyles(esEls[0].getStyles(style));
-      for (var k = 0; k < esEls.length; k++)
-        esEls[k].setStyle(style, '0');
-    }
-  },
-
-  checkDeleteButtons: function() {
-    return;
-    // Удаляем кнопку "Удалить", если элемент 1 в списке и значения полей пустые
-    if (this.eRows.length == 1) {
-      var eRow = this.eContainer.getElement(this.options.rowElementSelector);
-    }
-  },
-
-  removeTrash: function(eRow) {
-    eRow.getElements(this.options.removeExceptFirstRow).each(function(el) {
-      el.dispose();
-    });
-  },
-
-  createRowButton: function(eRow, btn, action, options) {
-    var els = eRow.getElements(this.options.elementContainerSelector);
-    var fieldSet = this;
-    var eRowBtns = eRow.getElement('.rowBtns');
-    this.buttons.push(new Ngn.Btn(// Вставляем кнопку после последнего элемента формы в этой строке
-      //Ngn.addTips(Ngn.Btn.btn(btn)).inject(els[els.length - 1], 'after'), function() {
-      //Ngn.Btn.btn(btn).inject(els[els.length - 1], 'after'), function() {
-      Ngn.Btn.btn(btn).inject(eRowBtns), function() {
-        fieldSet.fireEvent(btn.cls);
-        action.bind(this)();
-      }, options || {}));
-  },
-
-  createDeleteButton: function(eRow) {
-    var fieldSet = this;
-    this.createRowButton(eRow, {
-      caption: this.options.deleteTitle,
-      cls: 'delete'
-    }, function() {
-      eRow.dispose();
-      fieldSet.regenInputNames();
-      fieldSet.buttons.erase(this);
-    });
-  },
-
-  createCleanupButton: function(eRow) {
-    var els = eRow.getElements(this.options.elementContainerSelector);
-    //реализовать через css
-    //var eLabel = eRow.getElement(this.options.removeExceptFirstRow);
-    //if (eLabel) eBtn.setStyle('margin-top', (eBtn.getStyle('margin-top').toInt() + eLabel.getSizeWithMargin().y) + 'px');
-    this.createRowButton(eRow, {
-      caption: this.options.cleanupTitle,
-      cls: 'cleanup'
-    }, function() {
-      eRow.getElements(Ngn.Frm.selector).set('value', '');
-    });
-  },
-
-  addRow: function() {
-    var eLastRow = this.eContainer.getLast(this.options.rowElementSelector);
-    var eNewRow = this.eSampleRow.clone();
-    var lastRowN = this.getN(eLastRow);
-    var nextRowN = this.getNextN(eLastRow);
-    var eLabel;
-    var lastRowElements = eLastRow.getElements(Ngn.Frm.selector);
-    eNewRow.getElements('.element').each(function(eElement, i) {
-      //c(eElement.get('class').replace('-' + curN + '-', '-' + nextN + '-'));
-      //c('(.*)-' + lastRowN + '-(.*)');
-      eElement.set('class', eElement.get('class').replace(new RegExp('(.*)-0-(.*)'), '$1-' + nextRowN + '-$2'));
-    });
-    eNewRow.getElements(Ngn.Frm.selector).each(function(eInput, i) {
-      Ngn.Frm.emptify(eInput);
-      //if (eInput.get('value')) eInput.set('value', '');
-      //if (eInput.get('checked')) eInput.set('checked', false);
-      //c(nextRowN);
-      eInput.set('name', this.getInputName(eInput, nextRowN));
-      //eInput.set('id', lastRowElements[i].get('id').replace('-' + lastRowN + '-', '-' + nextRowN + '-'));
-      eLabel = eInput.getNext('label');
-      //if (eLabel) eLabel.set('for', eInput.get('id'));
-      this.initInput(eInput);
-    }.bind(this));
-    eNewRow.inject(eLastRow, 'after');
-    this.createDeleteButton(eNewRow);
-    this.fireEvent('addRow');
-    if (this.options.addRowNumber) this.addRowNumber(eNewRow, nextRowN);
-    this.moveStyles(eNewRow);
-    this.afterAddRow(eNewRow);
-    // this.initSorting();
-  },
-
-  initInput: function(eInput) {
-  },
-  afterAddRow: function(eNewRow) {
-  },
-
-  getNextN: function(eRow) {
-    return this.getN(eRow, 1);
-  },
-
-  getN: function(eRow, plus) {
-    plus = plus || 0;
-    var els = eRow.getElements(Ngn.Frm.selector);
-    var name;
-    for (var i = 0; i < els.length; i++) {
-      name = els[i].get('name');
-      if (name) break;
-    }
-    return this.firstIndex(name) + plus;
-  },
-
-  getInputName: function(eInput, n) {
-    var name = eInput.get('name');
-    if (!name) return;
-    return name.replace(/([a-z0-9]+)\[([0-9]+)\](.*)/i, '$1[' + n + ']$3');
-  },
-
-  regenInputNames: function() {
-    this.eContainer.getElements(this.options.rowElementSelector).each(function(eRow, n) {
-      eRow.getElements(Ngn.Frm.selector).each(function(eInput) {
-        eInput.set('name', this.getInputName(eInput, n));
-      }.bind(this));
-    }.bind(this));
-  },
-
-  initSorting: function() {
-    var ST = new Sortables(this.eContainer, {
-      handle: this.options.dragBoxSelector
-    });
-    ST.addEvent('start', function(el, clone) {
-      el.addClass('move');
-    });
-    ST.addEvent('complete', function(el, clone) {
-      el.removeClass('move');
-    }.bind(this));
-
-    this.eContainer.getElements(this.options.dragBoxSelector).each(function(el) {
-      el.addEvent('mouseover', function() {
-        el.addClass('over');
-      });
-      el.addEvent('mouseout', function() {
-        el.removeClass('over');
-      });
-    });
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.ElSelectDialog.js|--*/
-Ngn.ElSelectDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    dialogClass: 'dialog selectDialog',
-    noPadding: false
-  },
-  okClose: function() {
-    //this.formEl.setVisibleValue(this.getValue());
-    this.fireEvent('changeValue', this.getValue());
-    this.parent();
-  },
-  getValue: function() {
-    throw new Error('Abstract');
-  }
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.DialogSelect.js|--*/
-Ngn.Form.El.DialogSelect = new Class({
-  Extends: Ngn.Form.El,
-  options: {
-    selectTitle: 'Нажмите, чтобы сменить',
-    selectClass: ''
-  },
-  baseName: 'defualt',
-  getInitField: function() {
-    return this.eRow.getElement('input') || this.eRow.getElement('select');
-  },
-  getSelectDialogEl: function() {
-    return new Element('a', {
-      'class': 'pseudoLink dgray' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
-      html: this.options.selectTitle
-    }).inject(this.eInitField, 'after');
-  },
-  makeHiddenField: function() {
-    this.eInput = new Element('input', { type: 'hidden', name: this.eInitField.get('name') }).inject(this.eInitField, 'after');
-  },
-  init: function() {
-    this.eInitField = this.getInitField();
-    this.value = this.eInitField.get('value');
-    this.makeHiddenField();
-    this.eSelectDialog = this.getSelectDialogEl();
-    new Element('div', {'class': 'rightFading'}).inject(this.eSelectDialog);
-    this.eInitField.dispose();
-    this.initControlDefault();
-    this.setValue(this.value);
-  },
-  setValue: function(value) {
-    this.setVisibleValue(value);
-    this._setValue(value);
-  },
-  setVisibleValue: function(value) {
-    this.eSelectDialog.set('html', value || 'not defined');
-  },
-  _setValue: function(value) {
-    if (!value) return;
-    this.value = value;
-    this.eInput.set('value', value);
-  },
-  initControl: function() {
-    this.eSelectDialog.addEvent('click', function() {
-      var cls = this.getDialogClass();
-      if (!cls) throw new Error('class not found');
-      new cls(Object.merge({
-        value: this.value
-      }, this.getDialogOptions()));
-    }.bind(this));
-  },
-  initControlDefault: function() {
-    this.initControl();
-  },
-  getDialogClass: function() {
-    throw new Error('Create abstract method getDialogClass()');
-  },
-  getDialogOptions: function() {
-    return {
-      onChangeValue: function(value) {
-        this.setValue(value);
-        if (this.form && this.form.options.dialog) {
-          this.form.options.dialog.fireEvent('change' + this.baseName.capitalize(), value);
-        }
-      }.bind(this)
-    };
-  }
-});
-/*--|/home/user/ngn-env/ngn/more/scripts/js/common/tpl.php| (with request data)--*/
-Ngn.toObj('Ngn.tpls.fontSelect', '<div class="selectItems">\n    <div class="item" data-name="Aero_Matics_Stencil_Regular">\n    Aero_Matics_Stencil_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Ancient_Kyiv">\n    Ancient_Kyiv    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Archive">\n    Archive    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Attentica_4f_Ultralight">\n    Attentica_4f_Ultralight    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Avdira">\n    Avdira    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azamat">\n    Azamat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans">\n    Azoft_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold">\n    Azoft_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold_Italic">\n    Azoft_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Italic">\n    Azoft_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bad_Script">\n    Bad_Script    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bardelin">\n    Bardelin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Barkentina">\n    Barkentina    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender">\n    Bender    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black">\n    Bender_Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black_Italic">\n    Bender_Black_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold">\n    Bender_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold_Italic">\n    Bender_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Italic">\n    Bender_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light">\n    Bender_Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light_Italic">\n    Bender_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boblic">\n    Boblic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bombarda">\n    Bombarda    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boom_Boom">\n    Boom_Boom    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bradobrei">\n    Bradobrei    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella">\n    Brava_Novella    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella_Italic">\n    Brava_Novella_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brush">\n    Brush    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Regular">\n    Corki_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Rounded">\n    Corki_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan">\n    Corki_Tuscan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan_Rounded">\n    Corki_Tuscan_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Danger">\n    Danger    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Days">\n    Days    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decolz">\n    Decolz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decree_Art_Two">\n    Decree_Art_Two    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Derby">\n    Derby    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Deuz_Ex">\n    Deuz_Ex    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Don_Quixote">\n    Don_Quixote    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans">\n    Droid_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans_Bold">\n    Droid_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="FatC">\n    FatC    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Font_Awesome">\n    Font_Awesome    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Free_Font_Pro">\n    Free_Font_Pro    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat">\n    Fregat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold">\n    Fregat_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold_Italic">\n    Fregat_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Italic">\n    Fregat_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Glidesketch">\n    Glidesketch    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Gogol">\n    Gogol    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web">\n    Graublau_Web    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web_Bold">\n    Graublau_Web_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Medium">\n    Hagin_Caps_Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Thin">\n    Hagin_Caps_Thin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo">\n    Hattori_Hanzo    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo_Italic">\n    Hattori_Hanzo_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Helgoland">\n    Helgoland    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Intruder">\n    Intruder    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold">\n    Iwona_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold_Italic">\n    Iwona_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold">\n    Iwona_Condensed_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold_Italic">\n    Iwona_Condensed_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Italic">\n    Iwona_Condensed_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Regular">\n    Iwona_Condensed_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Italic">\n    Iwona_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Italic">\n    Iwona_Condensed_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Regular">\n    Iwona_Condensed_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Medium_Regular">\n    Iwona_Condensed_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Regular">\n    Iwona_Condensed_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condesed_Medium_Italic">\n    Iwona_Condesed_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Italic">\n    Iwona_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Regular">\n    Iwona_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Italic">\n    Iwona_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Italic">\n    Iwona_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Regular">\n    Iwona_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Italic">\n    Iwona_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Regular">\n    Iwona_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Regular">\n    Iwona_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="John_Daniels">\n    John_Daniels    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Juan">\n    Juan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Bold_RU">\n    Kelson_Sans_Bold_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Light_RU">\n    Kelson_Sans_Light_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Regular_RU">\n    Kelson_Sans_Regular_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Bold">\n    Kotyhoroshko_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Regular">\n    Kotyhoroshko_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lloyd">\n    Lloyd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lobster">\n    Lobster    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Audrey_BG">\n    Lovely_Audrey_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Grace_BG">\n    Lovely_Grace_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Sofia_BG">\n    Lovely_Sofia_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed">\n    Lytiga_Pro_Condensed    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed_Italic">\n    Lytiga_Pro_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended">\n    Lytiga_Pro_Extended    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended_Italic">\n    Lytiga_Pro_Extended_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Italic">\n    Lytiga_Pro_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Regular">\n    Lytiga_Pro_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="MS_Reshetka">\n    MS_Reshetka    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Bold">\n    Marta_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Italic">\n    Marta_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Regular">\n    Marta_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs">\n    Mikodacs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs_PCS">\n    Mikodacs_PCS    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Multima_Bold">\n    Multima_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Museo_Sans_500">\n    Museo_Sans_500    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Neonic">\n    Neonic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nikodecs">\n    Nikodecs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG">\n    Nioki_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Bold">\n    Nioki_BG_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Italic">\n    Nioki_BG_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Now_Grotesk">\n    Now_Grotesk    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Bold">\n    Old_Standard_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Italic">\n    Old_Standard_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Regular">\n    Old_Standard_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Oranienbaum">\n    Oranienbaum    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus">\n    Orpheus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Bold">\n    Orpheus_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Italic">\n    Orpheus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold">\n    Palemonas_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold_Italic">\n    Palemonas_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Italic">\n    Palemonas_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Regular">\n    Palemonas_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama">\n    Perforama    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama_Italic">\n    Perforama_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pharmadin">\n    Pharmadin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Philosopher">\n    Philosopher    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Bold">\n    Pixar_One_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Display">\n    Pixar_One_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Regular">\n    Pixar_One_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Bold">\n    Pixar_Two_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Display">\n    Pixar_Two_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Regular">\n    Pixar_Two_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans">\n    Resavska_BG_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold">\n    Resavska_BG_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold_Italic">\n    Resavska_BG_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Italic">\n    Resavska_BG_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Retropecan">\n    Retropecan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Black">\n    SkolaSans-Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BlackItalic">\n    SkolaSans-BlackItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Bold">\n    SkolaSans-Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BoldItalic">\n    SkolaSans-BoldItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Light">\n    SkolaSans-Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-LightItalic">\n    SkolaSans-LightItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Medium">\n    SkolaSans-Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-MediumItalic">\n    SkolaSans-MediumItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Regular">\n    SkolaSans-Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-RegularItalic">\n    SkolaSans-RegularItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Skoropys_XVII">\n    Skoropys_XVII    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sports_World_Regular">\n    Sports_World_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Stiff_Staff">\n    Stiff_Staff    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sumkin">\n    Sumkin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus">\n    Supremus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Condensed_Italic">\n    Supremus_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Italic">\n    Supremus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Tot_Shrift_Bold">\n    Tot_Shrift_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Underdog">\n    Underdog    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Venus_Rising">\n    Venus_Rising    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Zion_Train_Pro_Stencil_Bold">\n    Zion_Train_Pro_Stencil_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Znikomit_No25">\n    Znikomit_No25    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arial">\n    arial    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbd">\n    arialbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbi">\n    arialbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="ariali">\n    ariali    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgia">\n    georgia    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiab">\n    georgiab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiai">\n    georgiai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiaz">\n    georgiaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="impact">\n    impact    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahoma">\n    tahoma    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahomabd">\n    tahomabd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="times">\n    times    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbd">\n    timesbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbi">\n    timesbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesi">\n    timesi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdana">\n    verdana    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanab">\n    verdanab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanai">\n    verdanai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanaz">\n    verdanaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="clear"></div>\n  <script>\n  </script>\n</div>');
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.js|--*/
-// from common
-
-if (!Ngn.sd) Ngn.sd = {};
-
-Ngn.blink = function(el, duration) {
-  if (!duration) duration = 1000;
-  var element = $(el);
-  var on = true;
-  (function() {
-    element.setStyle('visibility', on ? 'hidden' : 'visible');
-    on = !on;
-  }).periodical(duration);
-};
-
-Ngn.sd.positionDiff = function(pos1, pos2, offset) {
-  if (!offset) offset = 0;
-  return {
-    x: pos1.x - pos2.x + offset,
-    y: pos1.y - pos2.y + offset
-  }
-};
-
-Ngn.sd.loadedFonts = {};
-Ngn.sd.loadFont = function(font, onLoad) {
-  if (!font) return;
-  if (Ngn.sd.loadedFonts[font]) {
-    onLoad();
-    return;
-  }
-  Asset.javascript((Ngn.sd.baseUrl || '') + '/sd/js/fonts/' + font + '.js', {
-    onLoad: function() {
-      Ngn.sd.loadedFonts[font] = true;
-      onLoad();
-    }
-  });
-};
-
-Ngn.sd.initFullBodyHeight = function() {
-  return;
-  var isFullHeight = null;
-  var fullBodyHeight = function() {
-    if (window.getScrollSize().y > window.getSize().y) {
-      if (isFullHeight === true || isFullHeight === null) document.getElement('body').setStyle('height', '');
-    } else {
-      if (isFullHeight === false || isFullHeight === null) document.getElement('body').setStyle('height', '100%');
-    }
-  };
-  window.addEvent('domready', fullBodyHeight);
-  window.addEvent('resize', fullBodyHeight);
-};
-
-// --
-
-Ngn.sd.setMinHeight = function(parent, offset, min) {
-  if (!offset) offset = 0;
-  if (!min) min = 0;
-  var max = 0;
-  parent.getChildren().each(function(el) {
-    var y = el.getSize().y + parseInt(el.getStyle('top'));
-    if (y > max) max = y + offset;
-  });
-  if (max) {
-    if (max < min) max = min;
-    parent.sdSetStyle('min-height', max);
-  }
-};
-
-Ngn.sd.Font = new Class({
-
-  directChangeFontStyleProps: function() {
-    return [];
-  },
-
-  _updateFont: function(forceDirectChange) {
-    if (!this.data.font) return;
-    if (!this.data.font.fontSize) this.data.font.fontSize = '24px';
-    var s = ['font-size', 'font-family', 'color'], prop;
-    for (var i = 0; i < s.length; i++) this.styleEl().sdSetStyle(s[i], '');
-    for (i in this.data.font) {
-      prop = i.hyphenate();
-      if (forceDirectChange || Ngn.Arr.inn(prop, this.directChangeFontStyleProps())) {
-        this.styleEl().setStyle(prop, this.data.font[i]);
-      }
-      if (Ngn.Arr.inn(prop, s)) this.styleEl().sdSetStyle(prop, this.data.font[i]);
-    }
-    this.updateBtnFontSettings();
-  },
-
-  updateBtnFontSettings: function() {
-    if (!this.btnFontSettings) return;
-    if (this.data.font.color) this.btnFontSettings.el.setStyle('background-color', this.data.font.color); else {
-      if (this.btnFontSettings.el.getStyle('background-color')) {
-        this.btnFontSettings.el.setStyle('background-color', '');
-      }
-    }
-  },
-
-  defaultFontColor: function() {
-    return this.data.font.color || false;
-  },
-
-  linkColor: function() {
-    if (!this.data.font) return false;
-    return this.data.font.linkColor || this.data.font.color || false;
-  },
-
-  linkOverColor: function() {
-    if (!this.data.font) return false;
-    return this.data.font.linkOverColor || false;
-  },
-
-  fontSettingsAction: 'json_fontSettings',
-
-  fontSettingsDialogOptions: function() {
-    return {
-      width: 420
-    };
-  },
-
-  initFont: function() {
-    if (!this.data.font) this.data.font = {};
-    this.initFontBtn();
-    this.updateFont();
-  },
-
-  _fontSettingsAction: function() {
-    if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
-    Ngn.sd.openedPropDialog = new Ngn.sd.FontSettingsDialog(Object.merge({
-      onClose: function() {
-        Ngn.sd.openedPropDialog = false;
-      },
-      dialogClass: 'settingsDialog compactFields dialog',
-      id: this.finalData().data.type + this.id(),
-      baseZIndex: 210,
-      force: false,
-      url: this.ctrl + '/' + this.fontSettingsAction + '/' + this.id(),
-      onSubmitSuccess: function() {
-        this.reload();
-      }.bind(this),
-      onChangeFont: function(fontFamily) {
-        this.data.font.fontFamily = fontFamily;
-        this._updateFont(true);
-      }.bind(this),
-      onChangeColor: function(color) {
-        this.data.font.color = color;
-        this._updateFont(true);
-      }.bind(this),
-      onChangeSize: function(fontSize) {
-        this.data.font.fontSize = fontSize;
-        this._updateFont(true);
-      }.bind(this)
-      //onChangeShadow: function(shadow) {
-      //  this.data.font.shadow = shadow;
-      //  this._updateFont(true);
-      //}.bind(this)
-    }, this.fontSettingsDialogOptions()));
-  },
-
-  initFontBtn: function() {
-    if (!this.eBtns) return;
-    this.btnFontSettings = new Ngn.Btn( //
-      Ngn.Btn.btn2('Font Settings', 'font').inject(this.eBtns), //
-      this._fontSettingsAction.bind(this) //
-    );
-  },
-
-  styleEl: function() {
-    return this.el;
-  }
-
-});
-
-Ngn.sd.FontSettingsDialog = new Class({
-  Extends: Ngn.Dialog.RequestForm,
-
-  options: {
-    useFx: false
-  },
-
-  formInit: function() {
-    var obj = this;
-    var el = this.message.getElement('[name=fontFamily]');
-    if (el) {
-      el.addEvent('change', function() {
-        obj.fireEvent('changeFont', this.get('value'));
-      });
-    }
-    this.message.getElement('[name=fontSize]').addEvent('change', function() {
-      obj.fireEvent('changeSize', this.get('value'));
-    });
-    this.message.getElement('[name=color]').addEvent('change', function() {
-      obj.fireEvent('changeColor', this.get('value'));
-    });
-    //this.message.getElement('[name=shadow]').addEvent('change', function() {
-    //  obj.fireEvent('changeShadow', this.get('value'));
-    //});
-  }
-
-});
-
-Ngn.sd.Items = new Class({
-
-  reload: function() {
-    this.loading(true);
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_getItem/' + this.id() + '?ownPageId=' + Ngn.sd.ownPageId,
-      onComplete: function(data) {
-        this.setData(data);
-        this.updateElement();
-        this.loading(false);
-      }.bind(this)
-    }).send();
-  },
-  id: function() {
-    return this.data.id;
-  },
-  setData: function(data) {
-    this.data = data;
-  },
-  loading: function(flag) {
-    Ngn.Request.Iface.loading(flag);
-  },
-  updateElement: function() {
-  }
-
-});
-
-Ngn.sd.ElementMeta = new Class({
-  initElement: function(el) {
-    this.el = el;
-    if (!this.id()) return;
-    if (!this.finalData().data.type) throw new Error('this.finalData().data.type');
-    this.el.addClass('sdEl').store('obj', this).set('data-id', this.id()).set('data-type', this.finalData().data.type).addClass('type_' + this.finalData().data.type).addClass('id_' + this.id());
-  }
-});
-
-Ngn.sd.styles = {};
-
-Ngn.sd.buildStyles = function() {
-  var r = {};
-  for (var selector in Ngn.sd.styles) {
-    var styles = Ngn.sd.styles[selector];
-    if (!r[selector]) r[selector] = [];
-    for (var property in styles) r[selector].push([property.hyphenate(), styles[property]]);
-  }
-  var css = '';
-  for (var selector in r) {
-    css += selector + ' {\n';
-    for (var i = 0; i < r[selector].length; i++) {
-      css += r[selector][i][0] + ': ' + r[selector][i][1] + ';\n';
-    }
-    css += '}\n';
-  }
-  return css;
-};
-
-Ngn.sd.directChangeStyleProperies = '(width|height|left|top|margin|padding)';
-Ngn.sd.directChangeStyleValues = 'rotate';
-
-Element.implement({
-  sdSetStyle: function(property, value, subSelector) {
-    if (property == 'opacity') {
-      this.setOpacity(this, parseFloat(value));
-      return this;
-    }
-    property = (property == 'float' ? floatName : property).camelCase();
-    if (typeOf(value) != 'string') {
-      //var map = (Element.Styles[property] || '@').split(' ');
-      //value = Array.from(value).map(function(val, i) {
-      //  if (!map[i]) return '';
-      //  return (typeOf(val) == 'number') ? map[i].replace('@', Math.round(val)) : val;
-      //}).join(' ');
-    } else if (value == String(Number(value))) {
-      value = Math.round(value);
-    }
-    var selector;
-    var cls = this.get('class');
-    if (cls) cls = cls.replace(/\s*dynamicStyles\s*/, '');
-
-    if (this.hasClass('sdEl')) {
-      if (subSelector) throw new Error('U can not use subSelector on .sdEl');
-      selector = '.' + cls.replace(/(\s+)/g, '.');
-    } else {
-      var eParent = this.getParent('.sdEl');
-      if (eParent) var pCls = this.getParent('.sdEl').get('class').replace(/\s*dynamicStyles\s*/, '');
-      selector = (pCls ? '.' + pCls.replace(/(\s+)/g, '.') : '');
-      if (subSelector) {
-        selector += (cls ? ' .' + cls : '') + ' ' + subSelector;
-      } else {
-        selector += ' ' + (cls ? '.' + cls : this.get('tag'));
-      }
-    }
-    if (!value) return;
-    if (!subSelector && (property.test(new RegExp(Ngn.sd.directChangeStyleProperies, 'i')) || value.test(new RegExp(Ngn.sd.directChangeStyleValues, 'i')))) {
-      if (!this.hasClass('dynamicStyles')) this.addClass('dynamicStyles');
-      this.setStyle(property, value);
-    }
-    Ngn.sd.addStyle(selector, property, value);
-  },
-  sdSetPosition: function(position) {
-    return this.sdSetStyles(this.computePosition(position));
-  },
-  sdSetStyles: function(styles) {
-    for (var style in styles) this.sdSetStyle(style, styles[style]);
-  }
-});
-
-Ngn.sd.addStyle = function(selector, property, value) {
-  if (!Ngn.sd.styles[selector]) Ngn.sd.styles[selector] = {};
-  Ngn.sd.styles[selector][property] = value;
-  Ngn.sd.updateCommonStyle();
-};
-
-Ngn.sd.updateCommonStyle = function() {
-  if (Ngn.sd.commonStyleGenId) clearTimeout(Ngn.sd.commonStyleGenId);
-  Ngn.sd.commonStyleGenId = (function() {
-    if ($('commonStyles')) $('commonStyles').dispose();
-    new Element('style', {
-      id: 'commonStyles',
-      type: 'text/css',
-      html: Ngn.sd.buildStyles()
-    }).inject($('layout'), 'top');
-  }).delay(300);
-};
-
-Ngn.sd.BlockAbstract = new Class({
-  Implements: [Options, Ngn.sd.ElementMeta, Ngn.sd.Items],
-  defaultData: false,
-  finalData: function() {
-    return this.defaultData ? Object.merge(this.defaultData, this._data) : this._data;
-  },
-  setData: function(data) {
-    if (!data) throw new Error('empty data');
-    this._data = this.defaultData ? Object.merge(this.defaultData(), data) : data;
-    this.data = data.data;
-  },
-  id: function() {
-    return this._data.id;
-  },
-  initialize: function(el, data, event, options) {
-    this.setData(data);
-    this.initElement(el);
-    this.addCont(this.el);
-    this.event = event;
-    this.setOptions(options);
-    this.ctrl = '/pageBlock/' + Ngn.sd.bannerId;
-    this.init();
-  },
-  delete: function() {
-    this.el.dispose();
-  },
-  addCont: function(el) {
-    new Element('div', {'class': 'cont'}).inject(el);
-  },
-  updateContainerHeight: function() {
-    Ngn.sd.updateContainerHeight(this.container());
-  },
-  updateFont: function() {
-    this._updateFont();
-  },
-  updateElement: function() {
-    this.updateFont();
-    this.updateContainerHeight();
-    this.el.set('data-id', this.id());
-    this.replaceContent();
-    this.updateContent();
-    this.updateSize();
-    Ngn.sd.initLayersPanel();
-    window.fireEvent('resize');
-  },
-  eLastContainer: false,
-  _container: function() {
-    return this.el.getParent();
-  },
-  container: function() {
-    var eContainer = this._container();
-    if (!eContainer && this.eLastContainer) return this.eLastContainer;
-    //if (!eContainer.hasClass('container')) throw new Error('Block has no container');
-    return this.eLastContainer = eContainer;
-  },
-  inject: function(eContainer) {
-    this.setPosition(Ngn.sd.positionDiff(this.el.getPosition(), eContainer.getPosition(), -1));
-    if (!this._container() || this._container() != eContainer) {
-      this.el.inject(eContainer);
-    }
-    return this;
-  },
-  setPosition: function(position) {
-    if (!this.data.position) this.data.position = {};
-    this.data.position = Object.merge(this.data.position, position);
-    this.el.sdSetPosition(this.data.position);
-  },
-  getDataForSave: function(create) {
-    this.data = Object.merge(this.data, {
-      ownPageId: Ngn.sd.ownPageId
-    });
-    this.loading(true);
-    // this._data.data - исходные изменяемые данные
-    // this.data - текущие несохраненные данные
-    if (create) {
-      this._data.data = Object.merge(this._data.data, this.data);
-      var p = {data: this._data};
-      delete p.data.html;
-    } else {
-      var p = {
-        id: this._data.id,
-        content: this._data.content,
-        data: this.data
-      };
-    }
-    return p;
-  },
-  save: function(create) {
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_' + (create ? 'create' : 'update') + '?ownPageId=' + Ngn.sd.ownPageId,
-      onComplete: function(data) {
-        this.setData(data);
-        if (create) {
-          Ngn.sd.blocks[this._data.id] = this;
-          this.initElement(this.el);
-        }
-        this.updateElement();
-        this.creationEvent();
-        this.loading(false);
-      }.bind(this)
-    }).post(this.getDataForSave(create));
-  },
-  creationEvent: function() {
-    Ngn.sd.initLayersPanel();
-  },
-  replaceContent: function() {
-    if (!this._data.html) return;
-    this.el.getElement('.cont').set('html', this._data.html);
-    this.el.getElement('.cont').getElements('a').addEvent('click', function(e) {
-      e.preventDefault()
-    });
-  }
-});
-
-Ngn.sd.BlockPreview = new Class({
-  Extends: Ngn.sd.BlockAbstract,
-  options: {
-    action: 'create'
-  },
-  init: function() {
-    this.el.addClass('blockPreview');
-    new Ngn.sd.BlockDragNew(this);
-  },
-  updateElement: function() {
-    Ngn.sd.block(Ngn.sd.elBlock().inject(this.container()), this._data);
-    this.el.destroy();
-  }
-});
-
-Ngn.sd.TranslateDragEvents = new Class({
-
-  translateDragEvents: function() {
-    return {
-      onStart: this.onStart.bind(this),
-      onDrag: this.onDrag.bind(this),
-      onComplete: this.onComplete.bind(this)
-    }
-  }
-
-});
-
-Ngn.sd.BlockDraggableProgress = {};
-
-Ngn.sd.BlockDraggable = new Class({
-  Implements: [Ngn.sd.TranslateDragEvents],
-
-  name: 'default',
-
-  initialize: function(block) {
-    this.block = block;
-    this.eHandle = this.getHandleEl();
-    this.init();
-    new Drag(new Element('div'), Object.merge({
-      handle: this.eHandle,
-      snap: 0,
-      stopPropagation: true
-    }, this.translateDragEvents()))
-  },
-
-  init: function() {
-  },
-
-  getHandleEl: function() {
-    return Elements.from('<div class="btn' + (this.name.capitalize()) + ' control"></div>')[0].inject(this.block.el, 'top');
-  },
-
-  onStart: function(el, e) {
-    Ngn.sd.BlockDraggableProgress[this.name] = true;
-  },
-
-  onComplete: function() {
-    delete Ngn.sd.BlockDraggableProgress[this.name];
-    this.block.updateContainerHeight();
-    window.fireEvent(this.name);
-    this.block.save();
-  }
-
-});
-
-Ngn.sd.BlockResize = new Class({
-  Extends: Ngn.sd.BlockDraggable,
-
-  name: 'resize',
-
-  onStart: function(el, e) {
-    this.parent(el, e);
-    this.offset = this.block.el.getPosition();
-  },
-
-  onDrag: function(el, e) {
-    this.block.resize({
-      w: e.event.pageX - this.offset.x,
-      h: e.event.pageY - this.offset.y
-    });
-  }
-
-});
-
-Ngn.sd.BlockRotate = new Class({
-  Extends: Ngn.sd.BlockDraggable,
-
-  name: 'rotate',
-
-  init: function() {
-    this.block.data.rotate = this.block.data.rotate || 0;
-    if (this.block.data.rotate) this.block.rotate(this.block.data.rotate);
-  },
-  onStart: function(el, e) {
-    this.parent(el, e);
-    this.startY = e.event.pageY;
-    this.startRotate = this.block.data.rotate;
-  },
-  onDrag: function(el, e) {
-    this.block.rotate(this.startRotate - (this.startY - e.event.pageY) * 2);
-  }
-
-});
-
-Ngn.sd.blocks = {};
-Ngn.sd.BlockB = new Class({
-  Extends: Ngn.sd.BlockAbstract,
-  Implements: [Ngn.sd.Font],
-  options: {
-    action: 'update'
-  },
-  className: function() {
-    return 'Ngn.sd.BlockB' + Ngn.String.ucfirst(this.data.type);
-  },
-  setData: function(data) {
-    if (data.html === undefined) throw new Error('undefined data.html');
-    this.parent(data);
-  },
-  styleEl: function() {
-    return this.el.getElement('.cont');
-  },
-  delete: function() {
-    this.parent();
-    delete Ngn.sd.blocks[this._data.id];
-    Ngn.sd.initLayersPanel();
-    //this.updateContainerHeight();
-  },
-  init: function() {
-    if (this._data.id) Ngn.sd.blocks[this._data.id] = this;
-    this.el.sdSetPosition(this.data.position);
-    this.updateOrder();
-    this.initControls();
-    this.initFont();
-    this.replaceContent();
-    this.updateContent();
-    this.updateSize();
-    // Ngn.sd.setMinHeight(eContainer); 
-  }, // предназначено для изменения стилей внутренних элементов из данных блока
-  setToTheTop: function() {
-    var minOrderKey = 1;
-    for (var i in Ngn.sd.blocks) {
-      if (Ngn.sd.blocks[i]._data.orderKey < minOrderKey) {
-        minOrderKey = Ngn.sd.blocks[i]._data.orderKey;
-      }
-    }
-    this.updateOrder(minOrderKey - 1);
-    return this;
-  },
-  updateOrder: function(orderKey) {
-    if (orderKey !== undefined) this._data.orderKey = orderKey;
-    this.el.setStyle('z-index', -this._data.orderKey + 100);
-  },
-  updateContent: function() {
-  },
-  rotate: function(deg) {
-    this._rotate(this.el.getElement('.cont'), deg);
-  },
-  _rotate: function(el, deg) {
-    el.sdSetStyle('transform', 'rotate(' + deg + 'deg)');
-    el.sdSetStyle('-ms-transform', 'rotate(' + deg + 'deg)');
-    el.sdSetStyle('-webkit-transform', 'rotate(' + deg + 'deg)');
-    this.data.rotate = deg;
-  },
-  initCopyCloneBtn: function() {
-    if (this.finalData().data.type == 'image') {
-      this.initCloneBtn();
-    } else {
-      this.initCopyBtn();
-    }
-  },
-  initCopyBtn: function() {
-    /*
-     // temporarily disabled
-     new Ngn.Btn(Ngn.Btn.btn2('Клонировать', 'copy').inject(this.eBtns, 'top'), function() {
-     var data = Object.clone(this._data);
-     data.data.position.x += 50;
-     data.data.position.y += 50;
-     delete data.id;
-     Ngn.sd.block(Ngn.sd.elBlock().inject(this.container()), data).save(true);
-     }.bind(this));
-     */
-  },
-  initCloneBtn: function() {
-    return;
-    new Ngn.Btn(Ngn.Btn.btn2('Клонировать', 'copy').inject(this.eBtns, 'top'), function() {
-      var data = {
-        data: {
-          position: {
-            x: this._data.data.position.x + 20,
-            y: this._data.data.position.y + 20
-          },
-          type: 'clone',
-          refId: this._data.id,
-          size: this._data.data.size
-        },
-        html: this._data.html
-      };
-      Ngn.sd.block(Ngn.sd.elBlock().inject(this.container()), data).save(true);
-    }.bind(this));
-  },
-  initBtnsHide: function() {
-    this.eBtns.setStyle('display', 'none');
-    this.el.addEvent('mouseover', function() {
-      if (Object.values(Ngn.sd.BlockDraggableProgress).length) return;
-      if (Ngn.sd.isPreview()) return;
-      if (Ngn.sd.movingBlock.get()) return;
-      this.eBtns.setStyle('display', 'block');
-    }.bind(this));
-    this.el.addEvent('mouseout', function() {
-      if (Object.values(Ngn.sd.BlockDraggableProgress).length) return;
-      if (Ngn.sd.movingBlock.get()) return;
-      this.eBtns.setStyle('display', 'none');
-    }.bind(this));
-  },
-  deleteAction: function() {
-    if (!confirm('Are you shure?')) return;
-    this.loading(true);
-    this._deleteAction();
-  },
-  _deleteAction: function() {
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_delete/' + this.id(),
-      onComplete: function() {
-        this.loading(false);
-        this.delete();
-      }.bind(this)
-    }).send();
-  },
-  initDeleteBtn: function() {
-    new Ngn.Btn(Ngn.Btn.btn2('Delete', 'delete').inject(this.eBtns, 'top'), function() {
-      this.deleteAction();
-    }.bind(this));
-  },
-  initBlockScopeBtn: function() {
-    return;
-    Ngn.Btn.flag2(this.global(), {
-      title: 'Блок глобальный. Нажмите, что бы сделать локальным',
-      cls: 'global',
-      url: '/pageBlock/ajax_updateGlobal/' + this._data.id + '/0'
-    }, {
-      title: 'Блок локальный. Нажмите, что бы сделать глобальным',
-      cls: 'local',
-      url: '/pageBlock/ajax_updateGlobal/' + this._data.id + '/1'
-    }).inject(this.eBtns, 'top');
-  },
-  initTextScopeBtn: function() {
-    if (Ngn.sd.getBlockType(this.finalData().data.type).separateContent) {
-      Ngn.Btn.flag2(this.data.separateContent, {
-        title: 'Блок имеет отдельный текст для каждого раздела. Сделать общий текст для всех разделов',
-        cls: 'dynamic',
-        url: '/pageBlock/ajax_updateSeparateContent/' + this._data.id + '/0',
-        confirm: 'Тексты для всех, кроме самого первого раздела будут удалены. Вы уверены?'
-      }, {
-        title: 'Блок имеет общий текст для всех разделов. Сделать отдельный текст для каждого раздела',
-        cls: 'static',
-        url: '/pageBlock/ajax_updateSeparateContent/' + this._data.id + '/1'
-      }).inject(this.eBtns, 'top');
-    }
-  },
-  initEditBtn: function() {
-    if (this.finalData().data.type != 'image') {
-      new Ngn.Btn(Ngn.Btn.btn2('Редактировать', 'edit').inject(this.eBtns, 'top'), this.editAction.bind(this));
-    }
-  },
-  initBtns: function() {
-    this.eBtns = new Element('div', {'class': 'btnSet'}).inject(this.el, 'top');
-    this.initDeleteBtn();
-    this.initEditBtn();
-    this.initCopyCloneBtn();
-    this.initBlockScopeBtn();
-    this.initTextScopeBtn();
-  },
-  global: function() {
-    if (this.data.global !== undefined) return this.data.global;
-    return Ngn.sd.blockContainers[this.data.containerId].data.global;
-  },
-  editAction: function() {
-    //Ngn.sd.previewSwitch(true);
-    var cls = this.editDialogClass();
-    var options = Object.merge(Object.merge({
-      url: this.ctrl + '/json_edit/' + this._data.id + '?ownPageId=' + Ngn.sd.ownPageId,
-      dialogClass: 'settingsDialog dialog',
-      title: 'Edit Content',
-      width: 500,
-      id: this.data.type,
-      savePosition: true, // force: false,
-      onClose: function() {
-        //Ngn.sd.previewSwitch(false);
-      },
-      onSubmitSuccess: function() {
-        this.reload();
-      }.bind(this)
-    }, Ngn.sd.getBlockType(this.data.type).editDialogOptions || {}), this.editDialogOptions());
-    new cls(options);
-  },
-  editDialogClass: function() {
-    return Ngn.Dialog.RequestForm;
-  },
-  editDialogOptions: function() {
-    return {};
-  },
-  initControls: function() {
-    //this.initBtns();
-    //this.initBtnsHide();
-    this.initDrag();
-    new Ngn.sd.BlockResize(this);
-  },
-  initDrag: function() {
-    //this.eDrag = Elements.from('<a class="btn control drag dragBox2" data-move="1" title="Передвинуть блок"></a>')[0].inject(this.eBtns, 'top');
-    this.drag = new Ngn.sd.BlockDrag(this);
-//    return; 
-  },
-  updateSize: function() {
-    if (!this.finalData().data.size) return;
-    this.resizeEl(this.finalData().data.size);
-  },
-  resize: function(size) {
-    this.resizeEl(size);
-    this.data = Object.merge(this.data, {size: size});
-  },
-  resizeEl: function(size) {
-    this.resizeBlockEl(size);
-    this.resizeContentEl(size);
-  },
-  resizeBlockEl: function(size) {
-    this._resizeEl(this.el, size);
-  },
-  resizeContentEl: function(size) {
-    this._resizeEl(this.el.getElement('.cont'), size);
-  },
-  _resizeEl: function(el, size) {
-    if (size.w) el.sdSetStyle('width', size.w + 'px');
-    if (size.h) el.sdSetStyle('height', size.h + 'px');
-  },
-  move: function(d) {
-    var r = {
-      up: ['y', -1],
-      down: ['y', 1],
-      left: ['x', -1],
-      right: ['x', 1]
-    };
-    var p = {};
-    p[r[d][0]] = this.data.position[r[d][0]] + r[d][1];
-    this.setPosition(p);
-    clearTimeout(this.timeoutId);
-    this.timeoutId = this.save.bind(this).delay(1000);
-  },
-  resetData: function() {
-    this.data = this._data.data;
-  },
-  hasAnimation: function() {
-    return false;
-  },
-  framesCount: function() {
-    return 0;
-  }
-});
-
-Ngn.sd.BlockBMenu = new Class({
-  Extends: Ngn.sd.BlockB,
-  init: function() {
-    this.parent();
-  },
-  editDialogOptions: function() {
-    var obj = this;
-    return {
-      width: 250,
-      id: 'menu', //footer: false,
-      onFormResponse: function() {
-        this.form.addEvent('elHDistanceChange', function(value) {
-          obj.data.prop.hDistance = value;
-          obj.updateContent();
-        });
-        this.form.addEvent('elHDistanceChanged', function() {
-          obj.save();
-        });
-        this.form.addEvent('elHPaddingChange', function(value) {
-          obj.data.prop.hPadding = value;
-          obj.updateContent();
-        });
-        this.form.addEvent('elHPaddingChanged', function() {
-          obj.save();
-        });
-        this.form.addEvent('elVPaddingChange', function(value) {
-          obj.data.prop.vPadding = value;
-          obj.updateContent();
-        });
-        this.form.addEvent('elVPaddingChanged', function() {
-          obj.save();
-        });
-        this.form.eForm.getElement('[name=activeBgColor]').addEvent('change', function(color) {
-          obj.data.prop.activeBgColor = color.hex;
-          obj.updateContent();
-          //obj.save();
-        });
-      }
-    };
-  },
-  updateContent: function() {
-    if (!this.data.prop) this.data.prop = {};
-    if (this.data.prop.activeBgColor)
-      this.el.getElement('.cont').getElement('a.sel').sdSetStyle('background-color', this.data.prop.activeBgColor);
-    if (this.data.prop.overBgColor)
-      this.el.getElement('.cont').sdSetStyle('background-color', this.data.prop.overBgColor, 'a:hover');
-    this.el.getElement('.cont').sdSetStyle('margin-right', this.data.prop.hDistance + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-left', this.data.prop.hPadding + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-right', this.data.prop.hPadding + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-top', this.data.prop.vPadding + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-bottom', this.data.prop.vPadding + 'px', 'a');
-  },
-  _updateFont: function() {
-    this.parent();
-    this.updateLinkSelectedColor();
-  },
-  updateLinkSelectedColor: function() {
-    if (!this.data.font || !this.data.font.linkSelectedColor) return;
-    this.styleEl().sdSetStyle('color', this.data.font.linkSelectedColor, 'a.sel');
-  }
-});
-
-Ngn.sd.BlockBImage = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  replaceContent: function() {
-    this.parent();
-    var eImg = this.el.getElement('img');
-    eImg.set('src', eImg.get('src') /*+ '?' + Math.random(1000)*/);
-  },
-
-  initControls: function() {
-    this.parent();
-    new Ngn.sd.BlockRotate(this);
-  },
-
-  resizeContentEl: function(size) {
-    this._resizeEl(this.el.getElement('img'), size);
-    this.parent(size);
-  },
-
-  initFont: function() {
-  }
-
-});
-
-Ngn.sd.BlockBGallery = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  init: function() {
-    this.parent();
-    var carousel = new Ngn.Carousel(this.el.getElement('.cont'));
-    $('prev').addEvent('click', function() {
-      carousel.toPrevious();
-    });
-    $('next').addEvent('click', function() {
-      carousel.toNext();
-    });
-  }
-
-});
-
-Ngn.sd.BlockBFont = new Class({
-  Extends: Ngn.sd.BlockB,
-  fontSettingsAction: 'json_cufonSettings',
-  fontSettingsDialogOptions: function() {
-    return {
-      width: 350,
-      onChangeFont: function(font) {
-        if (!this.data.font) this.data.font = {};
-        this.data.font.fontFamily = font;
-        this.updateCufon();
-      }.bind(this),
-      onChangeSize: function(size) {
-        if (!this.data.font) this.data.font = {};
-        this.data.font.fontSize = size;
-        this.updateCufon();
-      }.bind(this),
-      onChangeColor: function(color) {
-        if (!this.data.font) this.data.font = {};
-        this.data.font.color = color;
-        this.updateCufon();
-      }.bind(this),
-      onCancelClose: function() {
-        if (this.data.font) {
-          this.resetData();
-          this.updateCufon();
-        } else {
-          this.styleEl().set('html', this.data.html);
-        }
-      }.bind(this)
-    };
-  },
-  directChangeFontStyleProps: function() {
-    return ['font-size', 'font-family', 'color'];
-  },
-  updateFont: function() {
-  },
-  updateCufon: function() {
-    this._updateFont();
-    Ngn.sd.BlockBFont.html[this.id()] = this.data.html;
-    this.loadFont(function() {
-      Cufon.set('fontFamily', this.data.font.fontFamily); // Так-то куфон подхватывает шрифт из стилей, но где-то в другом месте (в диалоге, например) он может быть определен через set(). Так что нужно переопределять и тут
-      var cufonProps = {};
-      if (this.data.font.shadow) {
-        cufonProps = {
-          textShadow: '1px 1px rgba(0, 0, 0, 0.8)'
-        };
-      }
-      Cufon.replace(this.styleEl(), cufonProps);
-      Ngn.Request.Iface.loading(false);
-    }.bind(this));
-  },
-  loadFont: function(onLoad) {
-    if (!this.data.font || !this.data.font.fontFamily) return;
-    Ngn.Request.Iface.loading(true);
-    Ngn.sd.loadFont(this.data.font.fontFamily, onLoad);
-  },
-  replaceContent: function() {
-    this.parent();
-    this.updateCufon();
-  },
-  initControls: function() {
-    this.parent();
-    new Ngn.sd.BlockRotate(this);
-  },
-  init: function() {
-    this.parent();
-    if (this.data.font.blink) Ngn.blink(this.el.getElement('.cont'), 500);
-  },
-  hasAnimation: function() {
-    return this.data.font.blink ? true : false;
-  },
-  framesCount: function() {
-    return 2;
-  }
-});
-
-Ngn.sd.BlockBFont.html = {};
-
-Ngn.sd.BlockBClone = new Class({
-  Extends: Ngn.sd.BlockB,
-  finalData: function() {
-    return Ngn.sd.blocks[this._data.data.refId]._data;
-  },
-  initCopyCloneBtn: function() {
-  },
-  initResize: function() {
-  },
-  getDataForSave: function(create) {
-    var p = this.parent(create);
-    if (p.data.data && p.data.data.size) delete p.data.data.size;
-    return p;
-  }
-});
-
-Ngn.sd.BlockBBlog = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  initBtns: function() {
-    this.parent();
-    new Ngn.Btn(Ngn.Btn.btn2('Настройки блога', 'settings').inject(this.eBtns, 'top'), function() {
-      new Ngn.Dialog.RequestForm({
-        url: '/blogSettings',
-        dialogClass: 'settingsDialog compactFields dialog',
-        width: 400
-      });
-    });
-  },
-  _resize: function(size) {
-    delete size.h;
-    this.parent(size);
-  },
-  replaceContent: function() {
-    this.parent();
-    this.el.getElements('.pNums a').each(function(el) {
-      el.addEvent('click', function(e) {
-        new Event(e).stop();
-        new Ngn.Request({
-          url: el.get('href').replace(/^\/(\w+)\//g, '/blog/'),
-          onComplete: function() {
-          }
-        }).send();
-      });
-    });
-  },
-  editAction: function() {
-  }
-
-});
-
-Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  defaultData: function() {
-    return {
-      size: {
-        w: 150,
-        h: 40
-      }
-    };
-  },
-
-  _resize: function(size) {
-    this.el.getElement('.btn').sdSetStyles({
-      width: size.w + 'px',
-      height: size.h + 'px'
-    });
-    var eSpan = this.el.getElement('.btn span');
-    eSpan.sdSetStyle('margin-top', (Math.floor(size.h / 2 - (eSpan.getSize().y / 2)) - 1) + 'px');
-    this.parent(size);
-  }
-
-});
-
-// factory
-Ngn.sd.block = function(el, data) {
-  var cls = 'Ngn.sd.BlockB' + Ngn.String.ucfirst(data.data.type);
-  var o = eval(cls);
-  cls = o || Ngn.sd.BlockB;
-  return new cls(el, data);
-};
-
-Ngn.sd.BlockDragAbstract = new Class({
-  initialize: function(block) {
-    this.block = block;
-    this.drag = new Drag.Move(this.block.el, this.getDragOptions());
-    this.startPos = {};
-    this.init();
-  },
-  init: function() {
-  },
-  create: false,
-  getDragOptions: function() {
-    return {
-      onDrop: function(eBlock, eContainer, event) {
-        this.drop(eBlock);
-      }.bind(this)
-    };
-  },
-  drop: function(eBlock) {
-    window.fireEvent('resize');
-    this.block.setPosition({
-      x: eBlock.getStyle('left').toInt(),
-      y: eBlock.getStyle('top').toInt()
-    });
-    this.block.updateContainerHeight();
-    this.block.save(this.create);
-  }
-});
-
-Ngn.sd.BlockDragNew = new Class({
-  Extends: Ngn.sd.BlockDragAbstract,
-  create: true,
-  init: function() {
-    this.drag.start(this.block.event);
-  },
-  cancel: function() {
-    this.block.delete();
-  }
-});
-
-Ngn.sd.blockDraggin = false;
-
-Ngn.sd.BlockDrag = new Class({
-  Extends: Ngn.sd.BlockDragAbstract,
-  initialize: function(block) {
-    this.block = block;
-    if (this.block.eDrag) {
-      this.block.eDrag.addEvent('click', function() {
-        if (this.dragging) return;
-        Ngn.sd.movingBlock.toggle(block);
-      }.bind(this));
-    }
-    this.drag = new Drag.Move(this.block.el, this.getDragOptions());
-    this.startPos = {};
-    this.init();
-  },
-  dragging: false,
-  start: function(eBlock) {
-    this.dragging = true;
-    Ngn.sd.blockDraggin = true;
-    this.startPos = eBlock.getPosition(this.block.container());
-    Ngn.sd.movingBlock.cancel();
-  },
-  drop: function(eBlock, eContainer) {
-    (function() {
-      this.dragging = false;
-      Ngn.sd.blockDraggin = false;
-    }.bind(this)).delay(10);
-    var eCurContainer = this.block.container();
-    this.parent(eBlock, eContainer);
-    if (eCurContainer != eContainer) Ngn.sd.updateContainerHeight(eCurContainer);
-  },
-  cancel: function() {
-    this.dragging = false;
-    this.block.el.sdSetPosition(this.startPos);
-  }
-});
-
-Ngn.sd.elBlock = function() {
-  return new Element('div', {'class': 'block'});
-};
-
-// data: id
-Ngn.sd.ContainerAbstract = new Class({
-  Implements: [Options, Ngn.sd.ElementMeta, Ngn.sd.Font, Ngn.sd.Items],
-  type: null,
-  options: {
-    disableFont: false
-  },
-  finalData: function() {
-    return {data: this.data};
-  },
-  initialize: function(data, options) {
-    this.setOptions(options);
-    this.data = data;
-    this.afterData();
-    this.ctrl = '/' + this.type;
-    this.data.type = this.type;
-    this.initElement(this.getEl());
-    this.el.store('data', data);
-    if (!this.data.position) this.data.position = {
-      x: 0,
-      y: 0
-    };
-    this.setPosition(this.data.position);
-    this.initControls();
-    if (!this.options.disableFont) this.initFont();
-  },
-  afterData: function() {
-  },
-  btns: {},
-  initControls: function() {
-    this.eBtns = new Element('div', {'class': 'btnSet'}).inject(this.el);
-    new Element('div', {
-      'class': 'ctrlTitle',
-      html: this.id() + ':'
-    }).inject(this.eBtns);
-    this.initDrag();
-    this.btns.deleteBg = new Ngn.Btn(Ngn.Btn.btn2('Удалить фон', 'delete').inject(this.eBtns), function() {
-      if (!Ngn.confirm()) return;
-      this.loading(true);
-      new Ngn.Request.JSON({
-        url: this.ctrl + '/json_removeBg/' + this.id(),
-        onComplete: function() {
-          this.loading(false);
-          this.setBg(false);
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.initConfigManager.js|--*/
+Ngn.initConfigManager = function() {
+  document.getElements('a[class~=delete]').each(function(el, n) {
+    var name = el.get('title');
+    el.set('title', 'Удалить');
+    el.addEvent('click', function(e){
+      e.preventDefault();
+      if (!confirm('Вы уверены?')) return;
+      eValue = $('value_' + name2id(name).replace('k_', ''));
+      eValue.addClass('loader');
+      new Request({
+        url: window.location.pathname,
+        onComplete: function(data) {
+        eValue.dispose();
         }.bind(this)
-      }).send();
-    }.bind(this));
-    new Ngn.Btn(Ngn.Btn.btn2('Настройки фона', 'bgSettings').inject(this.eBtns), function() {
-      new Ngn.Dialog.RequestForm({
-        dialogClass: 'settingsDialog compactFields dialog',
-        width: 450,
-        url: this.ctrl + '/json_bgSettings/' + this.id(),
-        onSubmitSuccess: function() {
-          this.reload();
-        }.bind(this)
+      }).GET({
+        action: 'ajax_deleteValue',
+        name: name
       });
-    }.bind(this));
-    new Ngn.Btn(Ngn.Btn.btn2('Задать фон', 'image').inject(this.eBtns), null, {
-      fileUpload: {
-        url: this.ctrl + '/json_uploadBg/' + this.id(),
-        onRequest: function() {
-          this.loading(true);
-        }.bind(this),
-        onComplete: function(r) {
-          this.loading(false);
-          this.setBg(r.url + '?' + Math.random(1000));
-        }.bind(this)
-      }
-    });
-    this.setBg(this.data.bg || false);
-  },
-  toggleBtns: function() {
-    this.btns.deleteBg.toggleDisabled(!!this.data.bg);
-  },
-  initDrag: function() {
-    var eDrag = Elements.from('<div class="drag dragBox" title="Передвинуть фон"></div>')[0].inject(this.eBtns);
-    var startCursorPos;
-    new Drag(eDrag, {
-      snap: 0,
-      onStart: function(el, e) {
-        startCursorPos = [e.event.clientX, e.event.clientY];
-      },
-      onDrag: function(el, e) {
-        this.curPosition = {
-          x: this.data.position.x + startCursorPos[0] - e.event.clientX,
-          y: this.data.position.y + startCursorPos[1] - e.event.clientY
-        };
-        this.setPosition(this.curPosition);
-      }.bind(this),
-      onComplete: function(el) {
-        this.data.position = this.curPosition;
-        this.save();
-      }.bind(this)
-    });
-  },
-  setBg: function(url) {
-    if (url) this.data.bg = url; else delete this.data.bg;
-    this.refreshBg();
-  },
-  refreshBg: function() {
-    var s = ['color'];
-    for (var i = 0; i < s.length; i++) this.styleEl().sdSetStyle('background-' + s[i], '');
-    if (this.data.bgSettings) for (var i in this.data.bgSettings) this.styleEl().sdSetStyle('background-' + i, this.data.bgSettings[i]);
-    this.el.sdSetStyle('background-image', this.data.bg ? 'url(' + this.data.bg + '?' + this.data.dateUpdate + ')' : 'none');
-    this.toggleBtns();
-  },
-  save: function(create) {
-    var data = this.data;
-    if (data.bg) delete data.bg;
-    this.loading(true);
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_' + (create ? 'create' : 'update'),
-      onComplete: function() {
-        this.loading(false);
-      }.bind(this)
-    }).post({data: data});
-  },
-  updateElement: function() {
-    this.refreshBg();
-    this._updateFont();
-  },
-  updateFont: function() {
-    this._updateFont();
-  },
-  setPosition: function(position) {
-    if (!position.x && !position.y) {
-      this.el.sdSetStyle('background-position', '');
-      return;
-    }
-    this.el.sdSetStyle('background-position', (-position.x) + 'px ' + (-position.y) + 'px');
-  },
-  loading: function(flag) {
-    Ngn.Request.Iface.loading(flag);
-  }
-});
-
-Ngn.sd.BlockContainer = new Class({
-  Extends: Ngn.sd.ContainerAbstract,
-  type: 'blockContainer',
-  getEl: function() {
-    var eParent = $('layout2').getElement('.lCont');
-    var eContainer = new Element('div', {'class': 'container'});
-    if (this.data.wrapper) {
-      if ($(this.data.wrapper)) eParent = $(this.data.wrapper); else {
-        eParent = new Element('div', {
-          id: this.data.wrapper,
-          'class': this.data.wrapper
-        }).inject(eParent);
-        new Element('div', {'class': 'clear clear_' + this.data.wrapper}).inject(eParent);
-      }
-      eContainer.inject(eParent.getElement('.clear_' + this.data.wrapper), 'before');
-    } else {
-      eContainer.inject(eParent);
-    }
-    return eContainer;
-  },
-  initControls: function() {
-  }
-});
-
-Ngn.sd.Layout = new Class({
-  Extends: Ngn.sd.ContainerAbstract,
-  type: 'layout',
-  options: {
-    disableFont: true,
-    cls: false
-  },
-  initControls: function() {
-  },
-  getEl: function() {
-    if (!this.data.parent) throw new Error('parent not defined in ' + this.id() + ' layout');
-    if (!$(this.data.parent)) throw new Error(this.data.parent + ' not found');
-    var el = new Element('div', {
-      id: this.id(),
-      'class': 'layout' + (this.options.cls ? ' ' + this.options.cls : '')
-    }).inject($(this.data.parent));
-    return el;
-  }
-});
-
-Ngn.sd.LayoutContent = new Class({
-  Extends: Ngn.sd.ContainerAbstract,
-  type: 'layoutContent',
-  getEl: function() {
-    return new Element('div', {
-      'class': 'lCont'
-    }).inject($('layout2'));
-  },
-  defaultFontColor: function() {
-    return '#000';
-  },
-  initControls: function() {
-  }
-});
-
-if (!Ngn.sd.blockTypes) Ngn.sd.blockTypes = [];
-
-Ngn.sd.getBlockType = function(type) {
-  for (var i = 0; i < Ngn.sd.blockTypes.length; i++) {
-    if (Ngn.sd.blockTypes[i].data.type == type) return Ngn.sd.blockTypes[i];
-  }
-  for (var i = 0; i < Ngn.sd.blockUserTypes.length; i++) {
-    if (Ngn.sd.blockUserTypes[i].data.type == type) return Ngn.sd.blockUserTypes[i];
-  }
-  return false;
-};
-
-Ngn.sd.exportLayout = function() {
-  var eLayout = $('layout').clone();
-  eLayout.getElements('.btnSet').dispose();
-  eLayout.getElements('.btnResize').dispose();
-  eLayout.getElements('.block.type_font').each(function(eBlock) {
-    eBlock.getElement('.cont').set('html', Ngn.sd.BlockBFont.html[eBlock.get('data-id')]);
-  });
-  eLayout.getElements('.dynamicStyles').removeProperty('style').removeClass('dynamicStyles');
-  // replace dynamic blocks content
-  eLayout.getElements('.block').each(function(eBlock) {
-    // разобраться в этом куске
-    if (!Ngn.sd.blocks[eBlock.get('data-id')]) return;
-    var type = Ngn.sd.blocks[eBlock.get('data-id')].finalData().data.type;
-    if (Ngn.sd.getBlockType(type).dynamic) {
-      var eStyle = eBlock.getElement('style');
-      eStyle.inject(eBlock.getElement('.cont').set('html', '{tplBlock:' + eBlock.get('data-id') + '}'), 'top');
-    }
-  });
-  new Element('style', {
-    type: 'text/css',
-    html: Ngn.sd.buildStyles()
-  }).inject(eLayout, 'top');
-  return eLayout.get('html');
-};
-
-Ngn.sd.ownPageId = 0;
-Ngn.sd.blockUserTypes = [];
-
-Ngn.sd.initUserTypes = function(types) {
-  if (!types.length) return;
-  new Ngn.sd.UserPanel(types);
-  Ngn.sd.blockUserTypes = types;
-};
-
-Ngn.sd.initPageTitle = document.title;
-
-Ngn.getParam = function(val) {
-  var result = "Not found",
-    tmp = [];
-  location.search
-    //.replace ( "?", "" )
-    // this is better, there might be a question mark inside
-    .substr(1)
-    .split("&")
-    .forEach(function (item) {
-      tmp = item.split("=");
-      if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
-    });
-  return result;
-};
-
-Ngn.sd.loadData = function(ownPageId, onComplete) {
-  onComplete = onComplete || function() {
-  };
-  $('layout1').set('html', '');
-  Ngn.sd.ownPageId = ownPageId;
-  Ngn.Request.Iface.loading(true);
-  Ngn.sd.blockContainers = {};
-  if (Ngn.sd.pagesSet) Ngn.sd.pagesSet.setActive(ownPageId);
-  new Ngn.Request.JSON({
-    url: '/cpanel/' + Ngn.sd.bannerId + '/json_get/?renderKey=' + Ngn.renderKey,
-    onComplete: function(data) {
-      var v, i;
-      document.getElement('head title').set('html', data.pageTitle + ' - ' + Ngn.sd.initPageTitle);
-      if (data.blockUserTypes) Ngn.sd.initUserTypes(data.blockUserTypes);
-      //for (i = 0; i < data.items.layout.length; i++) {
-      //  new Ngn.sd.Layout(data.items.layout[i], {
-      //    cls: i == 0 ? data.layout : ''
-      //  });
-      //}
-      //for (i = 0; i < data.items.layoutContent.length; i++) {
-      //  Ngn.sd.layoutContent = new Ngn.sd.LayoutContent(data.items.layoutContent[i]);
-      //}
-      //for (i = 0; i < data.items.blockContainer.length; i++) {
-      //  v = data.items.blockContainer[i];
-      //  Ngn.sd.blockContainers[v.id] = new Ngn.sd.BlockContainer(v);
-      //}
-      Ngn.sd.eLayoutContent = new Element('div', {
-        'class': 'lCont sdEl'
-      }).inject('layout1');
-      Ngn.sd.blocks = {};
-      for (i = data.items.pageBlock.length - 1; i >= 0; i--) {
-        v = data.items.pageBlock[i];
-        Ngn.sd.blocks[v.id] = Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), v);
-      }
-
-      Ngn.sd.eContentOverlayBorder = new Element('div', {'class': 'contentOverlayBorder'}).inject(Ngn.sd.eLayoutContent, 'top');
-      new Element('div', {'class': 'contentOverlay contentOverlayLeft'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      new Element('div', {'class': 'contentOverlay contentOverlayTop'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      Ngn.sd.eContentOverlayRight = new Element('div', {'class': 'contentOverlay contentOverlayRight'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      Ngn.sd.eContentOverlayBottom = new Element('div', {'class': 'contentOverlay contentOverlayBottom'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-
-      Ngn.sd.data = data;
-      Ngn.sd.setBannerSize(data.bannerSettings.size);
-      Ngn.sd.updateLayoutContentHeight();
-      Ngn.sd.updateOrderBar(data.items.pageBlock);
-      Ngn.sd.setPageTitle(ownPageId);
-      // window.location = window.location.href.replace(/#pg\d+/, '') + '#pg' + ownPageId;
-      Ngn.Request.Iface.loading(false);
-      window.fireEvent('resize');
-      onComplete(data);
-    }
-  }).send();
-};
-
-Ngn.sd.PageBlocksShift = new Class({
-  back: function(id) {
-    var ePrev = Ngn.sd.blocks[id].el.getPrevious('.block');
-    if (ePrev) {
-      Ngn.sd.blocks[id].el.inject(ePrev, 'before');
-      this.updateOrder(id);
-    }
-  },
-  forward: function(id) {
-    var eNext = Ngn.sd.blocks[id].el.getNext('.block');
-    if (eNext) {
-      Ngn.sd.blocks[id].el.inject(eNext, 'after');
-      this.updateOrder(id);
-    }
-  },
-  updateOrder: function(id) {
-    var esBlocks = Ngn.sd.blocks[id].el.getParent('.layout').getElements('.block');
-    var ids = [];
-    for (var i = 0; i < esBlocks.length; i++) {
-      ids.push(esBlocks[i].get('data-id'));
-    }
-    new Ngn.Request.JSON({
-      url: '/pageBlock/' + Ngn.sd.bannerId + '/json_updateOrder'
-    }).post({
-        ids: ids
-      });
-  }
-});
-
-Ngn.sd.PagesSet = new Class({
-  Extends: Ngn.FieldSet,
-  initRows: function() {
-    this.parent();
-    for (var i = 0; i < this.esRows.length; i++) {
-      this.createRowButton(this.esRows[i], {
-        caption: 'Перейти к редактированию раздела',
-        cls: 'edit'
-      }, function() {
-        Ngn.sd.loadData(this.options.n);
-      }, {
-        n: this.esRows[i].retrieve('n')
-      });
-    }
-  },
-  setActive: function(n) {
-    for (var i = 0; i < this.esRows.length; i++) {
-      this.esRows[i].removeClass('active');
-    }
-    this.esRows[n - 1].addClass('active');
-  }
-
-});
-
-Ngn.sd.pages = {};
-
-Ngn.sd.setPageTitle = function(n) {
-  if (Ngn.sd.pages[n]) $('pageTitle').set('html', Ngn.sd.pages[n]);
-};
-
-Ngn.sd.UserPanel = new Class({
-  initialize: function(blockUserTypes) {
-    var eBlocksPanel = new Element('div', {
-      'class': 'dropRightMenu extraBlocks'
-    }).inject(Ngn.sd.ePanel, 'after');
-    new Element('div', {
-      'class': 'tit',
-      html: 'Ещё'
-    }).inject(eBlocksPanel);
-    Ngn.sd.buildBlockBtns(blockUserTypes, eBlocksPanel);
-    new Ngn.HidebleBar.V(eBlocksPanel);
-  }
-});
-
-Ngn.sd.OrderBarItem = new Class({
-
-  initialize: function(id) {
-    this.id = id;
-    this.el = new Element('div', {
-      'class': 'item',
-      html: Ngn.sd.blocks[id]._data.data.type + ' ' + Ngn.sd.blocks[id]._data.id
-    }).inject($('orderBar'));
-    this.el.addEvent('mouseover', function() {
-      Ngn.sd.blocks[id].el.addClass('highlight');
-    });
-    this.el.addEvent('mouseout', function() {
-      Ngn.sd.blocks[id].el.removeClass('highlight');
-    });
-  }
-
-});
-
-Ngn.sd.updateOrderBar = function(orderedBlocks) {
-  $('orderBar').set('html', '');
-  for (var i = 0; i < orderedBlocks.length; i++) {
-    if (Ngn.sd.blocks[orderedBlocks[i].id]) new Ngn.sd.OrderBarItem(orderedBlocks[i].id);
-  }
-};
-
-Ngn.sd.animation = {};
-Ngn.sd.animation.exists = function() {
-  for (var i in Ngn.sd.blocks) {
-    if (Ngn.sd.blocks[i].hasAnimation()) return true;
-  }
-  return false;
-};
-Ngn.sd.setBannerSize = function(size) {
-  Ngn.sd.bannerSize = size;
-  Ngn.sd.eLayoutContent.setStyle('width', size.w + 'px');
-  Ngn.sd.eContentOverlayBottom.setStyle('width', size.w + 'px');
-  Ngn.sd.eContentOverlayBottom.setStyle('top', size.h + 'px');
-  Ngn.sd.eContentOverlayRight.setStyle('left', size.w + 'px');
-  Ngn.sd.eLayoutContent.setStyle('min-height', 'auto');
-  Ngn.sd.eLayoutContent.setStyle('height', size.h + 'px');
-  Ngn.sd.eContentOverlayBorder.setStyle('height', size.h + 'px');
-};
-Ngn.sd.animation.framesCount = function() {
-  var count = 0;
-  for (var i in Ngn.sd.blocks) {
-    if (Ngn.sd.blocks[i].framesCount() > count) {
-      count = Ngn.sd.blocks[i].framesCount();
-    }
-  }
-  return count;
-};
-
-Ngn.sd.sortBySubKey = function(obj, key1, key2) {
-  var r = [];
-  for (var key in obj) r.push(obj[key]);
-  r.sort(function(a, b) {
-    bb = parseInt(b[key1][key2]);
-    aa = parseInt(a[key1][key2]);
-    return aa < bb ? -1 : aa > bb ? 1 : 0;
-  });
-  return r;
-};
-
-Ngn.sd.initLayersPanel = function() {
-  Ngn.sd.eLayers.set('html', '');
-  var title;
-  var item;
-  var sortedBlocks = Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey');
-  new Element('div', {
-    html: 'Layers',
-    'class': 'lTitle'
-  }).inject(Ngn.sd.eLayers);
-  var eLayers = new Element('div', {
-    'class': 'layers'
-  }).inject(Ngn.sd.eLayers);
-  for (var i = 0; i < sortedBlocks.length; i++) {
-    item = sortedBlocks[i]._data;
-    if (item.data.subType == 'image') {
-      title = '<span class="ico">' + //
-      item.html + '</span>' + //
-        // item.id + ' ' + //
-      Ngn.String.ucfirst(item.data.type);
-    } else if (item.data.type == 'font') {
-      //var text = item.html.replace(/<br \/>/g, " ").substring(0, 10);
-      var text = item.html;
-      title = '<span class="ico">' + //
-      '<img src="/sd/img/font.png?v3"></span>' + //
-        // item.id + ' ' + //
-      '<span class="text">' + (text ? text : 'empty') + '</span>'
-    } else {
-      title = '<span class="ico"></span>unsupported';
-    }
-    var eItem = new Element('div', {
-      'class': 'item ' + 'item_' + item.data.type,
-      'data-id': item.id,
-      'data-type': item.data.type
-    });
-    new Element('div', {
-      'class': 'title',
-      html: title
-    }).inject(eItem);
-    var eBtns = new Element('div', {
-      'class': 'btns'
-    }).inject(eItem);
-    if (Ngn.sd.blocks[item.id].finalData().data.type == 'font') {
-      new Ngn.Btn( //
-        Ngn.Btn.btn2('Edit', 'edit').inject(eBtns), //
-        Ngn.sd.blocks[item.id]._fontSettingsAction.bind(Ngn.sd.blocks[item.id]) //
-      );
-    } else {
-      new Element('a', {
-        'class': 'smIcons dummy'
-      }).inject(eBtns);
-    }
-    new Ngn.Btn( //
-      Ngn.Btn.btn2('Delete', 'delete').inject(eBtns), //
-      Ngn.sd.blocks[item.id].deleteAction.bind(Ngn.sd.blocks[item.id]) //
-    );
-    eItem.inject(eLayers);
-  }
-  new Sortables(eLayers, {
-    onStart: function(eMovingLayer) {
-      eMovingLayer.addClass('drag');
-    },
-    onComplete: function(eMovingLayer) {
-      eMovingLayer.removeClass('drag');
-      var ePrevLayer;
-      var id = eMovingLayer.get('data-id');
-      ePrevLayer = eMovingLayer.getPrevious();
-      if (ePrevLayer) {
-        Ngn.sd.blocks[id].el.inject( //
-          Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'before');
-      } else {
-        ePrevLayer = eMovingLayer.getNext();
-        if (ePrevLayer) {
-          Ngn.sd.blocks[id].el.inject( //
-            Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'after');
-        }
-      }
-      // request
-      var ids = this.serialize(0, function(element) {
-        return element.get('data-id');
-      });
-      for (var i = 0; i < ids.length; i++) {
-        Ngn.sd.blocks[ids[i]].updateOrder(i);
-      }
-      new Ngn.Request({
-        url: '/pageBlock/' + Ngn.sd.bannerId + '/json_updateOrder'
-      }).post({
-          ids: ids
-        });
-    }
-  });
-};
-
-Ngn.sd.changeBannerBackground = function(backgroundUrl) {
-  new Ngn.Request.JSON({
-    url: '/cpanel/' + Ngn.sd.bannerId + '/json_createBackgroundBlock?backgroundUrl=' + backgroundUrl,
-    onComplete: function() {
-      Ngn.sd.reinit();
-    }
-  }).send();
-};
-
-Ngn.sd.buildPanel = function() {
-  var pg = window.location.hash.match(/#pg(\d+)/);
-  Ngn.sd.ePanel = new Element('div', {'class': 'cont'}).inject($('panel'));
-  new Element('a', {
-    'class': 'logo',
-    href: '/', //target: '_blank',
-    title: '...'
-  }).inject(Ngn.sd.ePanel);
-  Ngn.sd.eFeatureBtns = new Element('div', {
-    'class': 'featureBtns'
-  }).inject(Ngn.sd.ePanel);
-  //new Element('div', {'class': 'clear'}).inject(Ngn.sd.ePanel);
-
-
-  new Element('div', {
-    'class': 'tit'
-  }).inject(Ngn.sd.ePanel);
-
-  //===================
-  document.getElement('.profileBar').inject(Ngn.sd.ePanel);
-  //===================
-
-  // -- layers control
-  Ngn.sd.eLayers = new Element('div', {'class': 'cont'}).inject($('layers'));
-  Ngn.sd.loadData(pg ? pg[1] : 1, function(data) {
-    Ngn.sd.initLayersPanel();
-  });
-  Ngn.sd.bindKeys();
-
-
-  window.fireEvent('sdPanelComplete');
-};
-
-Ngn.sd.fbtn = function(title, cls) {
-  var btn = new Element('a', {
-    'class': 'panelBtn ' + cls,
-    html: '<i></i><div>' + title + '</div>'
-  });
-  new Element('div', {'class': 'featureBtnWrapper'}).grab(btn).inject(Ngn.sd.eFeatureBtns);
-  return btn;
-};
-
-Ngn.sd.movingBlock = {
-  get: function() {
-    return this.block;
-  },
-  set: function(block) {
-    this.block = block;
-    block.eDrag.addClass('pushed');
-  },
-  toggle: function(block) {
-    if (this.block) {
-      var enother = this.block != block;
-      this.block.eDrag.removeClass('pushed');
-      this.block = false;
-      if (enother) this.set(block);
-    } else {
-      this.set(block);
-    }
-  },
-  cancel: function() {
-    if (!this.block) return;
-    this.block.eDrag.removeClass('pushed');
-    this.block = false;
-  }
-};
-
-Ngn.sd.minContainerHeight = 100;
-
-Ngn.sd.bindKeys = function() {
-  var moveMap = {
-    119: 'up',
-    87: 'up',
-    1094: 'up',
-    1062: 'up',
-    1092: 'left',
-    1060: 'left',
-    97: 'left',
-    65: 'left',
-    1099: 'down',
-    1067: 'down',
-    83: 'down',
-    115: 'down',
-    100: 'right',
-    68: 'right',
-    1074: 'right',
-    1042: 'right'
-  };
-  var shiftMap = {
-    'q': 'back',
-    'Q': 'back',
-    'й': 'back',
-    'Й': 'back',
-    'e': 'forward',
-    'E': 'forward',
-    'у': 'forward',
-    'У': 'forward'
-  };
-  document.addEvent('keypress', function(e) {
-    if (e.shift && (e.key == 'p' || e.key == 'з')) Ngn.sd.previewSwitch(); // p
-    else if (moveMap[e.code]) {
-      var movingBlock = Ngn.sd.movingBlock.get();
-      if (movingBlock) movingBlock.move(moveMap[e.code]);
-    } else if (shiftMap[e.key]) {
-      var movingBlock = Ngn.sd.movingBlock.get();
-      if (movingBlock) {
-        (new Ngn.sd.PageBlocksShift)[shiftMap[e.key]](movingBlock._data.id);
-      }
-    }
-  });
-};
-
-Ngn.sd.isPreview = function() {
-  return $('layout').hasClass('preview');
-};
-
-Ngn.sd.previewSwitch = function(flag) {
-  flag = typeof(flag) == 'undefined' ? Ngn.sd.isPreview() : !flag;
-  if (flag) {
-    document.getElement('.body').removeClass('preview');
-    if (Ngn.sd.btnPreview) Ngn.sd.btnPreview.togglePushed(false);
-  } else {
-    document.getElement('.body').addClass('preview');
-    if (Ngn.sd.btnPreview) Ngn.sd.btnPreview.togglePushed(true);
-  }
-};
-
-Ngn.sd.updateLayoutContentHeight = function() {
-  return;
-  var y = 0;
-  for (var i in Ngn.sd.blockContainers) y += Ngn.sd.blockContainers[i].el.getSize().y;
-  $('layout').getElement('.lCont').sdSetStyle('min-height', (y + 6) + 'px');
-};
-
-Ngn.sd.SelectDialog = new Class({
-  Extends: Ngn.ElSelectDialog,
-  options: {
-    selectedName: false,
-    footer: false,
-    width: 580,
-    height: 300,
-    savePosition: true,
-    onChangeFont: function() {
-    }
-  },
-  setOptions: function(opts) {
-    this.parent(Object.merge(opts || {}, {id: this.name + 'Select'}));
-  },
-  init: function() {
-    var eSelected;
-    var obj = this;
-    this.message.getElements('div.item').each(function(el) {
-      if (obj.options.selectedName && el.get('data-name') == obj.options.selectedName) {
-        eSelected = el.addClass('selected');
-      }
-      el.addEvent('click', function() {
-        if (eSelected) eSelected.removeClass('selected');
-        el.addClass('selected');
-        eSelected = this;
-        obj.fireEvent('changeValue', el.get('data-name'));
-      });
-    });
-    if (eSelected) (function() {
-      new Fx.Scroll(obj.message).toElement(eSelected)
-    }).delay(500);
-  }
-});
-
-// @requiresBefore s2/js/common/tpl?name=fontSelect&controller=/font/ajax_browse
-Ngn.sd.FontSelectDialog = new Class({
-  Extends: Ngn.sd.SelectDialog,
-  name: 'font',
-  options: {
-    width: 600,
-    message: Ngn.tpls.fontSelect,
-    title: 'Choose Font...'
-  },
-  init: function() {
-    this.parent();
-    this.message.addClass('hLoader');
-    var els = this.message.getElements('div.item');
-    var loaded = 0;
-    els.each(function(el) {
-      Ngn.sd.loadFont(el.get('data-name'), function() {
-        loaded++;
-        Cufon.set('fontFamily', el.get('data-name')).replace(el.getElement('.font'));
-        if (loaded == els.length) this.message.removeClass('hLoader');
-      }.bind(this));
-    }.bind(this));
-  }
-});
-
-Ngn.Form.El.DialogSelect.Sd = new Class({
-  Extends: Ngn.Form.El.DialogSelect,
-
-  getSelectDialogEl: function() {
-    var eSelectDialog = new Element('div', {
-      'class': 'dialogSelect' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
-      title: this.options.selectTitle
-    }).inject(this.eInitField, 'after');
-    new Element('div', {'class': 'rightFading'}).inject(eSelectDialog);
-    return eSelectDialog;
-  }
-
-});
-
-Ngn.Form.El.FontFamilyCufon = new Class({
-  Extends: Ngn.Form.El.DialogSelect.Sd,
-  baseName: 'font',
-  options: {
-    selectClass: 'font'
-  },
-  init: function() {
-    this.parent();
-    this.value ? Ngn.sd.loadFont(this.value, this.initControl.bind(this)) : this.initControl();
-  },
-  initControlDefault: function() {
-  },
-  setValue: function(font) {
-    this.parent(font);
-    Cufon.set('fontFamily', font).replace(this.eSelectDialog);
-  },
-  getDialogClass: function() {
-    return Ngn.sd.FontSelectDialog;
-  }
-});
-
-Ngn.sd.itemTpl = function(k, v) {
-  var el = Elements.from(Ngn.tpls[k])[0].getElement('div.item[data-name=' + v + ']');
-  if (!el) throw new Error('Element "' + v + '" not found');
-  return el.get('html');
-};
-
-Ngn.sd.exportPageR = function(n) {
-  console.debug('Загружаю данные');
-  var onLoaded = function(n) {
-    var onComplete;
-    if (Ngn.sd.pages[n + 1]) {
-      onComplete = function() {
-        Ngn.sd.exportPageR(n + 1);
-      }
-    } else {
-      onComplete = function() {
-        new Ngn.Dialog.Link({
-          title: 'Результат',
-          width: 150,
-          link: '/index.html?' + Math.random()
-        });
-      }
-    }
-    console.debug('Экспортирую ' + (n == 1 ? 'индекс' : n));
-    Ngn.sd.exportRequest(n == 1 ? 'index' : 'page' + n, onComplete);
-  };
-  Ngn.sd.loadData(n, onLoaded);
-};
-
-Ngn.sd.init = function(bannerId) {
-  Ngn.sd.bannerId = bannerId;
-  Ngn.sd.buildPanel();
-  if (window.location.hash == '#preview') {
-    Ngn.sd.previewSwitch();
-  }
-};
-
-Ngn.sd.reinit = function() {
-  Ngn.sd.init(Ngn.sd.bannerId);
-};
-
-Ngn.sd.updateContainerHeight = function(eContainer) {
-  return;
-  Ngn.sd.setMinHeight(eContainer, 0, Ngn.sd.minContainerHeight);
-  Ngn.sd.updateLayoutContentHeight();
-};
-
-Ngn.sd.initFullBodyHeight();
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/carousel/Ngn.Carousel.js|--*/
-Ngn.Carousel = new Class({
-  Extends: Fx.Scroll,
-
-  options: {
-    mode: 'horizontal',
-    id: 'carousel',
-    childSelector: false,
-    loopOnScrollEnd: true,
-    periodical: false
-  },
-
-  initialize: function(element, options) {
-    this.parent(element, options);
-    this.cacheElements();
-    if (!this.elements[0]) throw new Error('No elements was found');
-    for (var i = 0; i < this.elements.length; i++) {
-      this.elements[i].store('initIndex', i);
-    }
-    this.currentIndex = 0;
-    this.elementWidth = this.elements[0].getSize().x;
-    this.visibleElementsN = Math.round(this.element.getSize().x / this.elementWidth);
-    if (this.options.periodical) this.toNext.periodical(this.options.periodical, this);
-    if (this.elements) this.toElementForce(this.elements[this.currentIndex]);
-  },
-
-  cacheElements: function() {
-    var els;
-    if (this.options.childSelector) {
-      els = this.element.getElements(this.options.childSelector);
-      //} else if (this.options.mode == 'horizontal'){
-      //  els = this.element.getElements(':first-child > *');
-    } else {
-      els = this.element.getChildren();
-    }
-    if (els[0] && this.options.changeContainerWidth && this.options.elementsOnPage) {
-      this.element.setStyle('width', (els[0].getSize().x * this.options.elementsOnPage) + 'px');
-      this.element.getFirst().setStyle('width', (els[0].getSize().x * els.length) + 'px');
-    }
-    this.elements = els;
-    return this;
-  },
-
-  curEl: null,
-
-  setSelectedElement: function(el) {
-    if (this.curEl) this.curEl.removeClass('sel');
-    this.curEl = el.addClass('sel');
-  },
-
-  toNext: function() {
-    if (!this.check()) return this;
-    this.currentIndex = this.getNextIndex();
-    if (!this.elements[this.currentIndex]) return;
-    this.toElement(this.elements[this.currentIndex]);
-    this.fireEvent('next');
-    return this;
-  },
-
-  toPrevious: function() {
-    if (!this.check()) return this;
-    this.currentIndex = this.getPreviousIndex();
-    if (!this.elements[this.currentIndex]) return;
-    this.toElement(this.elements[this.currentIndex]);
-    this.fireEvent('previous');
-    return this;
-  },
-
-  toElement: function(el) {
-    this.parent(el);
-    this.setSelectedElement(el);
-    this.fireEvent('toElement');
-  },
-
-  toElementForce: function(el){
-    var axes = ['x', 'y'];
-    var scroll = this.element.getScroll();
-    var position = Object.map(document.id(el).getPosition(this.element), function(value, axis){
-      return axes.contains(axis) ? value + scroll[axis] : false;
-    });
-    this.set(this.calculateScroll(position.x, position.y));
-    this.setSelectedElement(el);
-  },
-
-  setRight: function() {
-    this.set(this.element.getScrollSize().x, 0);
-  },
-
-  getNextIndex: function() {
-    this.currentIndex++;
-    if (this.currentIndex == this.elements.length || this.checkScroll()) {
-      this.fireEvent('loop');
-      this.fireEvent('nextLoop');
-      return 0;
-    } else {
-      return this.currentIndex;
-    }
-    ;
-  },
-
-  getPreviousIndex: function() {
-    this.currentIndex--;
-    var check = this.checkScroll();
-    if (this.currentIndex < 0 || check) {
-      this.fireEvent('loop');
-      this.fireEvent('previousLoop');
-      return (check) ? this.getOffsetIndex() : this.elements.length - 1;
-    } else {
-      return this.currentIndex;
-    }
-  },
-
-  getOffsetIndex: function() {
-    var visible = (this.options.mode == 'horizontal') ? this.element.getStyle('width').toInt() / this.elements[0].getStyle('width').toInt() : this.element.getStyle('height').toInt() / this.elements[0].getStyle('height').toInt();
-    return this.currentIndex + 1 - visible;
-  },
-
-  checkLink: function() {
-    return (this.timer && this.options.link == 'ignore');
-  },
-
-  checkScroll: function() {
-    if (!this.options.loopOnScrollEnd) return false;
-    if (this.options.mode == 'horizontal') {
-      var scroll = this.element.getScroll().x;
-      var total = this.element.getScrollSize().x - this.element.getSize().x;
-    } else {
-      var scroll = this.element.getScroll().y;
-      var total = this.element.getScrollSize().y - this.element.getSize().y;
-    }
-    return (scroll == total);
-  },
-
-  getCurrent: function() {
-    return this.elements[this.currentIndex];
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.HidebleBar.js|--*/
-Ngn.hidebleBarIds = [];
-Ngn.HidebleBar = new Class({
-
-  modes: ['up', 'down'],
-  slideMode: 'vertical',
-
-  initialize: function(eBar, mode) {
-    this.mode = mode || this.modes[0];
-    this.id = Ngn.hidebleBarIds.length + 1;
-    Ngn.hidebleBarIds.push(this.id);
-    this.eBar = document.id(eBar);
-    this.initBarPosition = this.eBar.getPosition();
-    this.eBar.addClass('hidebleBar ' + this.slideMode);
-    this.eHandlerHide = new Element('div', {'class': 'hidebleBarHandler'}).addClass(this.slideMode).addClass('hide').addClass(this.mode);
-    this.eHandlerShow = new Element('div', {'class': 'hidebleBarHandler'}).addClass(this.slideMode).addClass('show');
-    var handleShowExtraClass = this.eBar.get('class').replace(/\s*dropRightMenu\s*/, '') || false;
-    if (handleShowExtraClass) this.eHandlerShow.addClass(handleShowExtraClass);
-    Ngn.HidebleBar.addHover(this.eHandlerHide, 'hover');
-    Ngn.HidebleBar.addHover(this.eHandlerShow, 'hover');
-    this.eHandlerHide.inject(this.eBar);
-    this.eHandlerShow.inject(document.getElement('body'));
-    this.positionHandlerShow();
-    this.init();
-    window.addEvent('resize', this.position.bind(this));
-    var fxHide = new Fx.Slide(this.eBar, {
-      mode: this.slideMode,
-      duration: 100,
-      onComplete: function() {
-        this.hide();
-        Ngn.Storage.set('hidebleBar' + this.id, false);
-      }.bind(this)
-    });
-    var state = Ngn.Storage.bget('hidebleBar' + this.id);
-    if (!state) {
-      (function() {
-        fxHide.hide();
-        this.hide();
-      }).delay(1, this);
-    } else {
-      this.eHandlerShow.setStyle('visibility', 'hidden');
-    }
-    var fxShow = new Fx.Slide(this.eBar, {
-      mode: this.slideMode,
-      duration: 100,
-      onComplete: function() {
-        window.fireEvent('resize');
-        Ngn.Storage.set('hidebleBar' + this.id, true);
-        this.eHandlerShow.setStyle('visibility', 'hidden');
-      }.bind(this)
-    });
-    this.eHandlerHide.addEvent('click', function() {
-      fxHide.slideOut();
-    });
-    this.eHandlerShow.addEvent('click', function() {
-      fxShow.slideIn();
-    }.bind(this));
-  },
-
-  hide: function() {
-    this.eHandlerShow.setStyle('visibility', 'visible');
-    window.fireEvent('resize');
-  },
-
-  position: function() {
-    this.positionHandlerShow();
-  },
-
-  styleProp: 'top',
-  positionProp: 'y',
-
-  positionHandlerShow: function() {
-    if (this.mode == this.modes[1]) {
-      this.eHandlerShow.setStyle(this.styleProp, window.getSize()[this.positionProp] - this.eHandlerShow.getSize()[this.positionProp]);
-    } else {
-      this.eHandlerShow.setStyle(this.styleProp, this.initBarPosition[this.positionProp] + 'px');
-    }
-  },
-
-  init: function() {
-    this.eHandlerShow.addClass(this.mode == this.modes[1] ? this.modes[0] : this.modes[1]);
-    if (this.mode == this.modes[0]) this.eHandlerHide.setStyle(this.styleProp, this.eBar.getSize()[this.positionProp] - this.eHandlerHide.getSize()[this.positionProp]);
-  }
-
-});
-
-
-Ngn.HidebleBar.H = new Class({
-  Extends: Ngn.HidebleBar,
-
-  init: function() {
-    this.parent();
-    Ngn.setToCenterHor(this.eHandlerHide, this.eBar);
-    Ngn.setToCenterHor(this.eHandlerShow, this.eBar);
-  },
-
-  position: function() {
-    this.parent();
-    Ngn.setToCenterHor(this.eHandlerHide);
-    Ngn.setToCenterHor(this.eHandlerShow);
-  }
-
-});
-
-Ngn.HidebleBar.V = new Class({
-  Extends: Ngn.HidebleBar,
-
-  modes: ['left', 'right'],
-  slideMode: 'horizontal',
-  styleProp: 'left',
-  positionProp: 'x'
-
-});
-
-Ngn.HidebleBar.addHover = function(el, hoverClass) {
-  el.addEvent('mouseover', function() {
-    this.addClass(hoverClass);
-  });
-  el.addEvent('mouseout', function() {
-    this.removeClass(hoverClass);
-  });
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Link.js|--*/
-Ngn.Dialog.Link = new Class({
-  Extends: Ngn.Dialog.Msg,
-
-  options: {
-    width: 120,
-    title: '&nbsp;',
-    footer: false,
-    linkTitle: 'Открыть',
-    bindBuildMessageFunction: true
-    //link: ''
-  },
-
-  buildMessage: function() {
-    return Elements.from('<h2 style="text-align: center"><a href="' + this.options.link + '" target="_blank">' + this.options.linkTitle + '</a></h2>')[0];
-  }
-
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('New banner', 'add'), function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/newBanner',
-      width: 200,
-      onSubmitSuccess: function(r) {
-        window.location = '/cpanel/' + r.id;
-      }
+      el.set('title', '');
     });
   });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/text.js|--*/
-Ngn.sd.blockTypes.push({
-  title: 'Font',
-  data: {
-    type: 'font'
-  }
-});
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add text', 'text'), function() {
-    var data = Ngn.sd.getBlockType('font');
-    data.data.position = {
-      x: 0,
-      y: 0
-    };
-    Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), {
-      data: data.data,
-      html: ''
-    }).setToTheTop().save(true);
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/image.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add image', 'image'), null, {
-    fileUpload: {
-      url: '/pageBlock/' + Ngn.sd.bannerId + '/json_createImage',
-      onRequest: function() {
-        Ngn.Request.Iface.loading(true);
-      }.bind(this),
-      onComplete: function(v) {
-        var block = Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), v);
-        block.creationEvent();
-        Ngn.Request.Iface.loading(false);
-      }.bind(this)
-    }
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/background.js|--*/
-Ngn.sd.BlockBBackground = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-Ngn.sd.BackgroundInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'background',
-    title: 'Insert background',
-    okText: 'Insert',
-    dialogClass: 'dialog-images',
-    onRequest: function() {
-      this.initImages();
-    },
-    ok: function() {
-      Ngn.sd.changeBannerBackground(Ngn.sd.selectedBackgroundUrl);
-    }.bind(this)
-  },
-  initialize: function(options) {
-    var w = Ngn.sd.data.bannerSettings.size.w.toInt();
-    if (w < 200) {
-      w = w * 3;
-    } else if (w < 400) {
-      w = w * 2;
-    }
-    var h = Ngn.sd.data.bannerSettings.size.h.toInt();
-    if (h < 200) {
-      //h = h * 2;
-    } else if (h < 400) {
-      //h = h * 2;
-    }
-    this.options.width = w + 56;
-    this.options.height = h + 30;
-    this.options.url = '/cpanel/' + Ngn.sd.bannerId + '/ajax_backgroundSelect';
-    this.parent(options);
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    Ngn.sd.selectedBackgroundUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add background', 'background'), function() {
-    new Ngn.sd.BackgroundInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/button.js|--*/
-Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-Ngn.sd.addBannerButton = function(buttonUrl) {
-  new Ngn.Request.JSON({
-    url: '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?buttonUrl=' + buttonUrl,
-    onComplete: function() {
-      Ngn.sd.reinit();
-    }
-  }).send();
 };
-
-Ngn.sd.ButtonInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'button',
-    title: 'Insert button',
-    okText: 'Insert',
-    width: 400,
-    height: 300,
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect',
-    dialogClass: 'dialog-images',
-    onRequest: function() {
-      this.initImages();
-    },
-    ok: function() {
-      Ngn.sd.addBannerButton(Ngn.sd.selectedButtonUrl);
-    }.bind(this)
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    Ngn.sd.selectedButtonUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add button', 'button'), function() {
-    new Ngn.sd.ButtonInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.ImageInsertDialog.js|--*/
-Ngn.sd.ImageInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'image',
-    title: 'Insert image',
-    okText: 'Insert',
-    width: 400,
-    height: 300,
-    //url: 'ajax_select',
-    //createUrl: 'ajax_select',
-    dialogClass: 'dialog-images',
-    onRequest: function() {
-      this.initImages();
-    }
-  },
-  initialize: function(opts) {
-    if (!opts) opts = {};
-    opts = Object.merge(opts, {
-      ok: this.okAction.bind(this)
-    });
-    this.parent(opts);
-  },
-  okAction: function() {
-    this.insertImage(this.selectedUrl);
-  },
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_createImageBlock?url=' + url
-  },
-  insertImage: function(url) {
-    console.debug(this.createImageUrl(url));
-    new Ngn.Request.JSON({
-      url: this.createImageUrl(url),
-      onComplete: function() {
-        Ngn.sd.reinit();
-      }
-    }).send();
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    this.selectedUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/plugins/clipart.js|--*/
-Ngn.sd.BlockBClipart = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-Ngn.sd.ClipartInsertDialog = new Class({
-  Extends: Ngn.sd.ImageInsertDialog,
-  options: {
-    title: 'Insert clipart',
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect'
-  },
-
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_createClipartBlock?url=' + url
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add clipart', 'clipart'), function() {
-    new Ngn.sd.ClipartInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/fromTemplate.js|--*/
-Ngn.sd.CreateFromTemplateDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'template',
-    title: 'Create from template',
-    okText: 'Create',
-    width: 400,
-    height: 300,
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect',
-    onRequest: function() {
-    },
-    ok: function() {
-    }.bind(this)
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Create from template', 'template'), function() {
-    new Ngn.sd.CreateFromTemplateDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/settings.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Settings', 'settings'), function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/cpanel/' + Ngn.sd.bannerId + '/json_settings',
-      width: 250,
-      onSubmitSuccess: function(r) {
-        Ngn.sd.setBannerSize(r);
-      }
-    });
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/render.js|--*/
-Ngn.sd.render = function() {
-  new Ngn.Dialog.HtmlPage({
-    url: url = '/render/' + Ngn.sd.bannerId,
-    title: 'Render',
-    width: Ngn.sd.bannerSize.w.toInt() + 30
-  });
-};
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Render', 'render'), function() {
-    Ngn.sd.render();
-  });
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.HtmlPage.js|--*/
-Ngn.Dialog.HtmlPage = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    noPadding: false,
-    footer: false,
-    reduceHeight: true
-  }
-
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/download.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Download', 'download'), function() {
-    var dialog = new Ngn.Dialog.Loader({
-      title: 'Rendering...',
-      width: 200
-    });
-    new Ngn.Request({
-      url: '/download/' + Ngn.sd.bannerId,
-      onComplete: function(bannerUrl) {
-        dialog.close();
-        window.location = bannerUrl;
-      }
-    }).send();
-  });
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Loader.js|--*/
-Ngn.Dialog.Loader = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    bindBuildMessageFunction: true,
-    ok: false,
-    hasFaviconTimer: true // при редиректе, после включения DialogLoader'а FaviconTimer необходимо отключить
-  },
-
-  initialize: function(options) {
-    this.parent(options);
-  },
-
-  start: function() {
-    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.start();
-  },
-
-  stop: function() {
-    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.stop();
-  },
-
-  close: function() {
-    this.stop();
-    this.parent();
-  },
-
-  buildMessage: function() {
-    return '<div class="dialog-progress"></div>';
-  }
-
-});
-
-Ngn.Dialog.Loader.Simple = new Class({
-  Extends: Ngn.Dialog.Loader,
-
-  options: {
-    //cancel: false,
-    titleClose: false,
-    footer: false,
-    messageBoxClass: 'dummy',
-    titleBarClass: 'dialog-loader-title',
-    titleTextClass: 'dummy',
-    messageAreaClass: 'dummy',
-    bindBuildMessageFunction: true
-  }
-
-});
-
-Ngn.Dialog.Loader.Advanced = new Class({
-  Extends: Ngn.Dialog.Loader,
-
-  options: {
-    messageAreaClass: 'dialog-message dialog-message-loader',
-    onContinue: Function.from(),
-    noPadding: false
-  },
-
-  init: function() {
-    this.eProgress = this.message.getElement('.dialog-progress');
-    this.stop();
-  },
-
-  buildMessage: function() {
-    return '<div class="message-text"></div><div class="dialog-progress"></div>';
-  },
-
-  start: function() {
-    this.eProgress.removeClass('stopped');
-    this.parent();
-  },
-
-  stop: function() {
-    this.eProgress.addClass('stopped');
-    this.parent();
-  }
-
-});
-
-Ngn.Dialog.Loader.Request = new Class({
-  Extends: Ngn.Dialog.Loader.Simple,
-
-  options: {
-    loaderUrl: null,
-    onLoaderComplete: Function.from(),
-    titleClose: false,
-    footer: false
-  },
-
-  initialize: function(options) {
-    this.parent(options);
-    new Request({
-      url: this.options.loaderUrl,
-      onComplete: function(r) {
-        this.okClose();
-        this.fireEvent('loaderComplete', r);
-      }.bind(this)
-    }).send();
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FaviconTimer.js|--*/
-Ngn.FaviconTimer = {
-  
-  start: function() {
-    Ngn.Favicon.animate([
-      '/i/img/icons/l/loader1.ico',
-      '/i/img/icons/l/loader2.ico',
-      '/i/img/icons/l/loader3.ico',
-      '/i/img/icons/l/loader4.ico'
-    ]);
-  },
-  
-  stop: function() {
-    Ngn.Favicon.stop();
-  }
-  
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Favicon.js|--*/
-// Favicon.js - Change favicon dynamically [http://ajaxify.com/run/favicon].
-// Copyright (c) 2006 Michael Mahemoff. Only works in Firefox and Opera.
-// Background and MIT License notice at end of file, see the homepage for more.
-
-// USAGE:
-// * favicon.change("/icon/active.ico");  (Optional 2nd arg is new title.)
-// * favicon.animate(new Array("icon1.ico", "icon2.ico", ...));
-//     Tip: Use "" as the last element to make an empty icon between cycles.
-//     To stop the animation, call change() and pass in the new arg.
-//     (Optional 2nd arg is animation pause in millis, overwrites the default.)
-// * favicon.defaultPause = 5000;
-
-Ngn.Favicon = {
-
-  // -- "PUBLIC" ----------------------------------------------------------------
-
-  defaultPause: 1000,
-  initIconUrl: '/favicon.ico',
-
-  change: function(iconURL, optionalDocTitle) {
-    clearTimeout(this.loopTimer);
-    if (optionalDocTitle) {
-      document.title = optionalDocTitle;
-    }
-    this.replaceLink(iconURL);
-  },
-
-  animate: function(iconSequence, optionalDelay) {
-    var links = this.getAllLinks();
-    if (links.length && links[0].href) this.initIconUrl = links[0].href;
-    // --------------------------------------------------
-    this.preloadIcons(iconSequence);
-    this.iconSequence = iconSequence;
-    this.sequencePause = (optionalDelay) ? optionalDelay : this.defaultPause;
-    Ngn.Favicon.index = 0;
-    Ngn.Favicon.change(iconSequence[0]);
-    this.loopTimer = setInterval(function() {
-      Ngn.Favicon.index = (Ngn.Favicon.index + 1) % Ngn.Favicon.iconSequence.length;
-      Ngn.Favicon.replaceLink(Ngn.Favicon.iconSequence[Ngn.Favicon.index], false);
-    }, Ngn.Favicon.sequencePause);
-  },
-
-  stop: function() {
-    clearTimeout(this.loopTimer);
-    this.removeIconLinksIfExists();
-    if (this.initIconUrl) {
-      this.replaceLink(this.initIconUrl);
-    }
-  },
-
-  // -- "PRIVATE" ---------------------------------------------------------------
-
-  loopTimer: null,
-
-  preloadIcons: function(iconSequence) {
-    var dummyImageForPreloading = document.createElement("img");
-    for (var i = 0; i < iconSequence.length; i++) {
-      dummyImageForPreloading.src = iconSequence[i];
-    }
-  },
-
-  replaceLink: function(iconURL) {
-    var link = document.createElement("link");
-    link.type = "image/x-icon";
-    link.rel = "shortcut icon";
-    link.href = iconURL;
-    this.removeIconLinksIfExists();
-    this.docHead.appendChild(link);
-  },
-
-  removeIconLinksIfExists: function() {
-    var links = this.getAllLinks();
-    for (var i = 0; i < links.length; i++) {
-      this.docHead.removeChild(links[i]);
-    }
-  },
-
-  getAllLinks: function() {
-    var r = [];
-    var esLink = this.docHead.getElementsByTagName("link");
-    var n = 0;
-    for (var i = 0; i < esLink.length; i++) {
-      if (esLink[i].type == "image/x-icon"/* && esLink[i].rel == "shortcut icon"*/) {
-        r[n] = esLink[i];
-      }
-    }
-    return r;
-  },
-
-  docHead: document.getElementsByTagName("head")[0]
-}
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
-Ngn.Form.El.Color = new Class({
-  Extends: Ngn.Form.El,
-
-  init: function() {
-    var el = this.eRow;
-    var eColor = el.getElement('div.color');
-    var eInput = el.getElement('input').addClass('hexInput');
-    eInput.addEvent('change', function() {
-      eColor.setStyle('background-color', eInput.value);
-    });
-    new Ngn.Rainbow(eInput, {
-      eParent: eInput.getParent(),
-      id: 'rainbow_' + eInput.get('name'),
-      //styles: { // и так работает
-      //  'z-index': this.options.dialog.dialog.getStyle('z-index').toInt() + 1
-      //},
-      imgPath: '/i/img/rainbow/small/',
-      wheel: true,
-      startColor: eInput.value ? new Color(eInput.value).rgb : [255, 255, 255],
-      onChange: function(color) {
-        eColor.setStyle('background-color', color.hex);
-        eInput.value = color.hex;
-        eInput.fireEvent('change', color);
-      },
-      onComplete: function(color) {
-        eColor.setStyle('background-color', color.hex);
-        eInput.value = color.hex;
-        eInput.fireEvent('change', color);
-      }
-    });
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Rainbow.js|--*/
-Ngn.Rainbows = [];
-
-Ngn.Rainbow = new Class({
-  options: {
-    id: 'rainbow',
-    styles: {},
-    prefix: 'moor-',
-    imgPath: 'images/',
-    startColor: [255, 0, 0],
-    wheel: false,
-    onComplete: Function.from(),
-    onChange: Function.from(),
-    eParent: null
-  },
-
-  initialize: function(el, options) {
-    this.element = $(el);
-    if (!this.element) return;
-    this.setOptions(options);
-    if (!this.options.eParent) this.options.eParent = document.body;
-    this.sliderPos = 0;
-    this.pickerPos = {x: 0, y: 0};
-    this.backupColor = this.options.startColor;
-    this.currentColor = this.options.startColor;
-    this.sets = {
-      rgb: [],
-      hsb: [],
-      hex: []
-    };
-    this.pickerClick = this.sliderClick = false;
-    if (!this.layout) this.doLayout();
-    this.OverlayEvents();
-    this.sliderEvents();
-    this.backupEvent();
-    if (this.options.wheel) this.wheelEvents();
-    this.element.addEvent('click', function(e) {
-      this.closeAll().toggle(e);
-    }.bind(this));
-
-    this.layout.overlay.setStyle('background-color', this.options.startColor.rgbToHex());
-    //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
-
-    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
-    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
-
-    this.manualSet(this.options.startColor);
-
-    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
-    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
-    this.sliderPos = this.snippet('arrPos') - this.snippet('arrSize', 'int');
-
-    if (window.khtml) this.hide();
-  },
-
-  toggle: function() {
-    this[this.visible ? 'hide' : 'show']();
-  },
-
-  show: function() {
-    this.rePosition();
-    (function() {
-      this.layout.setStyle('display', 'block');
-    }).delay(100, this);
-    this.visible = true;
-  },
-
-  hide: function() {
-    this.layout.setStyles({'display': 'none'});
-    this.visible = false;
-  },
-
-  closeAll: function() {
-    Ngn.Rainbows.each(function(obj) {
-      obj.hide();
-    });
-
-    return this;
-  },
-
-  manualSet: function(color, type) {
-    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
-    var rgb, hsb, hex;
-
-    if (type == 'rgb') {
-      rgb = color;
-      hsb = color.rgbToHsb();
-      hex = color.rgbToHex();
-    } else if (type == 'hsb') {
-      hsb = color;
-      rgb = color.hsbToRgb();
-      hex = rgb.rgbToHex();
-    } else {
-      hex = color;
-      rgb = color.hexToRgb(true);
-      hsb = rgb.rgbToHsb();
-    }
-
-    this.setRainbow(rgb);
-    this.autoSet(hsb);
-  },
-
-  autoSet: function(hsb) {
-    var curH = this.snippet('curSize', 'int').h;
-    var curW = this.snippet('curSize', 'int').w;
-    var oveH = this.layout.overlay.height;
-    var oveW = this.layout.overlay.width;
-    var sliH = this.layout.slider.height;
-    var arwH = this.snippet('arrSize', 'int');
-    var hue;
-
-    var posx = Math.round(((oveW * hsb[1]) / 100) - curW);
-    var posy = Math.round(-((oveH * hsb[2]) / 100) + oveH - curH);
-
-    var c = Math.round(((sliH * hsb[0]) / 360));
-    c = (c == 360) ? 0 : c;
-    var position = sliH - c + this.snippet('slider') - arwH;
-    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
-
-    this.layout.cursor.setStyles({'top': posy, 'left': posx});
-    this.layout.arrows.setStyle('top', position);
-    this.layout.overlay.setStyle('background-color', hue);
-    this.sliderPos = this.snippet('arrPos') - arwH;
-    this.pickerPos.x = this.snippet('curPos').l + curW;
-    this.pickerPos.y = this.snippet('curPos').t + curH;
-  },
-
-  setRainbow: function(color, type) {
-    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
-    var rgb, hsb, hex;
-
-    if (type == 'rgb') {
-      rgb = color;
-      hsb = color.rgbToHsb();
-      hex = color.rgbToHex();
-    } else if (type == 'hsb') {
-      hsb = color;
-      rgb = color.hsbToRgb();
-      hex = rgb.rgbToHex();
-    } else {
-      hex = color;
-      rgb = color.hexToRgb();
-      hsb = rgb.rgbToHsb();
-    }
-    this.sets = {
-      rgb: rgb,
-      hsb: hsb,
-      hex: hex
-    };
-    if (this.pickerPos.x == null) this.autoSet(hsb);
-    this.RedInput.value = rgb[0];
-    this.GreenInput.value = rgb[1];
-    this.BlueInput.value = rgb[2];
-    this.HueInput.value = hsb[0];
-    this.SatuInput.value = hsb[1];
-    this.BrighInput.value = hsb[2];
-    //this.hexInput.value = hex;
-    this.currentColor = rgb;
-    //this.chooseColor.setStyle('background-color', rgb.rgbToHex());
-  },
-
-  parseColors: function(x, y, z) {
-    var s = Math.round((x * 100) / this.layout.overlay.width);
-    var b = 100 - Math.round((y * 100) / this.layout.overlay.height);
-    var h = 360 - Math.round((z * 360) / this.layout.slider.height) + this.snippet('slider') - this.snippet('arrSize', 'int');
-    h -= this.snippet('arrSize', 'int');
-    h = (h >= 360) ? 0 : (h < 0) ? 0 : h;
-    s = (s > 100) ? 100 : (s < 0) ? 0 : s;
-    b = (b > 100) ? 100 : (b < 0) ? 0 : b;
-
-    return [h, s, b];
-  },
-
-  OverlayEvents: function() {
-    var lim, curH, curW, inputs;
-    curH = this.snippet('curSize', 'int').h;
-    curW = this.snippet('curSize', 'int').w;
-    //inputs = Array.from(this.arrRGB).concat(this.arrHSB, this.hexInput);
-    document.addEvent('click', function() {
-      this.hide(this.layout);
-    }.bind(this));
-    /*
-    inputs.each(function(el) {
-      el.addEvent('keydown', this.eventKeydown.bindWithEvent(this, el));
-      el.addEvent('keyup', this.eventKeyup.bindWithEvent(this, el));
-    }, this);
-    */
-    [this.element, this.layout].each(function(el) {
-      el.addEvents({
-        'click': function(e) {
-          e.preventDefault();
-        },
-        'keyup': function(e) {
-          if (e.key == 'esc' && this.visible) this.hide(this.layout);
-        }.bind(this)
-      }, this);
-    }, this);
-    lim = {
-      //x: [0 - curW, this.layout.overlay.width - curW],
-      //y: [0 - curH, this.layout.overlay.height - curH]
-      x: [0 - curW, 80 - curW],
-      y: [0 - curH, 80 - curH]
-    };
-    this.layout.addEvent('click', function(e) {
-      e.stop();
-    });
-    this.layout.drag = new Drag(this.layout.cursor, {
-      limit: lim,
-      onBeforeStart: this.overlayDrag.bind(this),
-      onStart: this.overlayDrag.bind(this),
-      onDrag: this.overlayDrag.bind(this),
-      snap: 0
-    });
-
-    this.layout.overlay2.addEvent('mousedown', function(e) {
-      this.layout.cursor.setStyles({
-        'top': e.page.y - this.layout.overlay.getTop() - curH,
-        'left': e.page.x - this.layout.overlay.getLeft() - curW
-      });
-      this.layout.drag.start(e);
-    }.bind(this));
-
-    /*
-     this.layout.overlay2.addEvent('dblclick', function(){
-     this.ok();
-     }.bind(this));
-     this.okButton.addEvent('click', function() {
-     this.ok();
-     }.bind(this));
-     */
-
-
-    this.transp.addEvent('click', function() {
-      this.hide();
-      this.fireEvent('onComplete', ['transparent', this]);
-    }.bind(this));
-  },
-
-  ok: function() {
-    if (this.currentColor == this.options.startColor) {
-      this.hide();
-      this.fireEvent('onComplete', [this.sets, this]);
-    } else {
-      this.backupColor = this.currentColor;
-      //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
-      this.hide();
-      this.fireEvent('onComplete', [this.sets, this]);
-    }
-  },
-
-  overlayDrag: function() {
-    var curH = this.snippet('curSize', 'int').h;
-    var curW = this.snippet('curSize', 'int').w;
-    this.pickerPos.x = this.snippet('curPos').l + curW;
-    this.pickerPos.y = this.snippet('curPos').t + curH;
-    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
-    this.fireEvent('onChange', [this.sets, this]);
-  },
-
-  sliderEvents: function() {
-    var arwH = this.snippet('arrSize', 'int'), lim;
-    lim = [0 + this.snippet('slider') - arwH, this.layout.slider.height - arwH + this.snippet('slider')];
-    this.layout.sliderDrag = new Drag(this.layout.arrows, {
-      limit: {y: lim},
-      modifiers: {x: false},
-      onBeforeStart: this.sliderDrag.bind(this),
-      onStart: this.sliderDrag.bind(this),
-      onDrag: this.sliderDrag.bind(this),
-      snap: 0
-    });
-
-    this.layout.slider.addEvent('mousedown', function(e) {
-      this.layout.arrows.setStyle('top', e.page.y - this.layout.slider.getTop() + this.snippet('slider') - arwH);
-      this.layout.sliderDrag.start(e);
-    }.bind(this));
-  },
-
-  sliderDrag: function() {
-    var arwH = this.snippet('arrSize', 'int'), hue;
-
-    this.sliderPos = this.snippet('arrPos') - arwH;
-    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
-    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
-    this.layout.overlay.setStyle('background-color', hue);
-    this.fireEvent('onChange', [this.sets, this]);
-  },
-
-  backupEvent: function() {
-    /*
-    this.layout.backup.addEvent('click', function() {
-      this.manualSet(this.backupColor);
-      this.fireEvent('onChange', [this.sets, this]);
-    }.bind(this));
-    */
-  },
-
-  wheelEvents: function() {
-    var arrColors = Object.append(Array.from(this.arrRGB), this.arrHSB);
-    arrColors.each(function(el) {
-      el.addEvents({
-        'mousewheel': function() {
-          this.eventKeys(el);
-        }.bind(this),
-        'keydown': function() {
-          this.eventKeys(el);
-        }.bind(this)
-      });
-    }, this);
-
-    [this.layout.arrows, this.layout.slider].each(function(el) {
-      el.addEvents({
-        'mousewheel': function() {
-          this.eventKeys([this.arrHSB[0], 'slider']);
-        }.bind(this),
-        'keydown': function() {
-          this.eventKeys([this.arrHSB[0], 'slider']);
-        }.bind(this)
-      });
-    }, this);
-  },
-
-  eventKeys: function(e, el, id) {
-    var wheel, type;
-    id = (!id) ? el.id : this.arrHSB[0];
-
-    if (e.type == 'keydown') {
-      if (e.key == 'up') wheel = 1; else if (e.key == 'down') wheel = -1; else return;
-    } else if (e.type == Element.Events.mousewheel.base) wheel = (e.wheel > 0) ? 1 : -1;
-
-    if (this.arrRGB.contains(el)) type = 'rgb'; else if (this.arrHSB.contains(el)) type = 'hsb'; else type = 'hsb';
-
-    if (type == 'rgb') {
-      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
-      var value = (el.value.toInt() || 0) + wheel;
-      value = (value > 255) ? 255 : (value < 0) ? 0 : value;
-
-      switch (el.className) {
-        case prefix + 'rInput':
-          pass = [value, rgb[1], rgb[2]];
-          break;
-        case prefix + 'gInput':
-          pass = [rgb[0], value, rgb[2]];
-          break;
-        case prefix + 'bInput':
-          pass = [rgb[0], rgb[1], value];
-          break;
-        default :
-          pass = rgb;
-      }
-      this.manualSet(pass);
-      this.fireEvent('onChange', [this.sets, this]);
-    } else {
-      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
-      var value = (el.value.toInt() || 0) + wheel;
-
-      if (el.className.test(/(HueInput)/)) value = (value > 359) ? 0 : (value < 0) ? 0 : value; else value = (value > 100) ? 100 : (value < 0) ? 0 : value;
-
-      switch (el.className) {
-        case prefix + 'HueInput':
-          pass = [value, hsb[1], hsb[2]];
-          break;
-        case prefix + 'SatuInput':
-          pass = [hsb[0], value, hsb[2]];
-          break;
-        case prefix + 'BrighInput':
-          pass = [hsb[0], hsb[1], value];
-          break;
-        default :
-          pass = hsb;
-      }
-
-      this.manualSet(pass, 'hsb');
-      this.fireEvent('onChange', [this.sets, this]);
-    }
-    e.stop();
-  },
-
-  eventKeydown: function(e, el) {
-    var n = e.code, k = e.key;
-    if ((!el.className.test(/hexInput/) && !(n >= 48 && n <= 57)) && (k != 'backspace' && k != 'tab' && k != 'delete' && k != 'left' && k != 'right'))
-      e.stop();
-  },
-
-  eventKeyup: function(e, el) {
-    var n = e.code, k = e.key, pass, prefix, chr = el.value.charAt(0);
-    if (el.value == null) return;
-    if (el.className.test(/hexInput/)) {
-      if (chr != "#" && el.value.length != 6) return;
-      if (chr == '#' && el.value.length != 7) return;
-    } else {
-      if (!(n >= 48 && n <= 57) && (!['backspace', 'tab', 'delete', 'left', 'right'].contains(k)) && el.value.length > 3) return;
-    }
-
-    prefix = this.options.prefix;
-
-    if (el.className.test(/(rInput|gInput|bInput)/)) {
-      if (el.value < 0 || el.value > 255) return;
-      switch (el.className) {
-        case prefix + 'rInput':
-          pass = [el.value, this.sets.rgb[1], this.sets.rgb[2]];
-          break;
-        case prefix + 'gInput':
-          pass = [this.sets.rgb[0], el.value, this.sets.rgb[2]];
-          break;
-        case prefix + 'bInput':
-          pass = [this.sets.rgb[0], this.sets.rgb[1], el.value];
-          break;
-        default :
-          pass = this.sets.rgb;
-      }
-      this.manualSet(pass);
-      this.fireEvent('onChange', [this.sets, this]);
-    } else if (!el.className.test(/hexInput/)) {
-      if (el.className.test(/HueInput/) && el.value < 0 || el.value > 360) return; else if (el.className.test(/HueInput/) && el.value == 360) el.value = 0; else if (el.className.test(/(SatuInput|BrighInput)/) && el.value < 0 || el.value > 100) return;
-      switch (el.className) {
-        case prefix + 'HueInput':
-          pass = [el.value, this.sets.hsb[1], this.sets.hsb[2]];
-          break;
-        case prefix + 'SatuInput':
-          pass = [this.sets.hsb[0], el.value, this.sets.hsb[2]];
-          break;
-        case prefix + 'BrighInput':
-          pass = [this.sets.hsb[0], this.sets.hsb[1], el.value];
-          break;
-        default :
-          pass = this.sets.hsb;
-      }
-      this.manualSet(pass, 'hsb');
-      this.fireEvent('onChange', [this.sets, this]);
-    } else {
-      pass = el.value.hexToRgb(true);
-      if (isNaN(pass[0]) || isNaN(pass[1]) || isNaN(pass[2])) return;
-      if (pass != null) {
-        this.manualSet(pass);
-        this.fireEvent('onChange', [this.sets, this]);
-      }
-    }
-  },
-
-  doLayout: function() {
-    var id = this.options.id, prefix = this.options.prefix;
-    var idPrefix = id + ' .' + prefix;
-
-    this.layout = new Element('div', {
-      'styles': Object.merge({ 'display': 'block', 'position': 'absolute', zIndex: 10}, this.options.styles),
-      'id': id
-    }).inject(this.options.eParent);
-
-    Ngn.Rainbows.push(this);
-
-    var box = new Element('div', {
-      'styles': {'position': 'relative'},
-      'class': prefix + 'box'
-    }).inject(this.layout);
-
-    var div = new Element('div', {
-      'styles': {'position': 'absolute', 'overflow': 'hidden'},
-      'class': prefix + 'overlayBox'
-    }).inject(box);
-
-    var ar = new Element('div', {
-      'styles': {
-        'position': 'absolute'
-        //,'zIndex': 1
-      },
-      'class': prefix + 'arrows'
-    }).inject(box);
-    ar.width = ar.getStyle('width').toInt();
-    ar.height = ar.getStyle('height').toInt();
-
-    var ov = new Element('img', {
-      'styles': {
-        'background-color': '#fff',
-        'position': 'relative'
-        //,'zIndex': 2
-      },
-      'src': this.options.imgPath + 'moor_woverlay.png',
-      'class': prefix + 'overlay'
-    }).inject(div);
-
-    var ov2 = new Element('img', {
-      'styles': {'position': 'absolute', 'top': 0, 'left': 0/*, 'zIndex': 2*/},
-      'src': this.options.imgPath + 'moor_boverlay.png',
-      'class': prefix + 'overlay'
-    }).inject(div);
-
-    if (window.ie6) {
-      div.setStyle('overflow', '');
-      var src = ov.src;
-      ov.src = this.options.imgPath + 'blank.gif';
-      ov.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
-      src = ov2.src;
-      ov2.src = this.options.imgPath + 'blank.gif';
-      ov2.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
-    }
-    ov.width = ov2.width = div.getStyle('width').toInt();
-    ov.height = ov2.height = div.getStyle('height').toInt();
-
-    var cr = new Element('div', {
-      'styles': {'overflow': 'hidden', 'position': 'absolute'/*, 'zIndex': 2*/},
-      'class': prefix + 'cursor'
-    }).inject(div);
-    cr.width = cr.getStyle('width').toInt();
-    cr.height = cr.getStyle('height').toInt();
-
-    var sl = new Element('img', {
-      'styles': {'position': 'absolute'/*, 'z-index': 2, marginLeft: '1px'*/},
-      'src': this.options.imgPath + 'moor_slider.png',
-      'class': prefix + 'slider'
-    }).inject(box);
-    this.layout.slider = document.getElement('#' + idPrefix + 'slider');
-    sl.width = sl.getStyle('width').toInt();
-    sl.height = sl.getStyle('height').toInt();
-
-    new Element('div', {
-      'styles': {'position': 'absolute'},
-      'class': prefix + 'colorBox'
-    }).inject(box);
-
-    /*
-     new Element('div', {
-      'styles': {
-      //'zIndex': 2,
-      'position': 'absolute'
-      },
-      'class': prefix + 'chooseColor'
-    }).inject(box);
-
-    this.layout.backup = new Element('div', {
-      'styles': {
-        //'zIndex': 2,
-        'position': 'absolute', 'cursor': 'pointer'},
-      'class': prefix + 'currentColor'
-    }).inject(box);
-    */
-
-    var R = new Element('label').inject(box).setStyle('position', 'absolute');
-    var G = R.clone().inject(box).addClass(prefix + 'gLabel').appendText('G: ');
-    var B = R.clone().inject(box).addClass(prefix + 'bLabel').appendText('B: ');
-    R.appendText('R: ').addClass(prefix + 'rLabel');
-
-    var inputR = new Element('input');
-    var inputG = inputR.clone().inject(G).addClass(prefix + 'gInput');
-    var inputB = inputR.clone().inject(B).addClass(prefix + 'bInput');
-    inputR.inject(R).addClass(prefix + 'rInput');
-
-    var HU = new Element('label').inject(box).setStyle('position', 'absolute');
-    var SA = HU.clone().inject(box).addClass(prefix + 'SatuLabel').appendText('S: ');
-    var BR = HU.clone().inject(box).addClass(prefix + 'BrighLabel').appendText('B: ');
-    HU.appendText('H: ').addClass(prefix + 'HueLabel');
-
-    var inputHU = new Element('input');
-    var inputSA = inputHU.clone().inject(SA).addClass(prefix + 'SatuInput');
-    var inputBR = inputHU.clone().inject(BR).addClass(prefix + 'BrighInput');
-    inputHU.inject(HU).addClass(prefix + 'HueInput');
-    SA.appendText(' %');
-    BR.appendText(' %');
-    new Element('span', {'styles': {'position': 'absolute'}, 'class': prefix + 'ballino'}).set('html', " &deg;").inject(HU, 'after');
-
-    //var hex = new Element('label').inject(box).setStyle('position', 'absolute').addClass(prefix + 'hexLabel').appendText('#hex: ').adopt(new Element('input').addClass(prefix + 'hexInput'));
-
-    /*
-    var ok = new Element('input', {
-      'styles': {'position': 'absolute'},
-      'type': 'button',
-      'value': 'OK',
-      'class': prefix + 'okButton'
-    }).inject(box);
-    */
-
-    var transp = new Element('a', {'style': {'position': 'absolute'}, 'href': '#', 'class': prefix + 'transp'}).inject(box);
-
-    this.rePosition();
-
-    var overlays = $$('#' + idPrefix + 'overlay');
-    this.layout.overlay = overlays[0];
-
-    this.layout.overlay2 = overlays[1];
-    this.layout.cursor = document.getElement('#' + idPrefix + 'cursor');
-    this.layout.arrows = document.getElement('#' + idPrefix + 'arrows');
-    this.chooseColor = document.getElement('#' + idPrefix + 'chooseColor');
-    //this.layout.backup = document.getElement('#' + idPrefix + 'currentColor');
-    this.RedInput = document.getElement('#' + idPrefix + 'rInput');
-    this.GreenInput = document.getElement('#' + idPrefix + 'gInput');
-    this.BlueInput = document.getElement('#' + idPrefix + 'bInput');
-    this.HueInput = document.getElement('#' + idPrefix + 'HueInput');
-    this.SatuInput = document.getElement('#' + idPrefix + 'SatuInput');
-    this.BrighInput = document.getElement('#' + idPrefix + 'BrighInput');
-    //this.hexInput = document.getElement('#' + idPrefix + 'hexInput');
-
-    this.arrRGB = [this.RedInput, this.GreenInput, this.BlueInput];
-    this.arrHSB = [this.HueInput, this.SatuInput, this.BrighInput];
-    //this.okButton = document.getElement('#' + idPrefix + 'okButton');
-    this.transp = box.getElement('.' + prefix + 'transp');
-
-    if (!window.khtml) this.hide();
-  },
-  rePosition: function() {
-    return;
-    var coords = this.element.getCoordinates();
-    this.layout.setStyles({
-      'left': coords.left,
-      'top': coords.top + coords.height + 1
-    });
-  },
-
-  snippet: function(mode, type) {
-    var size;
-    type = (type) ? type : 'none';
-    switch (mode) {
-      case 'arrPos':
-        var t = this.layout.arrows.getStyle('top').toInt();
-        size = t;
-        break;
-      case 'arrSize':
-        var h = this.layout.arrows.height;
-        h = (type == 'int') ? (h / 2).toInt() : h;
-        size = h;
-        break;
-      case 'curPos':
-        var l = this.layout.cursor.getStyle('left').toInt();
-        var t = this.layout.cursor.getStyle('top').toInt();
-        size = {'l': l, 't': t};
-        break;
-      case 'slider':
-        var t = this.layout.slider.getStyle('marginTop').toInt();
-        size = t;
-        break;
-      default :
-        var h = this.layout.cursor.height;
-        var w = this.layout.cursor.width;
-        h = (type == 'int') ? (h / 2).toInt() : h;
-        w = (type == 'int') ? (w / 2).toInt() : w;
-        size = {w: w, h: h};
-    }
-    ;
-    return size;
-  }
-});
-
-Ngn.Rainbow.implement(new Options);
-Ngn.Rainbow.implement(new Events);
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Textarea.js|--*/
-Ngn.Form.El.Textarea = new Class({
-  Extends: Ngn.Form.El,
-
-  resizebleOptions: {},
-
-  init: function() {
-    if (this.form.options.dialog && this.form.options.dialog.options.vResize) return;
-    //new Ngn.ResizableTextarea(this.eRow); // реализовать настройку в Ngn.Form.ElInit...
-  }
-
-});

@@ -1,4 +1,4 @@
-s:83102:"
+s:83043:"
 /*--|/home/user/ngn-env/ngn/i/css/common/screen.css|--*/
 /* -------------------------------------------------------------- 
   
@@ -2702,6 +2702,9 @@ background-position: -102px 0;
 .panelBtn.settings i {
 background-position: -119px 0;
 }
+.panelBtn.download i {
+background-position: -222px 0;
+}
 .panelBtn.profile i {
 
 }
@@ -3217,6 +3220,12 @@ text-align: left;
 border-bottom: 1px solid #444;
 cursor: pointer;
 }
+#layers .title .text {
+display: inline-block;
+width: 100px;
+white-space: nowrap;
+overflow-x: hidden;
+}
 #layers .item {
 cursor: pointer;
 }
@@ -3260,14 +3269,10 @@ overflow: hidden;
 height: 100%;
 }
 /* -- background, button -- dialogs */
-#background_message,
-#button_message,
-#template_message {
+.dialog-images {
 padding: 10px;
 }
-#background_message img,
-#button_message img,
-#template_message img {
+.dialog-images img {
 cursor: pointer;
 display: block;
 float: left;
@@ -3275,14 +3280,10 @@ margin: 0 1px 2px 0;
 padding: 2px;
 border: 1px solid #fff;
 }
-#background_message img:hover,
-#button_message img:hover,
-#template_message img:hover {
+.dialog-images img:hover {
 border: 1px solid #ccc;
 }
-#background_message img.selected,
-#button_message img.selected,
-#template_message img.selected {
+.dialog-images img.selected {
 background: #bfdeff;
 border-color: #555;
 }

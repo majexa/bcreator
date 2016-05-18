@@ -1,4 +1,4 @@
-s:284207:"
+s:289276:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -5388,7 +5388,7 @@ Ngn.sd.BlockB = new Class({
     }.bind(this));
   },
   deleteAction: function() {
-    if (!confirm('Вы уверены?')) return;
+    if (!confirm('Are you shure?')) return;
     this.loading(true);
     this._deleteAction();
   },
@@ -6116,7 +6116,7 @@ Ngn.sd.initUserTypes = function(types) {
   Ngn.sd.blockUserTypes = types;
 };
 
-Ngn.sd.initPageTitle = document.getElement('head title').get('text');
+Ngn.sd.initPageTitle = document.title;
 
 Ngn.getParam = function(val) {
   var result = "Not found",
@@ -6297,7 +6297,6 @@ Ngn.sd.animation.exists = function() {
   return false;
 };
 Ngn.sd.setBannerSize = function(size) {
-  document.title = size.w + 'x' + size.h;
   Ngn.sd.bannerSize = size;
   Ngn.sd.eLayoutContent.setStyle('width', size.w + 'px');
   Ngn.sd.eContentOverlayBottom.setStyle('width', size.w + 'px');
@@ -6321,7 +6320,9 @@ Ngn.sd.sortBySubKey = function(obj, key1, key2) {
   var r = [];
   for (var key in obj) r.push(obj[key]);
   r.sort(function(a, b) {
-    return a[key1][key2] < b[key1][key2] ? -1 : a[key1][key2] > b[key1][key2] ? 1 : 0
+    bb = parseInt(b[key1][key2]);
+    aa = parseInt(a[key1][key2]);
+    return aa < bb ? -1 : aa > bb ? 1 : 0;
   });
   return r;
 };
@@ -6340,19 +6341,20 @@ Ngn.sd.initLayersPanel = function() {
   }).inject(Ngn.sd.eLayers);
   for (var i = 0; i < sortedBlocks.length; i++) {
     item = sortedBlocks[i]._data;
-    if (item.data.type == 'image' || item.data.type == 'background' || item.data.type == 'button') {
+    if (item.data.subType == 'image') {
       title = '<span class="ico">' + //
       item.html + '</span>' + //
         // item.id + ' ' + //
       Ngn.String.ucfirst(item.data.type);
     } else if (item.data.type == 'font') {
-      var text = item.html.replace(/<br \/>/g, " ").substring(0, 10);
+      //var text = item.html.replace(/<br \/>/g, " ").substring(0, 10);
+      var text = item.html;
       title = '<span class="ico">' + //
       '<img src="/sd/img/font.png?v3"></span>' + //
         // item.id + ' ' + //
-      (text ? text : 'empty')
+      '<span class="text">' + (text ? text : 'empty') + '</span>'
     } else {
-      throw new Error('Unsupported layer type "' + item.data.type + '"');
+      title = '<span class="ico"></span>unsupported';
     }
     var eItem = new Element('div', {
       'class': 'item ' + 'item_' + item.data.type,
@@ -7041,6 +7043,7 @@ Ngn.sd.BackgroundInsertDialog = new Class({
     id: 'background',
     title: 'Insert background',
     okText: 'Insert',
+    dialogClass: 'dialog-images',
     onRequest: function() {
       this.initImages();
     },
@@ -7051,9 +7054,9 @@ Ngn.sd.BackgroundInsertDialog = new Class({
   initialize: function(options) {
     var w = Ngn.sd.data.bannerSettings.size.w.toInt();
     if (w < 200) {
-      w = w * 3 + 20;
+      w = w * 3;
     } else if (w < 400) {
-      w = w * 2 + 20;
+      w = w * 2;
     }
     var h = Ngn.sd.data.bannerSettings.size.h.toInt();
     if (h < 200) {
@@ -7115,6 +7118,7 @@ Ngn.sd.ButtonInsertDialog = new Class({
     width: 400,
     height: 300,
     url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect',
+    dialogClass: 'dialog-images',
     onRequest: function() {
       this.initImages();
     },
@@ -7148,12 +7152,79 @@ window.addEvent('sdPanelComplete', function() {
     new Ngn.sd.ButtonInsertDialog();
   });
 });
+/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.ImageInsertDialog.js|--*/
+Ngn.sd.ImageInsertDialog = new Class({
+  Extends: Ngn.Dialog,
+  options: {
+    id: 'image',
+    title: 'Insert image',
+    okText: 'Insert',
+    width: 400,
+    height: 300,
+    //url: 'ajax_select',
+    //createUrl: 'ajax_select',
+    dialogClass: 'dialog-images',
+    onRequest: function() {
+      this.initImages();
+    }
+  },
+  initialize: function(opts) {
+    if (!opts) opts = {};
+    opts = Object.merge(opts, {
+      ok: this.okAction.bind(this)
+    });
+    this.parent(opts);
+  },
+  okAction: function() {
+    this.insertImage(this.selectedUrl);
+  },
+  createImageUrl: function(url) {
+    return '/cpanel/' + Ngn.sd.bannerId + '/json_createImageBlock?url=' + url
+  },
+  insertImage: function(url) {
+    console.debug(this.createImageUrl(url));
+    new Ngn.Request.JSON({
+      url: this.createImageUrl(url),
+      onComplete: function() {
+        Ngn.sd.reinit();
+      }
+    }).send();
+  },
+  removeClass: function() {
+    this.images.each(function(el) {
+      el.removeClass('selected');
+    });
+  },
+  initImages: function() {
+    this.images = this.message.getElements('img');
+    this.select(this.images[0]);
+    this.images.each(function(el) {
+      el.addEvent('click', function() {
+        this.select(el);
+      }.bind(this));
+    }.bind(this));
+  },
+  select: function(el) {
+    this.removeClass();
+    this.selectedUrl = el.get('src');
+    el.addClass('selected');
+  }
+});
+
 /*--|/home/user/ngn-env/bc/sd/js/plugins/clipart.js|--*/
+Ngn.sd.BlockBClipart = new Class({
+  Extends: Ngn.sd.BlockBImage
+});
+
 Ngn.sd.ClipartInsertDialog = new Class({
-  Extends: Ngn.sd.ButtonInsertDialog,
+  Extends: Ngn.sd.ImageInsertDialog,
   options: {
     title: 'Insert clipart',
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect',
+    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect'
+  },
+
+  createImageUrl: function(url) {
+    return '/cpanel/' + Ngn.sd.bannerId + '/json_createClipartBlock?url=' + url
   }
 });
 
@@ -7163,43 +7234,23 @@ window.addEvent('sdPanelComplete', function() {
   });
 });
 /*--|/home/user/ngn-env/bc/sd/js/plugins/fromTemplate.js|--*/
+Ngn.sd.CreateFromTemplateDialog = new Class({
+  Extends: Ngn.Dialog,
+  options: {
+    id: 'template',
+    title: 'Create from template',
+    okText: 'Create',
+    width: 400,
+    height: 300,
+    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect',
+    onRequest: function() {
+    },
+    ok: function() {
+    }.bind(this)
+  }
+});
+
 window.addEvent('sdPanelComplete', function() {
-  Ngn.sd.CreateFromTemplateDialog = new Class({
-    Extends: Ngn.Dialog,
-    options: {
-      id: 'template',
-      title: 'Create from template',
-      okText: 'Create',
-      width: 400,
-      height: 300,
-      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_templateSelect',
-      onRequest: function() {
-        this.initImages();
-      },
-      ok: function() {
-        window.location = '/cpanel/createFromTemplate' + Ngn.sd.bannerId
-      }
-    },
-    removeClass: function() {
-      this.images.each(function(el) {
-        el.removeClass('selected');
-      });
-    },
-    initImages: function() {
-      this.images = this.message.getElements('img');
-      this.select(this.images[0]);
-      this.images.each(function(el) {
-        el.addEvent('click', function() {
-          this.select(el);
-        }.bind(this));
-      }.bind(this));
-    },
-    select: function(el) {
-      this.removeClass();
-      Ngn.sd.selectedTemplateUrl = el.get('src');
-      el.addClass('selected');
-    }
-  });
   new Ngn.Btn(Ngn.sd.fbtn('Create from template', 'template'), function() {
     new Ngn.sd.CreateFromTemplateDialog();
   });
@@ -7218,14 +7269,8 @@ window.addEvent('sdPanelComplete', function() {
 });
 /*--|/home/user/ngn-env/bc/sd/js/plugins/render.js|--*/
 Ngn.sd.render = function() {
-  var url;
-  if (Ngn.sd.animation.exists()) {
-    url = '/render/' + Ngn.sd.bannerId + '/ajax_animated/' + Ngn.sd.animation.framesCount();
-  } else {
-    url = '/render/' + Ngn.sd.bannerId;
-  }
   new Ngn.Dialog.HtmlPage({
-    url: url,
+    url: url = '/render/' + Ngn.sd.bannerId,
     title: 'Render',
     width: Ngn.sd.bannerSize.w.toInt() + 30
   });
@@ -7248,6 +7293,234 @@ Ngn.Dialog.HtmlPage = new Class({
   }
 
 });
+/*--|/home/user/ngn-env/bc/sd/js/plugins/download.js|--*/
+window.addEvent('sdPanelComplete', function() {
+  new Ngn.Btn(Ngn.sd.fbtn('Download', 'download'), function() {
+    var dialog = new Ngn.Dialog.Loader({
+      title: 'Rendering...',
+      width: 200
+    });
+    new Ngn.Request({
+      url: '/download/' + Ngn.sd.bannerId,
+      onComplete: function(bannerUrl) {
+        dialog.close();
+        window.location = bannerUrl;
+      }
+    }).send();
+  });
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Loader.js|--*/
+Ngn.Dialog.Loader = new Class({
+  Extends: Ngn.Dialog,
+
+  options: {
+    bindBuildMessageFunction: true,
+    ok: false,
+    hasFaviconTimer: true // при редиректе, после включения DialogLoader'а FaviconTimer необходимо отключить
+  },
+
+  initialize: function(options) {
+    this.parent(options);
+  },
+
+  start: function() {
+    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.start();
+  },
+
+  stop: function() {
+    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.stop();
+  },
+
+  close: function() {
+    this.stop();
+    this.parent();
+  },
+
+  buildMessage: function() {
+    return '<div class="dialog-progress"></div>';
+  }
+
+});
+
+Ngn.Dialog.Loader.Simple = new Class({
+  Extends: Ngn.Dialog.Loader,
+
+  options: {
+    //cancel: false,
+    titleClose: false,
+    footer: false,
+    messageBoxClass: 'dummy',
+    titleBarClass: 'dialog-loader-title',
+    titleTextClass: 'dummy',
+    messageAreaClass: 'dummy',
+    bindBuildMessageFunction: true
+  }
+
+});
+
+Ngn.Dialog.Loader.Advanced = new Class({
+  Extends: Ngn.Dialog.Loader,
+
+  options: {
+    messageAreaClass: 'dialog-message dialog-message-loader',
+    onContinue: Function.from(),
+    noPadding: false
+  },
+
+  init: function() {
+    this.eProgress = this.message.getElement('.dialog-progress');
+    this.stop();
+  },
+
+  buildMessage: function() {
+    return '<div class="message-text"></div><div class="dialog-progress"></div>';
+  },
+
+  start: function() {
+    this.eProgress.removeClass('stopped');
+    this.parent();
+  },
+
+  stop: function() {
+    this.eProgress.addClass('stopped');
+    this.parent();
+  }
+
+});
+
+Ngn.Dialog.Loader.Request = new Class({
+  Extends: Ngn.Dialog.Loader.Simple,
+
+  options: {
+    loaderUrl: null,
+    onLoaderComplete: Function.from(),
+    titleClose: false,
+    footer: false
+  },
+
+  initialize: function(options) {
+    this.parent(options);
+    new Request({
+      url: this.options.loaderUrl,
+      onComplete: function(r) {
+        this.okClose();
+        this.fireEvent('loaderComplete', r);
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FaviconTimer.js|--*/
+Ngn.FaviconTimer = {
+  
+  start: function() {
+    Ngn.Favicon.animate([
+      '/i/img/icons/l/loader1.ico',
+      '/i/img/icons/l/loader2.ico',
+      '/i/img/icons/l/loader3.ico',
+      '/i/img/icons/l/loader4.ico'
+    ]);
+  },
+  
+  stop: function() {
+    Ngn.Favicon.stop();
+  }
+  
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Favicon.js|--*/
+// Favicon.js - Change favicon dynamically [http://ajaxify.com/run/favicon].
+// Copyright (c) 2006 Michael Mahemoff. Only works in Firefox and Opera.
+// Background and MIT License notice at end of file, see the homepage for more.
+
+// USAGE:
+// * favicon.change("/icon/active.ico");  (Optional 2nd arg is new title.)
+// * favicon.animate(new Array("icon1.ico", "icon2.ico", ...));
+//     Tip: Use "" as the last element to make an empty icon between cycles.
+//     To stop the animation, call change() and pass in the new arg.
+//     (Optional 2nd arg is animation pause in millis, overwrites the default.)
+// * favicon.defaultPause = 5000;
+
+Ngn.Favicon = {
+
+  // -- "PUBLIC" ----------------------------------------------------------------
+
+  defaultPause: 1000,
+  initIconUrl: '/favicon.ico',
+
+  change: function(iconURL, optionalDocTitle) {
+    clearTimeout(this.loopTimer);
+    if (optionalDocTitle) {
+      document.title = optionalDocTitle;
+    }
+    this.replaceLink(iconURL);
+  },
+
+  animate: function(iconSequence, optionalDelay) {
+    var links = this.getAllLinks();
+    if (links.length && links[0].href) this.initIconUrl = links[0].href;
+    // --------------------------------------------------
+    this.preloadIcons(iconSequence);
+    this.iconSequence = iconSequence;
+    this.sequencePause = (optionalDelay) ? optionalDelay : this.defaultPause;
+    Ngn.Favicon.index = 0;
+    Ngn.Favicon.change(iconSequence[0]);
+    this.loopTimer = setInterval(function() {
+      Ngn.Favicon.index = (Ngn.Favicon.index + 1) % Ngn.Favicon.iconSequence.length;
+      Ngn.Favicon.replaceLink(Ngn.Favicon.iconSequence[Ngn.Favicon.index], false);
+    }, Ngn.Favicon.sequencePause);
+  },
+
+  stop: function() {
+    clearTimeout(this.loopTimer);
+    this.removeIconLinksIfExists();
+    if (this.initIconUrl) {
+      this.replaceLink(this.initIconUrl);
+    }
+  },
+
+  // -- "PRIVATE" ---------------------------------------------------------------
+
+  loopTimer: null,
+
+  preloadIcons: function(iconSequence) {
+    var dummyImageForPreloading = document.createElement("img");
+    for (var i = 0; i < iconSequence.length; i++) {
+      dummyImageForPreloading.src = iconSequence[i];
+    }
+  },
+
+  replaceLink: function(iconURL) {
+    var link = document.createElement("link");
+    link.type = "image/x-icon";
+    link.rel = "shortcut icon";
+    link.href = iconURL;
+    this.removeIconLinksIfExists();
+    this.docHead.appendChild(link);
+  },
+
+  removeIconLinksIfExists: function() {
+    var links = this.getAllLinks();
+    for (var i = 0; i < links.length; i++) {
+      this.docHead.removeChild(links[i]);
+    }
+  },
+
+  getAllLinks: function() {
+    var r = [];
+    var esLink = this.docHead.getElementsByTagName("link");
+    var n = 0;
+    for (var i = 0; i < esLink.length; i++) {
+      if (esLink[i].type == "image/x-icon"/* && esLink[i].rel == "shortcut icon"*/) {
+        r[n] = esLink[i];
+      }
+    }
+    return r;
+  },
+
+  docHead: document.getElementsByTagName("head")[0]
+}
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
 Ngn.Form.El.Color = new Class({
   Extends: Ngn.Form.El,
