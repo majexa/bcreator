@@ -47,6 +47,12 @@
     max-height: 100px;
     max-width: 200px;
   }
+  .table p {
+    margin: 0 0 7px 0;
+  }
+  .table b {
+    font-weight: bold;
+  }
 </style>
 
 <div class="subtitle">
@@ -77,22 +83,29 @@
   </tr>
   <? foreach ($d['banners'] as $v) { ?>
     <tr>
-      <td>Banner ID=<?= $v['id'] ?></td>
-      <td><?= $v['size'] ?></td>
-      <td class="preview">
-        <? if ($v['directLink']) { ?>
-          <img src="<?= $v['directLink'] ?>">
-        <? } ?>
-      </td>
       <td>
-        <? if ($v['downloadLink']) { ?>
-          <a href="<?= $v['downloadLink'] ?>">Download</a>
-        <? } else { ?>
+        <p><b><?= $v['title'] ?></b></p>
+        <div class="preview">
+        <? if ($v['directLink']) { ?>
+          <a href="<?= $v['directLink'] ?>" target="_blank"><img src="<?= $v['directLink'] ?>"></a>
+        <? } ?>
+        </div>
+      </td>
+      <td><?= $v['size'] ?></td>
+      <td>
+        <? if (!$v['downloadLink']) { ?>
           Need to render
         <? } ?>
       </td>
-      <td><a href="/cpanel/<?= $v['id'] ?>" target="_blank"><img role="button" alt="" src="/public/images/images_new/edit.png" class="x-action-col-icon x-action-col-0"></a></td>
-      <td><a href="/list/delete/<?= $v['id'] ?>"><img role="button" alt="" src="/public/images/images_new/delete.png" class="x-action-col-icon x-action-col-1"></a></td>
+      <td>
+        <a href="<?= $v['downloadLink'] ?>" title="Download"><img src="/public/images/images_new/download.png"></a>
+      </td>
+      <td>
+        <a href="/cpanel/<?= $v['id'] ?>"><img src="/public/images/images_new/edit.png" title="Edit"></a>
+      </td>
+      <td>
+        <a href="/list/delete/<?= $v['id'] ?>"><img src="/public/images/images_new/delete.png" title="Delete"></a>
+      </td>
     </tr>
   <? } ?>
   </table>

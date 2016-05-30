@@ -18,21 +18,9 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
   function action_create() {
     $this->setPageTitle('Create new');
     $this->d['menu'][1]['active'] = true;
-    $form = new Form([
-      [
-        'title'    => 'Banner Size',
-        'name'     => 'size',
-        'required' => true,
-        'type'     => 'select',
-        'options'  => CtrlSdCpanel::getSizeOptions()
-      ]
-    ], [
-      'title'       => 'Create banner...',
-      'submitTitle' => 'Create'
-    ]);
-    if ($form->isSubmittedAndValid()) {
-      $id = BcCore::createBanner($form->getData()['size']);
-      $this->redirect('/cpanel/'.$id);
+    $form = new BannerSettingsCreationForm;
+    if ($form->update()) {
+      $this->redirect('/cpanel/'.$form->createdId);
       return;
     }
     $this->d['form'] = BcreatorCore::extendForm($form)->html();

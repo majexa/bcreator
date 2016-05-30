@@ -65,13 +65,49 @@
             <div class="item"><a href="https://www.jvzoo.com/b/0/183117/1" class="link"><span
                   class="fa fa-unlock-alt"></span>REGISTER</a></div>
           </div>
-        <? }
-        else { ?>
+        <? } else { ?>
+          <style>
+            .header .right .menu > ul > li {
+              position: relative;
+            }
+            .header .right .menu > ul > li div {
+              padding-top: 15px;
+              position: absolute;
+              top: 30px;
+              left: 0;
+              display: none;
+            }
+            .header .right .menu > ul > li:hover div {
+              display: block;
+            }
+            .header .right .menu ul ul {
+              background: #fff;
+              border: 1px solid #cccccc;
+              border-radius: 4px;
+            }
+            .header .right .menu ul ul li:first-child {
+              border-top: none;
+            }
+            .header .right .menu ul ul li {
+              white-space: nowrap;
+              display: block;
+              float: none;
+            }
+          </style>
           <div class="menu">
             <ul class="list">
               <? foreach ($d['menu'] as $i => $v) { ?>
                 <li id="m<?= $i + 1 ?>"<?= $v['active'] ? ' class="active"' : '' ?>>
                   <a href="<?= $v['link'] ?>"><?= $v['title'] ?></a>
+                  <? if ($v['menu']) { ?>
+                    <div>
+                    <ul>
+                      <? foreach ($v['menu'] as $vv) { ?>
+                        <li><a href="<?= $vv['link'] ?>"><?= $vv['title'] ?></a></li>
+                      <? } ?>
+                    </ul>
+                    </div>
+                  <? } ?>
                 </li>
               <? } ?>
             </ul>

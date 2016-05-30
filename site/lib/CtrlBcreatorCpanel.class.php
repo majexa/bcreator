@@ -4,21 +4,16 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
 
   protected function afterInit() {
     parent::afterInit();
-    foreach ([
-      'new',
-      'text',
-      'image',
-      'new',
-      'background',
-      'button',
-      'clipart',
-      'fromTemplate',
-      'settings',
-      'render',
-      'download'
-    ] as $plugin) {
-      Sflm::frontend('js')->addPath('sd/js/plugins/'.$plugin.'.js');
-    }
+    Sflm::frontend('js')->addPath('sd/js/plugins/new.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/animatedText.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/animatedImage.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/background.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/button.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/clipart.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/fromTemplate.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/settings.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/render.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/download.js');
   }
 
 }

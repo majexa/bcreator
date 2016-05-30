@@ -1,4 +1,4 @@
-s:83043:"
+s:84462:"
 /*--|/home/user/ngn-env/ngn/i/css/common/screen.css|--*/
 /* -------------------------------------------------------------- 
   
@@ -2973,7 +2973,7 @@ max-width: 115px;
 }
 .compactFields .element {
 float: left;
-max-width: 160px;
+
 font-size: 11px;
 }
 .compactFields input[type=text], .compactFields select {
@@ -3204,6 +3204,9 @@ background-position: 1px 1px;
 .smIcons.delete i {
 background-position: -17px 1px;
 }
+.smIcons.cleanup i {
+background-position: -34px 1px;
+}
 #layers .btns .smIcons {
 margin-top: 7px;
 }
@@ -3244,11 +3247,11 @@ max-height: 25px;
 max-width: 25px;
 margin: 0;
 }
-#layers .item_font .title .ico {
+#layers .item_text .title .ico {
 border: 1px solid #9C9C9C;
 box-sizing: border-box;
 }
-#layers .item_font .title img {
+#layers .item_text .title img {
 margin-top: 5px !important;
 }
 #layers .title .ico {
@@ -3468,6 +3471,36 @@ background-position: -171px 0;
 background-position: -188px 0;
 }
 
+.settingsDialog .fieldSet .element {
+float: left;
+width: 184px;
+}
+.fieldSet .element input[type=text] {
+width: 160px;
+}
+.apeform .colSet {
+display: block;
+}
+
+.settingsDialog .fieldSet .rowBtns {
+position: absolute;
+right: 8px;
+top: 7px;
+margin-left: 0 !important;
+}
+.settingsDialog .fieldSet .hgrp {
+width: 100%;
+position: relative;
+}
+.settingsDialog .foot-wrap {
+border-top: 1px solid #575757;
+margin-top: 10px;
+}
+
+a:hover.iconBtn, a.over.iconBtn {
+border-color: #575757;
+box-shadow: none;
+}
 /*--|/home/user/ngn-env/ngn/i/css/common/hidebleBar.css|--*/
 .hidebleBarHandler {
 cursor: pointer;

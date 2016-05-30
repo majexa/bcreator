@@ -1,3 +1,4 @@
+var Ngn = {};
 /*
 ---
 
@@ -4601,7 +4602,6 @@ Locale.addEvent('change', function(language){
 }).fireEvent('change', Locale.getCurrent());
 
 })();
-var Ngn = {};
 /*
 ---
 
@@ -10467,17 +10467,19 @@ Ngn.Form = new Class({
   initHtml5Upload: function() {
     this.uploadType = 'html5';
     this.eForm.getElements('input[type=file]').each(function(eInput) {
+      if (eInput.retrieve('uploadInitialized')) return;
+      eInput.store('uploadInitialized', true);
       var cls = eInput.get('multiple') ? 'multiUpload' : 'upload';
       var eInputValidator = new Element('input', {
         type: 'hidden'
-        // name: eInput.get('name') + '_helper',
+        //name: eInput.get('name') + '_helper'
       }).inject(eInput, 'after');
       var fileSaved = eInput.getParent('.element').getElement('.fileSaved');
       if (!fileSaved) eInputValidator.addClass(eInput.hasClass('required') ? 'validate-' + cls + '-required' : 'validate-' + cls);
       if (eInput.get('data-file')) eInputValidator.set('value', 1);
       var name = eInput.get('name');
       var uploadOptions = {
-        url: this.uploadOptions.url.replace('{fn}', name.replace(']', '').replace('[', '')),
+        url: this.uploadOptions.url.replace('{fn}', name),
         loadedFiles: this.uploadOptions.loadedFiles,
         fileEvents: {
           change: function() {
@@ -10586,6 +10588,7 @@ Ngn.Form = new Class({
     eRow.getElements('.element').each(function(el) {
       Ngn.Form.ElInit.factory(this, Ngn.Form.getElType(el));
     }.bind(this));
+    this.initHtml5Upload();
   },
 
   initFileNav: function() {
@@ -10943,6 +10946,84 @@ Form.Validator.addAllThese([
   }]
 ]);
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.elementExtras.js|--*/
+Element.implement({
+  values: function() {
+    var r = {};
+    this.getElements('input').each(function(el) {
+      if (el.get('type') == 'radio') {
+        if (el.get('checked')) {
+          r = el.get('value');
+        }
+      } else if (el.get('type') == 'checkbox') {
+        if (el.get('checked')) {
+          r[el.get('name')] = el.get('value');
+        }
+      } else {
+        r[el.get('name')] = el.get('value');
+      }
+    });
+    return r;
+  },
+  getSizeWithMarginBorder: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + parseInt(this.getStyle('border-left-width')) + parseInt(this.getStyle('border-right-width')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + parseInt(this.getStyle('border-top-width')) + parseInt(this.getStyle('border-bottom-width')) + s.y
+    };
+  },
+  getSizeWithMargin: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + s.y
+    };
+  },
+  getSizeWithoutBorders: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('border-left-width')) - parseInt(this.getStyle('border-right-width')),
+      y: s.y - parseInt(this.getStyle('border-top-width')) - parseInt(this.getStyle('border-bottom-width'))
+    };
+  },
+  getSizeWithoutPadding: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('padding-left')) - parseInt(this.getStyle('padding-right')),
+      y: s.y - parseInt(this.getStyle('padding-top')) - parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  setSize: function(s) {
+    if (!s.x && !s.y) throw new Error('No sizes defined');
+    if (s.x) this.setStyle('width', s.x + 'px');
+    if (s.y) this.setStyle('height', s.y + 'px');
+    this.fireEvent('resize');
+  },
+  setValue: function(v) {
+    this.set('value', v);
+    this.fireEvent('change');
+  },
+  getPadding: function() {
+    return {
+      x: parseInt(this.getStyle('padding-left')) + parseInt(this.getStyle('padding-right')),
+      y: parseInt(this.getStyle('padding-top')) + parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  storeAppend: function(k, v) {
+    var r = this.retrieve(k);
+    this.store(k, r ? r.append(v) : r = [v]);
+  },
+  setTip: function(title) {
+    if (!Ngn.tips) Ngn.initTips(this);
+    if (this.retrieve('tip:native')) {
+      Ngn.tips.hide(this);
+      this.store('tip:title', title);
+    } else {
+      Ngn.tips.attach(this);
+    }
+  }
+});
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.js|--*/
 Ngn.Frm = {};
 Ngn.Frm.init = {}; // объект для хранения динамических функций иниыиализации
@@ -11193,6 +11274,7 @@ Ngn.Frm.storable = function(eInput) {
   });
 }
 
+// @requiresBefore i/js/ngn/core/Ngn.elementExtras.js
 Ngn.Frm.virtualElement = {
   // abstract toggleDisabled: function(flag) {},
   parentForm: null,
@@ -12579,6 +12661,7 @@ Ngn.Form.Upload = new Class({
   },
 
   initialize: function(form, eInput, options) {
+    console.trace('***');
     this.form = form;
     this.eInput = document.id(eInput);
     this.eCaption = this.eInput.getParent('.element').getElement('.help');
@@ -13131,63 +13214,6 @@ Ngn.Frm.headerToggleFx = function(btns) {
     });
   });
 };
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.VisibilityCondition.js|--*/
-Ngn.Frm.VisibilityCondition = new Class({
-
-  initialize: function(eForm, sectionName, condFieldName, cond) {
-    this.sectionName = sectionName;
-    this.initSectionSelector();
-    this.eSection = eForm.getElement(this.sectionSelector);
-    if (!this.eSection) {
-      console.debug('Element "' + this.sectionSelector + '" does not exists');
-      return;
-    }
-    /*
-     this.fx = new Fx.Slide(this.eSection, {
-     duration: 200,
-     transition: Fx.Transitions.Pow.easeOut
-     });
-     this.fx.hide();
-     */
-    var toggleSection = function(v, isFx) {
-      // v необходима для использования в условии $d['cond']
-      var flag = (eval(cond));
-      if (!flag) {
-        // Если скрываем секцию, необходимо снять все required css-классы в её полях
-        this.eSection.getElements('.required').each(function(el) {
-          el.removeClass('required');
-          el.addClass('required-disabled');
-        });
-      } else {
-        this.eSection.getElements('.required-disabled').each(function(el) {
-          el.removeClass('required-disabled');
-          el.addClass('required');
-        });
-      }
-      if (isFx && 0) {
-        // если нужно завернуть не развёрнутую до конца секцию,
-        // нужно просто скрыть её
-        if (flag == this.fx.open)
-          flag ? (function() {
-            this.fx.show();
-          }).delay(200, this) : (function() {
-            this.fx.hide();
-          }).delay(200, this); else
-          flag ? this.fx.slideIn() : this.fx.slideOut();
-      } else {
-        this.eSection.setStyle('display', flag ? 'block' : 'none');
-        this.eSection.getElements(Ngn.Frm.selector).each(function(el) {
-          el.set('disabled', !flag);
-        });
-      }
-    }.bind(this);
-    toggleSection(Ngn.Frm.getValueByName(condFieldName), false);
-    Ngn.Frm.addEvent('change', condFieldName, toggleSection, true);
-    Ngn.Frm.addEvent('focus', condFieldName, toggleSection, true);
-  }
-
-});
-
 /*--|/home/user/ngn-env/ngn/i/js/ngn/trash/Ngn.IframeFormRequest.js|--*/
 Ngn.IframeFormRequest = new Class({
 

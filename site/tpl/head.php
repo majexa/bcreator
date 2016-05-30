@@ -9,6 +9,11 @@
   <? } ?>
   <? if (strstr($d['ctrlName'], 'Cpanel')) { ?>
     <link rel="stylesheet" type="text/css" href="/sd/css/edit.css" media="screen, projection"/>
-    <link rel="stylesheet" type="text/css" href="/m/css/brand.css" media="screen, projection"/>
+    <link rel="stylesheet" type="text/css" href="/m/css/edit.css" media="screen, projection"/>
   <? } ?>
+  <script>
+    Ngn.sd.barsClass = Ngn.sd.BcreatorBars;
+    Locale.use('en-US');
+  </script>
 </head>
+

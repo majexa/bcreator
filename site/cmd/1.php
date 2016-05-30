@@ -1,8 +1,5 @@
 <?php
 
-print "\n\n".DbModelCore::create('users', [
-  'email' => 'asd@sd.sd',
-  'name' => 'sd',
-  'pass' => 'sd',
-  'active' => true
-]);
+Sflm::$output = true;
+Sflm::frontend('js', 'asd')->addClass('Ngn.DdGrid.Admin');
+

@@ -7918,210 +7918,6 @@ var Sortables = this.Sortables = new Class({
 /*
 ---
 
-name: Element.Delegation
-
-description: Extends the Element native object to include the delegate method for more efficient event management.
-
-license: MIT-style license.
-
-requires: [Element.Event]
-
-provides: [Element.Delegation]
-
-...
-*/
-
-(function(){
-
-var eventListenerSupport = !!window.addEventListener;
-
-Element.NativeEvents.focusin = Element.NativeEvents.focusout = 2;
-
-var bubbleUp = function(self, match, fn, event, target){
-	while (target && target != self){
-		if (match(target, event)) return fn.call(target, event, target);
-		target = document.id(target.parentNode);
-	}
-};
-
-var map = {
-	mouseenter: {
-		base: 'mouseover',
-		condition: Element.MouseenterCheck
-	},
-	mouseleave: {
-		base: 'mouseout',
-		condition: Element.MouseenterCheck
-	},
-	focus: {
-		base: 'focus' + (eventListenerSupport ? '' : 'in'),
-		capture: true
-	},
-	blur: {
-		base: eventListenerSupport ? 'blur' : 'focusout',
-		capture: true
-	}
-};
-
-/*<ltIE9>*/
-var _key = '$delegation:';
-var formObserver = function(type){
-
-	return {
-
-		base: 'focusin',
-
-		remove: function(self, uid){
-			var list = self.retrieve(_key + type + 'listeners', {})[uid];
-			if (list && list.forms) for (var i = list.forms.length; i--;){
-				// the form may have been destroyed, so it won't have the
-				// removeEvent method anymore. In that case the event was
-				// removed as well.
-				if (list.forms[i].removeEvent) list.forms[i].removeEvent(type, list.fns[i]);
-			}
-		},
-
-		listen: function(self, match, fn, event, target, uid){
-			var form = (target.get('tag') == 'form') ? target : event.target.getParent('form');
-			if (!form) return;
-
-			var listeners = self.retrieve(_key + type + 'listeners', {}),
-				listener = listeners[uid] || {forms: [], fns: []},
-				forms = listener.forms, fns = listener.fns;
-
-			if (forms.indexOf(form) != -1) return;
-			forms.push(form);
-
-			var _fn = function(event){
-				bubbleUp(self, match, fn, event, target);
-			};
-			form.addEvent(type, _fn);
-			fns.push(_fn);
-
-			listeners[uid] = listener;
-			self.store(_key + type + 'listeners', listeners);
-		}
-	};
-};
-
-var inputObserver = function(type){
-	return {
-		base: 'focusin',
-		listen: function(self, match, fn, event, target){
-			var events = {blur: function(){
-				this.removeEvents(events);
-			}};
-			events[type] = function(event){
-				bubbleUp(self, match, fn, event, target);
-			};
-			event.target.addEvents(events);
-		}
-	};
-};
-
-if (!eventListenerSupport) Object.append(map, {
-	submit: formObserver('submit'),
-	reset: formObserver('reset'),
-	change: inputObserver('change'),
-	select: inputObserver('select')
-});
-/*</ltIE9>*/
-
-var proto = Element.prototype,
-	addEvent = proto.addEvent,
-	removeEvent = proto.removeEvent;
-
-var relay = function(old, method){
-	return function(type, fn, useCapture){
-		if (type.indexOf(':relay') == -1) return old.call(this, type, fn, useCapture);
-		var parsed = Slick.parse(type).expressions[0][0];
-		if (parsed.pseudos[0].key != 'relay') return old.call(this, type, fn, useCapture);
-		var newType = parsed.tag;
-		parsed.pseudos.slice(1).each(function(pseudo){
-			newType += ':' + pseudo.key + (pseudo.value ? '(' + pseudo.value + ')' : '');
-		});
-		old.call(this, type, fn);
-		return method.call(this, newType, parsed.pseudos[0].value, fn);
-	};
-};
-
-var delegation = {
-
-	addEvent: function(type, match, fn){
-		var storage = this.retrieve('$delegates', {}), stored = storage[type];
-		if (stored) for (var _uid in stored){
-			if (stored[_uid].fn == fn && stored[_uid].match == match) return this;
-		}
-
-		var _type = type, _match = match, _fn = fn, _map = map[type] || {};
-		type = _map.base || _type;
-
-		match = function(target){
-			return Slick.match(target, _match);
-		};
-
-		var elementEvent = Element.Events[_type];
-		if (_map.condition || elementEvent && elementEvent.condition){
-			var __match = match, condition = _map.condition || elementEvent.condition;
-			match = function(target, event){
-				return __match(target, event) && condition.call(target, event, type);
-			};
-		}
-
-		var self = this, uid = String.uniqueID();
-		var delegator = _map.listen ? function(event, target){
-			if (!target && event && event.target) target = event.target;
-			if (target) _map.listen(self, match, fn, event, target, uid);
-		} : function(event, target){
-			if (!target && event && event.target) target = event.target;
-			if (target) bubbleUp(self, match, fn, event, target);
-		};
-
-		if (!stored) stored = {};
-		stored[uid] = {
-			match: _match,
-			fn: _fn,
-			delegator: delegator
-		};
-		storage[_type] = stored;
-		return addEvent.call(this, type, delegator, _map.capture);
-	},
-
-	removeEvent: function(type, match, fn, _uid){
-		var storage = this.retrieve('$delegates', {}), stored = storage[type];
-		if (!stored) return this;
-
-		if (_uid){
-			var _type = type, delegator = stored[_uid].delegator, _map = map[type] || {};
-			type = _map.base || _type;
-			if (_map.remove) _map.remove(this, _uid);
-			delete stored[_uid];
-			storage[_type] = stored;
-			return removeEvent.call(this, type, delegator, _map.capture);
-		}
-
-		var __uid, s;
-		if (fn) for (__uid in stored){
-			s = stored[__uid];
-			if (s.match == match && s.fn == fn) return delegation.removeEvent.call(this, type, match, fn, __uid);
-		} else for (__uid in stored){
-			s = stored[__uid];
-			if (s.match == match) delegation.removeEvent.call(this, type, match, s.fn, __uid);
-		}
-		return this;
-	}
-
-};
-
-[Element, Window, Document].invoke('implement', {
-	addEvent: relay(addEvent, delegation.addEvent),
-	removeEvent: relay(removeEvent, delegation.removeEvent)
-});
-
-})();
-/*
----
-
 script: Object.Extras.js
 
 name: Object.Extras
@@ -8349,6 +8145,210 @@ Locale.Set = new Class({
 });
 
 
+
+})();
+/*
+---
+
+name: Element.Delegation
+
+description: Extends the Element native object to include the delegate method for more efficient event management.
+
+license: MIT-style license.
+
+requires: [Element.Event]
+
+provides: [Element.Delegation]
+
+...
+*/
+
+(function(){
+
+var eventListenerSupport = !!window.addEventListener;
+
+Element.NativeEvents.focusin = Element.NativeEvents.focusout = 2;
+
+var bubbleUp = function(self, match, fn, event, target){
+	while (target && target != self){
+		if (match(target, event)) return fn.call(target, event, target);
+		target = document.id(target.parentNode);
+	}
+};
+
+var map = {
+	mouseenter: {
+		base: 'mouseover',
+		condition: Element.MouseenterCheck
+	},
+	mouseleave: {
+		base: 'mouseout',
+		condition: Element.MouseenterCheck
+	},
+	focus: {
+		base: 'focus' + (eventListenerSupport ? '' : 'in'),
+		capture: true
+	},
+	blur: {
+		base: eventListenerSupport ? 'blur' : 'focusout',
+		capture: true
+	}
+};
+
+/*<ltIE9>*/
+var _key = '$delegation:';
+var formObserver = function(type){
+
+	return {
+
+		base: 'focusin',
+
+		remove: function(self, uid){
+			var list = self.retrieve(_key + type + 'listeners', {})[uid];
+			if (list && list.forms) for (var i = list.forms.length; i--;){
+				// the form may have been destroyed, so it won't have the
+				// removeEvent method anymore. In that case the event was
+				// removed as well.
+				if (list.forms[i].removeEvent) list.forms[i].removeEvent(type, list.fns[i]);
+			}
+		},
+
+		listen: function(self, match, fn, event, target, uid){
+			var form = (target.get('tag') == 'form') ? target : event.target.getParent('form');
+			if (!form) return;
+
+			var listeners = self.retrieve(_key + type + 'listeners', {}),
+				listener = listeners[uid] || {forms: [], fns: []},
+				forms = listener.forms, fns = listener.fns;
+
+			if (forms.indexOf(form) != -1) return;
+			forms.push(form);
+
+			var _fn = function(event){
+				bubbleUp(self, match, fn, event, target);
+			};
+			form.addEvent(type, _fn);
+			fns.push(_fn);
+
+			listeners[uid] = listener;
+			self.store(_key + type + 'listeners', listeners);
+		}
+	};
+};
+
+var inputObserver = function(type){
+	return {
+		base: 'focusin',
+		listen: function(self, match, fn, event, target){
+			var events = {blur: function(){
+				this.removeEvents(events);
+			}};
+			events[type] = function(event){
+				bubbleUp(self, match, fn, event, target);
+			};
+			event.target.addEvents(events);
+		}
+	};
+};
+
+if (!eventListenerSupport) Object.append(map, {
+	submit: formObserver('submit'),
+	reset: formObserver('reset'),
+	change: inputObserver('change'),
+	select: inputObserver('select')
+});
+/*</ltIE9>*/
+
+var proto = Element.prototype,
+	addEvent = proto.addEvent,
+	removeEvent = proto.removeEvent;
+
+var relay = function(old, method){
+	return function(type, fn, useCapture){
+		if (type.indexOf(':relay') == -1) return old.call(this, type, fn, useCapture);
+		var parsed = Slick.parse(type).expressions[0][0];
+		if (parsed.pseudos[0].key != 'relay') return old.call(this, type, fn, useCapture);
+		var newType = parsed.tag;
+		parsed.pseudos.slice(1).each(function(pseudo){
+			newType += ':' + pseudo.key + (pseudo.value ? '(' + pseudo.value + ')' : '');
+		});
+		old.call(this, type, fn);
+		return method.call(this, newType, parsed.pseudos[0].value, fn);
+	};
+};
+
+var delegation = {
+
+	addEvent: function(type, match, fn){
+		var storage = this.retrieve('$delegates', {}), stored = storage[type];
+		if (stored) for (var _uid in stored){
+			if (stored[_uid].fn == fn && stored[_uid].match == match) return this;
+		}
+
+		var _type = type, _match = match, _fn = fn, _map = map[type] || {};
+		type = _map.base || _type;
+
+		match = function(target){
+			return Slick.match(target, _match);
+		};
+
+		var elementEvent = Element.Events[_type];
+		if (_map.condition || elementEvent && elementEvent.condition){
+			var __match = match, condition = _map.condition || elementEvent.condition;
+			match = function(target, event){
+				return __match(target, event) && condition.call(target, event, type);
+			};
+		}
+
+		var self = this, uid = String.uniqueID();
+		var delegator = _map.listen ? function(event, target){
+			if (!target && event && event.target) target = event.target;
+			if (target) _map.listen(self, match, fn, event, target, uid);
+		} : function(event, target){
+			if (!target && event && event.target) target = event.target;
+			if (target) bubbleUp(self, match, fn, event, target);
+		};
+
+		if (!stored) stored = {};
+		stored[uid] = {
+			match: _match,
+			fn: _fn,
+			delegator: delegator
+		};
+		storage[_type] = stored;
+		return addEvent.call(this, type, delegator, _map.capture);
+	},
+
+	removeEvent: function(type, match, fn, _uid){
+		var storage = this.retrieve('$delegates', {}), stored = storage[type];
+		if (!stored) return this;
+
+		if (_uid){
+			var _type = type, delegator = stored[_uid].delegator, _map = map[type] || {};
+			type = _map.base || _type;
+			if (_map.remove) _map.remove(this, _uid);
+			delete stored[_uid];
+			storage[_type] = stored;
+			return removeEvent.call(this, type, delegator, _map.capture);
+		}
+
+		var __uid, s;
+		if (fn) for (__uid in stored){
+			s = stored[__uid];
+			if (s.match == match && s.fn == fn) return delegation.removeEvent.call(this, type, match, fn, __uid);
+		} else for (__uid in stored){
+			s = stored[__uid];
+			if (s.match == match) delegation.removeEvent.call(this, type, match, s.fn, __uid);
+		}
+		return this;
+	}
+
+};
+
+[Element, Window, Document].invoke('implement', {
+	addEvent: relay(addEvent, delegation.addEvent),
+	removeEvent: relay(removeEvent, delegation.removeEvent)
+});
 
 })();
 /*
@@ -11985,6 +11985,84 @@ Ngn.Request.File = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.elementExtras.js|--*/
+Element.implement({
+  values: function() {
+    var r = {};
+    this.getElements('input').each(function(el) {
+      if (el.get('type') == 'radio') {
+        if (el.get('checked')) {
+          r = el.get('value');
+        }
+      } else if (el.get('type') == 'checkbox') {
+        if (el.get('checked')) {
+          r[el.get('name')] = el.get('value');
+        }
+      } else {
+        r[el.get('name')] = el.get('value');
+      }
+    });
+    return r;
+  },
+  getSizeWithMarginBorder: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + parseInt(this.getStyle('border-left-width')) + parseInt(this.getStyle('border-right-width')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + parseInt(this.getStyle('border-top-width')) + parseInt(this.getStyle('border-bottom-width')) + s.y
+    };
+  },
+  getSizeWithMargin: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + s.y
+    };
+  },
+  getSizeWithoutBorders: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('border-left-width')) - parseInt(this.getStyle('border-right-width')),
+      y: s.y - parseInt(this.getStyle('border-top-width')) - parseInt(this.getStyle('border-bottom-width'))
+    };
+  },
+  getSizeWithoutPadding: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('padding-left')) - parseInt(this.getStyle('padding-right')),
+      y: s.y - parseInt(this.getStyle('padding-top')) - parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  setSize: function(s) {
+    if (!s.x && !s.y) throw new Error('No sizes defined');
+    if (s.x) this.setStyle('width', s.x + 'px');
+    if (s.y) this.setStyle('height', s.y + 'px');
+    this.fireEvent('resize');
+  },
+  setValue: function(v) {
+    this.set('value', v);
+    this.fireEvent('change');
+  },
+  getPadding: function() {
+    return {
+      x: parseInt(this.getStyle('padding-left')) + parseInt(this.getStyle('padding-right')),
+      y: parseInt(this.getStyle('padding-top')) + parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  storeAppend: function(k, v) {
+    var r = this.retrieve(k);
+    this.store(k, r ? r.append(v) : r = [v]);
+  },
+  setTip: function(title) {
+    if (!Ngn.tips) Ngn.initTips(this);
+    if (this.retrieve('tip:native')) {
+      Ngn.tips.hide(this);
+      this.store('tip:title', title);
+    } else {
+      Ngn.tips.attach(this);
+    }
+  }
+});
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.js|--*/
 Ngn.Frm = {};
 Ngn.Frm.init = {}; // объект для хранения динамических функций иниыиализации
@@ -12235,6 +12313,7 @@ Ngn.Frm.storable = function(eInput) {
   });
 }
 
+// @requiresBefore i/js/ngn/core/Ngn.elementExtras.js
 Ngn.Frm.virtualElement = {
   // abstract toggleDisabled: function(flag) {},
   parentForm: null,
@@ -12704,17 +12783,19 @@ Ngn.Form = new Class({
   initHtml5Upload: function() {
     this.uploadType = 'html5';
     this.eForm.getElements('input[type=file]').each(function(eInput) {
+      if (eInput.retrieve('uploadInitialized')) return;
+      eInput.store('uploadInitialized', true);
       var cls = eInput.get('multiple') ? 'multiUpload' : 'upload';
       var eInputValidator = new Element('input', {
         type: 'hidden'
-        // name: eInput.get('name') + '_helper',
+        //name: eInput.get('name') + '_helper'
       }).inject(eInput, 'after');
       var fileSaved = eInput.getParent('.element').getElement('.fileSaved');
       if (!fileSaved) eInputValidator.addClass(eInput.hasClass('required') ? 'validate-' + cls + '-required' : 'validate-' + cls);
       if (eInput.get('data-file')) eInputValidator.set('value', 1);
       var name = eInput.get('name');
       var uploadOptions = {
-        url: this.uploadOptions.url.replace('{fn}', name.replace(']', '').replace('[', '')),
+        url: this.uploadOptions.url.replace('{fn}', name),
         loadedFiles: this.uploadOptions.loadedFiles,
         fileEvents: {
           change: function() {
@@ -12823,6 +12904,7 @@ Ngn.Form = new Class({
     eRow.getElements('.element').each(function(el) {
       Ngn.Form.ElInit.factory(this, Ngn.Form.getElType(el));
     }.bind(this));
+    this.initHtml5Upload();
   },
 
   initFileNav: function() {
@@ -14447,6 +14529,7 @@ Ngn.Form.Upload = new Class({
   },
 
   initialize: function(form, eInput, options) {
+    console.trace('***');
     this.form = form;
     this.eInput = document.id(eInput);
     this.eCaption = this.eInput.getParent('.element').getElement('.help');
@@ -14725,63 +14808,6 @@ Ngn.Frm.headerToggleFx = function(btns) {
     });
   });
 };
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.VisibilityCondition.js|--*/
-Ngn.Frm.VisibilityCondition = new Class({
-
-  initialize: function(eForm, sectionName, condFieldName, cond) {
-    this.sectionName = sectionName;
-    this.initSectionSelector();
-    this.eSection = eForm.getElement(this.sectionSelector);
-    if (!this.eSection) {
-      console.debug('Element "' + this.sectionSelector + '" does not exists');
-      return;
-    }
-    /*
-     this.fx = new Fx.Slide(this.eSection, {
-     duration: 200,
-     transition: Fx.Transitions.Pow.easeOut
-     });
-     this.fx.hide();
-     */
-    var toggleSection = function(v, isFx) {
-      // v необходима для использования в условии $d['cond']
-      var flag = (eval(cond));
-      if (!flag) {
-        // Если скрываем секцию, необходимо снять все required css-классы в её полях
-        this.eSection.getElements('.required').each(function(el) {
-          el.removeClass('required');
-          el.addClass('required-disabled');
-        });
-      } else {
-        this.eSection.getElements('.required-disabled').each(function(el) {
-          el.removeClass('required-disabled');
-          el.addClass('required');
-        });
-      }
-      if (isFx && 0) {
-        // если нужно завернуть не развёрнутую до конца секцию,
-        // нужно просто скрыть её
-        if (flag == this.fx.open)
-          flag ? (function() {
-            this.fx.show();
-          }).delay(200, this) : (function() {
-            this.fx.hide();
-          }).delay(200, this); else
-          flag ? this.fx.slideIn() : this.fx.slideOut();
-      } else {
-        this.eSection.setStyle('display', flag ? 'block' : 'none');
-        this.eSection.getElements(Ngn.Frm.selector).each(function(el) {
-          el.set('disabled', !flag);
-        });
-      }
-    }.bind(this);
-    toggleSection(Ngn.Frm.getValueByName(condFieldName), false);
-    Ngn.Frm.addEvent('change', condFieldName, toggleSection, true);
-    Ngn.Frm.addEvent('focus', condFieldName, toggleSection, true);
-  }
-
-});
-
 /*--|/home/user/ngn-env/ngn/i/js/ngn/trash/Ngn.IframeFormRequest.js|--*/
 Ngn.IframeFormRequest = new Class({
 
@@ -14974,7 +15000,11 @@ Ngn.Frm.Saver = new Class({
   }
   
 });
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
+Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete"});
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.js|--*/
+// @requiresBefore s2/js/locale/core
 /**
  *
  * <div id="mainElement">
@@ -14988,7 +15018,7 @@ Ngn.Frm.Saver = new Class({
  *   <div class="element">
  *     ...
  *   </div>
- *   <a href="#" class="add">Добавить</a>
+ *   <a href="#" class="add">Add</a>
  * </div>
  *
  */
@@ -15006,15 +15036,35 @@ Ngn.FieldSet = new Class({
     dragBoxSelector: 'div[class=dragBox]',
     removeExceptFirstRow: 'p.label',
     moveElementToRowStyles: ['border-bottom', 'padding-left'],
-    addTitle: 'Добавить',
-    cleanupTitle: 'Очистить поля строки',
-    deleteTitle: 'Удалить строку',
+    addTitle: Locale.get('Core.add'),
+    cleanupTitle: Locale.get('Core.clean'),
+    deleteTitle: Locale.get('Core.delete'),
     addRowNumber: false
   },
 
   changed: false,
   eSampleRow: null,
   buttons: [], // array of Ngn.Btn objects
+
+
+  initialize: function(eParent, options) {
+    this.eParent = eParent;
+    this.setOptions(options);
+    this.eContainer = this.getContainer();
+    this.eAddRow = this.eContainer.getElement(this.options.addRowBtnSelector);
+    if (!this.eAddRow) {
+      var eBottomBtns = new Element('div', {'class': 'bottomBtns'}).inject(this.eContainer, 'bottom');
+      this.eAddRow = Ngn.Btn.btn1(this.options.addTitle, 'btn add dgray').inject(eBottomBtns);
+      Elements.from('<div class="heightFix"></div>')[0].inject(this.eContainer, 'bottom');
+    }
+    this.buttons.push(new Ngn.Btn(this.eAddRow, function(btn) {
+      this.buttons.push(btn);
+      this.addRow();
+    }.bind(this)));
+    this.initRows();
+    //this.initSorting();
+    this.checkDeleteButtons();
+  },
 
   toggleDisabled: function(flag) {
     for (var i = 0; i < this.buttons.length; i++) {
@@ -15043,25 +15093,6 @@ Ngn.FieldSet = new Class({
     return eContainer.inject(this.eParent);
   },
 
-  initialize: function(eParent, options) {
-    this.eParent = eParent;
-    this.setOptions(options);
-    this.eContainer = this.getContainer();
-    this.eAddRow = this.eContainer.getElement(this.options.addRowBtnSelector);
-    if (!this.eAddRow) {
-      var eBottomBtns = new Element('div', {'class': 'bottomBtns'}).inject(this.eContainer, 'bottom');
-      this.eAddRow = Ngn.Btn.btn1(this.options.addTitle, 'btn add dgray').inject(eBottomBtns);
-      Elements.from('<div class="heightFix"></div>')[0].inject(this.eContainer, 'bottom');
-    }
-    this.buttons.push(new Ngn.Btn(this.eAddRow, function(btn) {
-      this.buttons.push(btn);
-      this.addRow();
-    }.bind(this)));
-    this.initRows();
-    //this.initSorting();
-    this.checkDeleteButtons();
-  },
-
   /*
    inputsEmpty: function(container) {
    var elements = container.getElements('input')
@@ -15088,17 +15119,18 @@ Ngn.FieldSet = new Class({
     }
     this.eSampleRow = this.esRows[0].clone();
     this.eSampleRow.getElements(this.options.cleanOnCloneSelector).dispose();
-    this.createCleanupButton(this.esRows[0]);
+    if (!this.esRows[0].getElement('input[type=file]')) {
+      this.createCleanupButton(this.esRows[0]);
+    }
     this.removeTrash(this.eSampleRow);
     for (var i = 0; i < this.esRows.length; i++) {
       if (this.options.addRowNumber) this.addRowNumber(this.esRows[i]);
       this.moveStyles(this.esRows[i]);
     }
-    return;
     if (this.esRows.length > 0) {
       for (var i = 1; i < this.esRows.length; i++) {
         this.removeTrash(this.esRows[i]);
-        this.createDeleteButton(this.esRows[i]);
+        this.createDeleteButton(this.esRows[i], i);
       }
     }
   },
@@ -15116,15 +15148,14 @@ Ngn.FieldSet = new Class({
   },
 
   moveStyles: function(eRow) {
-    return;
-    var style;
-    esEls = eRow.getElements(this.options.elementContainerSelector);
-    for (var j = 0; j < this.options.moveElementToRowStyles.length; j++) {
-      style = this.options.moveElementToRowStyles[j];
-      eRow.setStyles(esEls[0].getStyles(style));
-      for (var k = 0; k < esEls.length; k++)
-        esEls[k].setStyle(style, '0');
-    }
+    //var style;
+    //esEls = eRow.getElements(this.options.elementContainerSelector);
+    //for (var j = 0; j < this.options.moveElementToRowStyles.length; j++) {
+    //  style = this.options.moveElementToRowStyles[j];
+    //  eRow.setStyles(esEls[0].getStyles(style));
+    //  for (var k = 0; k < esEls.length; k++)
+    //    esEls[k].setStyle(style, '0');
+    //}
   },
 
   checkDeleteButtons: function() {
@@ -15146,15 +15177,15 @@ Ngn.FieldSet = new Class({
     var fieldSet = this;
     var eRowBtns = eRow.getElement('.rowBtns');
     this.buttons.push(new Ngn.Btn(// Вставляем кнопку после последнего элемента формы в этой строке
-      //Ngn.addTips(Ngn.Btn.btn(btn)).inject(els[els.length - 1], 'after'), function() {
-      //Ngn.Btn.btn(btn).inject(els[els.length - 1], 'after'), function() {
+      // Ngn.addTips(Ngn.Btn.btn(btn)).inject(els[els.length - 1], 'after'), function() {
+      // Ngn.Btn.btn(btn).inject(els[els.length - 1], 'after'), function() {
       Ngn.Btn.btn(btn).inject(eRowBtns), function() {
         fieldSet.fireEvent(btn.cls);
         action.bind(this)();
       }, options || {}));
   },
 
-  createDeleteButton: function(eRow) {
+  createDeleteButton: function(eRow, index) {
     var fieldSet = this;
     this.createRowButton(eRow, {
       caption: this.options.deleteTitle,
@@ -15167,10 +15198,6 @@ Ngn.FieldSet = new Class({
   },
 
   createCleanupButton: function(eRow) {
-    var els = eRow.getElements(this.options.elementContainerSelector);
-    //реализовать через css
-    //var eLabel = eRow.getElement(this.options.removeExceptFirstRow);
-    //if (eLabel) eBtn.setStyle('margin-top', (eBtn.getStyle('margin-top').toInt() + eLabel.getSizeWithMargin().y) + 'px');
     this.createRowButton(eRow, {
       caption: this.options.cleanupTitle,
       cls: 'cleanup'
@@ -15193,8 +15220,8 @@ Ngn.FieldSet = new Class({
     });
     eNewRow.getElements(Ngn.Frm.selector).each(function(eInput, i) {
       Ngn.Frm.emptify(eInput);
-      //if (eInput.get('value')) eInput.set('value', '');
-      //if (eInput.get('checked')) eInput.set('checked', false);
+      if (eInput.get('value')) eInput.set('value', '');
+      if (eInput.get('checked')) eInput.set('checked', false);
       //c(nextRowN);
       eInput.set('name', this.getInputName(eInput, nextRowN));
       //eInput.set('id', lastRowElements[i].get('id').replace('-' + lastRowN + '-', '-' + nextRowN + '-'));
@@ -15359,16 +15386,6 @@ Ngn.toObj('Ngn.tpls.fontSelect', '<div class="selectItems">\n    <div class="ite
 
 if (!Ngn.sd) Ngn.sd = {};
 
-Ngn.blink = function(el, duration) {
-  if (!duration) duration = 1000;
-  var element = $(el);
-  var on = true;
-  (function() {
-    element.setStyle('visibility', on ? 'hidden' : 'visible');
-    on = !on;
-  }).periodical(duration);
-};
-
 Ngn.sd.positionDiff = function(pos1, pos2, offset) {
   if (!offset) offset = 0;
   return {
@@ -15466,7 +15483,7 @@ Ngn.sd.Font = new Class({
     return this.data.font.linkOverColor || false;
   },
 
-  fontSettingsAction: 'json_fontSettings',
+  settingsAction: 'json_blockSettings',
 
   fontSettingsDialogOptions: function() {
     return {
@@ -15480,17 +15497,18 @@ Ngn.sd.Font = new Class({
     this.updateFont();
   },
 
-  _fontSettingsAction: function() {
+  _settingsAction: function() {
     if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
-    Ngn.sd.openedPropDialog = new Ngn.sd.FontSettingsDialog(Object.merge({
+    Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
       onClose: function() {
         Ngn.sd.openedPropDialog = false;
       },
-      dialogClass: 'settingsDialog compactFields dialog',
+      dialogClass: 'settingsDialog dialog',
       id: this.finalData().data.type + this.id(),
+      blockId: this.id(),
       baseZIndex: 210,
       force: false,
-      url: this.ctrl + '/' + this.fontSettingsAction + '/' + this.id(),
+      url: this.ctrl + '/' + this.settingsAction + '/' + this.id(),
       onSubmitSuccess: function() {
         this.reload();
       }.bind(this),
@@ -15510,14 +15528,18 @@ Ngn.sd.Font = new Class({
       //  this.data.font.shadow = shadow;
       //  this._updateFont(true);
       //}.bind(this)
-    }, this.fontSettingsDialogOptions()));
+    }, this.settingsDialogOptions()));
+  },
+
+  settingsDialogOptions: function() {
+    return {};
   },
 
   initFontBtn: function() {
     if (!this.eBtns) return;
     this.btnFontSettings = new Ngn.Btn( //
       Ngn.Btn.btn2('Font Settings', 'font').inject(this.eBtns), //
-      this._fontSettingsAction.bind(this) //
+      this._settingsAction.bind(this) //
     );
   },
 
@@ -15527,7 +15549,7 @@ Ngn.sd.Font = new Class({
 
 });
 
-Ngn.sd.FontSettingsDialog = new Class({
+Ngn.sd.SettingsDialog = new Class({
   Extends: Ngn.Dialog.RequestForm,
 
   options: {
@@ -15541,16 +15563,13 @@ Ngn.sd.FontSettingsDialog = new Class({
       el.addEvent('change', function() {
         obj.fireEvent('changeFont', this.get('value'));
       });
+      this.message.getElement('[name=fontSize]').addEvent('change', function() {
+        obj.fireEvent('changeSize', this.get('value'));
+      });
+      this.message.getElement('[name=color]').addEvent('change', function() {
+        obj.fireEvent('changeColor', this.get('value'));
+      });
     }
-    this.message.getElement('[name=fontSize]').addEvent('change', function() {
-      obj.fireEvent('changeSize', this.get('value'));
-    });
-    this.message.getElement('[name=color]').addEvent('change', function() {
-      obj.fireEvent('changeColor', this.get('value'));
-    });
-    //this.message.getElement('[name=shadow]').addEvent('change', function() {
-    //  obj.fireEvent('changeShadow', this.get('value'));
-    //});
   }
 
 });
@@ -15722,7 +15741,7 @@ Ngn.sd.BlockAbstract = new Class({
     this.replaceContent();
     this.updateContent();
     this.updateSize();
-    Ngn.sd.initLayersPanel();
+    Ngn.sd.interface.bars.layersBar.init();
     window.fireEvent('resize');
   },
   eLastContainer: false,
@@ -15783,7 +15802,7 @@ Ngn.sd.BlockAbstract = new Class({
     }).post(this.getDataForSave(create));
   },
   creationEvent: function() {
-    Ngn.sd.initLayersPanel();
+    Ngn.sd.interface.bars.layersBar.init();
   },
   replaceContent: function() {
     if (!this._data.html) return;
@@ -15918,7 +15937,7 @@ Ngn.sd.BlockB = new Class({
   delete: function() {
     this.parent();
     delete Ngn.sd.blocks[this._data.id];
-    Ngn.sd.initLayersPanel();
+    Ngn.sd.interface.bars.layersBar.init();
     //this.updateContainerHeight();
   },
   init: function() {
@@ -16214,50 +16233,9 @@ Ngn.sd.BlockBMenu = new Class({
   }
 });
 
-Ngn.sd.BlockBImage = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  replaceContent: function() {
-    this.parent();
-    var eImg = this.el.getElement('img');
-    eImg.set('src', eImg.get('src') /*+ '?' + Math.random(1000)*/);
-  },
-
-  initControls: function() {
-    this.parent();
-    new Ngn.sd.BlockRotate(this);
-  },
-
-  resizeContentEl: function(size) {
-    this._resizeEl(this.el.getElement('img'), size);
-    this.parent(size);
-  },
-
-  initFont: function() {
-  }
-
-});
-
-Ngn.sd.BlockBGallery = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  init: function() {
-    this.parent();
-    var carousel = new Ngn.Carousel(this.el.getElement('.cont'));
-    $('prev').addEvent('click', function() {
-      carousel.toPrevious();
-    });
-    $('next').addEvent('click', function() {
-      carousel.toNext();
-    });
-  }
-
-});
-
 Ngn.sd.BlockBFont = new Class({
   Extends: Ngn.sd.BlockB,
-  fontSettingsAction: 'json_cufonSettings',
-  fontSettingsDialogOptions: function() {
+  settingsDialogOptions: function() {
     return {
       width: 350,
       onChangeFont: function(font) {
@@ -16318,13 +16296,6 @@ Ngn.sd.BlockBFont = new Class({
     this.parent();
     new Ngn.sd.BlockRotate(this);
   },
-  init: function() {
-    this.parent();
-    if (this.data.font.blink) Ngn.blink(this.el.getElement('.cont'), 500);
-  },
-  hasAnimation: function() {
-    return this.data.font.blink ? true : false;
-  },
   framesCount: function() {
     return 2;
   }
@@ -16346,65 +16317,6 @@ Ngn.sd.BlockBClone = new Class({
     if (p.data.data && p.data.data.size) delete p.data.data.size;
     return p;
   }
-});
-
-Ngn.sd.BlockBBlog = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  initBtns: function() {
-    this.parent();
-    new Ngn.Btn(Ngn.Btn.btn2('Настройки блога', 'settings').inject(this.eBtns, 'top'), function() {
-      new Ngn.Dialog.RequestForm({
-        url: '/blogSettings',
-        dialogClass: 'settingsDialog compactFields dialog',
-        width: 400
-      });
-    });
-  },
-  _resize: function(size) {
-    delete size.h;
-    this.parent(size);
-  },
-  replaceContent: function() {
-    this.parent();
-    this.el.getElements('.pNums a').each(function(el) {
-      el.addEvent('click', function(e) {
-        new Event(e).stop();
-        new Ngn.Request({
-          url: el.get('href').replace(/^\/(\w+)\//g, '/blog/'),
-          onComplete: function() {
-          }
-        }).send();
-      });
-    });
-  },
-  editAction: function() {
-  }
-
-});
-
-Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockB,
-
-  defaultData: function() {
-    return {
-      size: {
-        w: 150,
-        h: 40
-      }
-    };
-  },
-
-  _resize: function(size) {
-    this.el.getElement('.btn').sdSetStyles({
-      width: size.w + 'px',
-      height: size.h + 'px'
-    });
-    var eSpan = this.el.getElement('.btn span');
-    eSpan.sdSetStyle('margin-top', (Math.floor(size.h / 2 - (eSpan.getSize().y / 2)) - 1) + 'px');
-    this.parent(size);
-  }
-
 });
 
 // factory
@@ -16740,14 +16652,10 @@ Ngn.sd.initUserTypes = function(types) {
 Ngn.sd.initPageTitle = document.title;
 
 Ngn.getParam = function(val) {
-  var result = "Not found",
-    tmp = [];
-  location.search
-    //.replace ( "?", "" )
+  var result = "Not found", tmp = [];
+  location.search//.replace ( "?", "" )
     // this is better, there might be a question mark inside
-    .substr(1)
-    .split("&")
-    .forEach(function (item) {
+    .substr(1).split("&").forEach(function(item) {
       tmp = item.split("=");
       if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
     });
@@ -16948,98 +16856,6 @@ Ngn.sd.sortBySubKey = function(obj, key1, key2) {
   return r;
 };
 
-Ngn.sd.initLayersPanel = function() {
-  Ngn.sd.eLayers.set('html', '');
-  var title;
-  var item;
-  var sortedBlocks = Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey');
-  new Element('div', {
-    html: 'Layers',
-    'class': 'lTitle'
-  }).inject(Ngn.sd.eLayers);
-  var eLayers = new Element('div', {
-    'class': 'layers'
-  }).inject(Ngn.sd.eLayers);
-  for (var i = 0; i < sortedBlocks.length; i++) {
-    item = sortedBlocks[i]._data;
-    if (item.data.subType == 'image') {
-      title = '<span class="ico">' + //
-      item.html + '</span>' + //
-        // item.id + ' ' + //
-      Ngn.String.ucfirst(item.data.type);
-    } else if (item.data.type == 'font') {
-      //var text = item.html.replace(/<br \/>/g, " ").substring(0, 10);
-      var text = item.html;
-      title = '<span class="ico">' + //
-      '<img src="/sd/img/font.png?v3"></span>' + //
-        // item.id + ' ' + //
-      '<span class="text">' + (text ? text : 'empty') + '</span>'
-    } else {
-      title = '<span class="ico"></span>unsupported';
-    }
-    var eItem = new Element('div', {
-      'class': 'item ' + 'item_' + item.data.type,
-      'data-id': item.id,
-      'data-type': item.data.type
-    });
-    new Element('div', {
-      'class': 'title',
-      html: title
-    }).inject(eItem);
-    var eBtns = new Element('div', {
-      'class': 'btns'
-    }).inject(eItem);
-    if (Ngn.sd.blocks[item.id].finalData().data.type == 'font') {
-      new Ngn.Btn( //
-        Ngn.Btn.btn2('Edit', 'edit').inject(eBtns), //
-        Ngn.sd.blocks[item.id]._fontSettingsAction.bind(Ngn.sd.blocks[item.id]) //
-      );
-    } else {
-      new Element('a', {
-        'class': 'smIcons dummy'
-      }).inject(eBtns);
-    }
-    new Ngn.Btn( //
-      Ngn.Btn.btn2('Delete', 'delete').inject(eBtns), //
-      Ngn.sd.blocks[item.id].deleteAction.bind(Ngn.sd.blocks[item.id]) //
-    );
-    eItem.inject(eLayers);
-  }
-  new Sortables(eLayers, {
-    onStart: function(eMovingLayer) {
-      eMovingLayer.addClass('drag');
-    },
-    onComplete: function(eMovingLayer) {
-      eMovingLayer.removeClass('drag');
-      var ePrevLayer;
-      var id = eMovingLayer.get('data-id');
-      ePrevLayer = eMovingLayer.getPrevious();
-      if (ePrevLayer) {
-        Ngn.sd.blocks[id].el.inject( //
-          Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'before');
-      } else {
-        ePrevLayer = eMovingLayer.getNext();
-        if (ePrevLayer) {
-          Ngn.sd.blocks[id].el.inject( //
-            Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'after');
-        }
-      }
-      // request
-      var ids = this.serialize(0, function(element) {
-        return element.get('data-id');
-      });
-      for (var i = 0; i < ids.length; i++) {
-        Ngn.sd.blocks[ids[i]].updateOrder(i);
-      }
-      new Ngn.Request({
-        url: '/pageBlock/' + Ngn.sd.bannerId + '/json_updateOrder'
-      }).post({
-          ids: ids
-        });
-    }
-  });
-};
-
 Ngn.sd.changeBannerBackground = function(backgroundUrl) {
   new Ngn.Request.JSON({
     url: '/cpanel/' + Ngn.sd.bannerId + '/json_createBackgroundBlock?backgroundUrl=' + backgroundUrl,
@@ -17047,39 +16863,6 @@ Ngn.sd.changeBannerBackground = function(backgroundUrl) {
       Ngn.sd.reinit();
     }
   }).send();
-};
-
-Ngn.sd.buildPanel = function() {
-  var pg = window.location.hash.match(/#pg(\d+)/);
-  Ngn.sd.ePanel = new Element('div', {'class': 'cont'}).inject($('panel'));
-  new Element('a', {
-    'class': 'logo',
-    href: '/', //target: '_blank',
-    title: '...'
-  }).inject(Ngn.sd.ePanel);
-  Ngn.sd.eFeatureBtns = new Element('div', {
-    'class': 'featureBtns'
-  }).inject(Ngn.sd.ePanel);
-  //new Element('div', {'class': 'clear'}).inject(Ngn.sd.ePanel);
-
-
-  new Element('div', {
-    'class': 'tit'
-  }).inject(Ngn.sd.ePanel);
-
-  //===================
-  document.getElement('.profileBar').inject(Ngn.sd.ePanel);
-  //===================
-
-  // -- layers control
-  Ngn.sd.eLayers = new Element('div', {'class': 'cont'}).inject($('layers'));
-  Ngn.sd.loadData(pg ? pg[1] : 1, function(data) {
-    Ngn.sd.initLayersPanel();
-  });
-  Ngn.sd.bindKeys();
-
-
-  window.fireEvent('sdPanelComplete');
 };
 
 Ngn.sd.fbtn = function(title, cls) {
@@ -17118,48 +16901,6 @@ Ngn.sd.movingBlock = {
 
 Ngn.sd.minContainerHeight = 100;
 
-Ngn.sd.bindKeys = function() {
-  var moveMap = {
-    119: 'up',
-    87: 'up',
-    1094: 'up',
-    1062: 'up',
-    1092: 'left',
-    1060: 'left',
-    97: 'left',
-    65: 'left',
-    1099: 'down',
-    1067: 'down',
-    83: 'down',
-    115: 'down',
-    100: 'right',
-    68: 'right',
-    1074: 'right',
-    1042: 'right'
-  };
-  var shiftMap = {
-    'q': 'back',
-    'Q': 'back',
-    'й': 'back',
-    'Й': 'back',
-    'e': 'forward',
-    'E': 'forward',
-    'у': 'forward',
-    'У': 'forward'
-  };
-  document.addEvent('keypress', function(e) {
-    if (e.shift && (e.key == 'p' || e.key == 'з')) Ngn.sd.previewSwitch(); // p
-    else if (moveMap[e.code]) {
-      var movingBlock = Ngn.sd.movingBlock.get();
-      if (movingBlock) movingBlock.move(moveMap[e.code]);
-    } else if (shiftMap[e.key]) {
-      var movingBlock = Ngn.sd.movingBlock.get();
-      if (movingBlock) {
-        (new Ngn.sd.PageBlocksShift)[shiftMap[e.key]](movingBlock._data.id);
-      }
-    }
-  });
-};
 
 Ngn.sd.isPreview = function() {
   return $('layout').hasClass('preview');
@@ -17305,13 +17046,23 @@ Ngn.sd.exportPageR = function(n) {
   Ngn.sd.loadData(n, onLoaded);
 };
 
+Ngn.sd.interface = {
+};
+
 Ngn.sd.init = function(bannerId) {
+  console.debug('asd');
+  if (typeof window.callPhantom === 'function') {
+    window.callPhantom({
+      action: 'asd'
+    });
+  }
+
   Ngn.sd.bannerId = bannerId;
-  Ngn.sd.buildPanel();
+  Ngn.sd.interface.bars = Ngn.sd.barsClass ? new Ngn.sd.barsClass() : new Ngn.sd.Bars();
   if (window.location.hash == '#preview') {
     Ngn.sd.previewSwitch();
   }
-};
+}
 
 Ngn.sd.reinit = function() {
   Ngn.sd.init(Ngn.sd.bannerId);
@@ -17324,145 +17075,6 @@ Ngn.sd.updateContainerHeight = function(eContainer) {
 };
 
 Ngn.sd.initFullBodyHeight();
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/carousel/Ngn.Carousel.js|--*/
-Ngn.Carousel = new Class({
-  Extends: Fx.Scroll,
-
-  options: {
-    mode: 'horizontal',
-    id: 'carousel',
-    childSelector: false,
-    loopOnScrollEnd: true,
-    periodical: false
-  },
-
-  initialize: function(element, options) {
-    this.parent(element, options);
-    this.cacheElements();
-    if (!this.elements[0]) throw new Error('No elements was found');
-    for (var i = 0; i < this.elements.length; i++) {
-      this.elements[i].store('initIndex', i);
-    }
-    this.currentIndex = 0;
-    this.elementWidth = this.elements[0].getSize().x;
-    this.visibleElementsN = Math.round(this.element.getSize().x / this.elementWidth);
-    if (this.options.periodical) this.toNext.periodical(this.options.periodical, this);
-    if (this.elements) this.toElementForce(this.elements[this.currentIndex]);
-  },
-
-  cacheElements: function() {
-    var els;
-    if (this.options.childSelector) {
-      els = this.element.getElements(this.options.childSelector);
-      //} else if (this.options.mode == 'horizontal'){
-      //  els = this.element.getElements(':first-child > *');
-    } else {
-      els = this.element.getChildren();
-    }
-    if (els[0] && this.options.changeContainerWidth && this.options.elementsOnPage) {
-      this.element.setStyle('width', (els[0].getSize().x * this.options.elementsOnPage) + 'px');
-      this.element.getFirst().setStyle('width', (els[0].getSize().x * els.length) + 'px');
-    }
-    this.elements = els;
-    return this;
-  },
-
-  curEl: null,
-
-  setSelectedElement: function(el) {
-    if (this.curEl) this.curEl.removeClass('sel');
-    this.curEl = el.addClass('sel');
-  },
-
-  toNext: function() {
-    if (!this.check()) return this;
-    this.currentIndex = this.getNextIndex();
-    if (!this.elements[this.currentIndex]) return;
-    this.toElement(this.elements[this.currentIndex]);
-    this.fireEvent('next');
-    return this;
-  },
-
-  toPrevious: function() {
-    if (!this.check()) return this;
-    this.currentIndex = this.getPreviousIndex();
-    if (!this.elements[this.currentIndex]) return;
-    this.toElement(this.elements[this.currentIndex]);
-    this.fireEvent('previous');
-    return this;
-  },
-
-  toElement: function(el) {
-    this.parent(el);
-    this.setSelectedElement(el);
-    this.fireEvent('toElement');
-  },
-
-  toElementForce: function(el){
-    var axes = ['x', 'y'];
-    var scroll = this.element.getScroll();
-    var position = Object.map(document.id(el).getPosition(this.element), function(value, axis){
-      return axes.contains(axis) ? value + scroll[axis] : false;
-    });
-    this.set(this.calculateScroll(position.x, position.y));
-    this.setSelectedElement(el);
-  },
-
-  setRight: function() {
-    this.set(this.element.getScrollSize().x, 0);
-  },
-
-  getNextIndex: function() {
-    this.currentIndex++;
-    if (this.currentIndex == this.elements.length || this.checkScroll()) {
-      this.fireEvent('loop');
-      this.fireEvent('nextLoop');
-      return 0;
-    } else {
-      return this.currentIndex;
-    }
-    ;
-  },
-
-  getPreviousIndex: function() {
-    this.currentIndex--;
-    var check = this.checkScroll();
-    if (this.currentIndex < 0 || check) {
-      this.fireEvent('loop');
-      this.fireEvent('previousLoop');
-      return (check) ? this.getOffsetIndex() : this.elements.length - 1;
-    } else {
-      return this.currentIndex;
-    }
-  },
-
-  getOffsetIndex: function() {
-    var visible = (this.options.mode == 'horizontal') ? this.element.getStyle('width').toInt() / this.elements[0].getStyle('width').toInt() : this.element.getStyle('height').toInt() / this.elements[0].getStyle('height').toInt();
-    return this.currentIndex + 1 - visible;
-  },
-
-  checkLink: function() {
-    return (this.timer && this.options.link == 'ignore');
-  },
-
-  checkScroll: function() {
-    if (!this.options.loopOnScrollEnd) return false;
-    if (this.options.mode == 'horizontal') {
-      var scroll = this.element.getScroll().x;
-      var total = this.element.getScrollSize().x - this.element.getSize().x;
-    } else {
-      var scroll = this.element.getScroll().y;
-      var total = this.element.getScrollSize().y - this.element.getSize().y;
-    }
-    return (scroll == total);
-  },
-
-  getCurrent: function() {
-    return this.elements[this.currentIndex];
-  }
-
-});
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.HidebleBar.js|--*/
 Ngn.hidebleBarIds = [];
@@ -17605,6 +17217,177 @@ Ngn.Dialog.Link = new Class({
   }
 
 });
+/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.Bars.js|--*/
+Ngn.sd.Bars = new Class({
+  layersBar: null,
+  initialize: function() {
+    var pg = window.location.hash.match(/#pg(\d+)/);
+    Ngn.sd.ePanel = new Element('div', {'class': 'cont'}).inject($('panel'));
+    new Element('a', {
+      'class': 'logo',
+      href: '/', //target: '_blank',
+      title: '...'
+    }).inject(Ngn.sd.ePanel);
+    Ngn.sd.eFeatureBtns = new Element('div', {
+      'class': 'featureBtns'
+    }).inject(Ngn.sd.ePanel);
+    //new Element('div', {'class': 'clear'}).inject(Ngn.sd.ePanel);
+    new Element('div', {
+      'class': 'tit'
+    }).inject(Ngn.sd.ePanel);
+    document.getElement('.profileBar').inject(Ngn.sd.ePanel);
+    Ngn.sd.eLayers = new Element('div', {'class': 'cont'}).inject($('layers'));
+    Ngn.sd.loadData(pg ? pg[1] : 1, function(data) {
+      this.layersBar = this.getLayersBar();
+      window.fireEvent('sdInitialized');
+    }.bind(this));
+    this.bindKeys();
+    window.fireEvent('sdPanelComplete');
+  },
+  getLayersBar: function() {
+    return new Ngn.sd.LayersBar();
+  },
+  bindKeys: function() {
+    var moveMap = {
+      119: 'up',
+      87: 'up',
+      1094: 'up',
+      1062: 'up',
+      1092: 'left',
+      1060: 'left',
+      97: 'left',
+      65: 'left',
+      1099: 'down',
+      1067: 'down',
+      83: 'down',
+      115: 'down',
+      100: 'right',
+      68: 'right',
+      1074: 'right',
+      1042: 'right'
+    };
+    var shiftMap = {
+      'q': 'back',
+      'Q': 'back',
+      'й': 'back',
+      'Й': 'back',
+      'e': 'forward',
+      'E': 'forward',
+      'у': 'forward',
+      'У': 'forward'
+    };
+    document.addEvent('keypress', function(e) {
+      if (e.shift && (e.key == 'p' || e.key == 'з')) Ngn.sd.previewSwitch(); // p
+      else if (moveMap[e.code]) {
+        var movingBlock = Ngn.sd.movingBlock.get();
+        if (movingBlock) movingBlock.move(moveMap[e.code]);
+      } else if (shiftMap[e.key]) {
+        var movingBlock = Ngn.sd.movingBlock.get();
+        if (movingBlock) {
+          (new Ngn.sd.PageBlocksShift)[shiftMap[e.key]](movingBlock._data.id);
+        }
+      }
+    });
+  }
+});
+
+/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.LayersBar.js|--*/
+Ngn.sd.LayersBar = new Class({
+  initialize: function() {
+    this.init();
+  },
+  init: function() {
+    Ngn.sd.eLayers.set('html', '');
+    var title;
+    var item;
+    var sortedBlocks = Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey');
+    new Element('div', {
+      html: 'Layers',
+      'class': 'lTitle'
+    }).inject(Ngn.sd.eLayers);
+    var eLayers = new Element('div', {
+      'class': 'layers'
+    }).inject(Ngn.sd.eLayers);
+    for (var i = 0; i < sortedBlocks.length; i++) {
+      item = sortedBlocks[i]._data;
+      this.getTitle(item);
+      var eItem = new Element('div', {
+        'class': 'item ' + 'item_' + (item.data.subType || item.data.type),
+        'data-id': item.id,
+        'data-type': item.data.type
+      });
+      new Element('div', {
+        'class': 'title',
+        html: this.getTitle(item)
+      }).inject(eItem);
+      var eBtns = new Element('div', {
+        'class': 'btns'
+      }).inject(eItem);
+      if (this.canEdit(item)) {
+        new Ngn.Btn( //
+          Ngn.Btn.btn2('Edit', 'edit').inject(eBtns), //
+          Ngn.sd.blocks[item.id]._settingsAction.bind(Ngn.sd.blocks[item.id]) //
+        );
+      } else {
+        new Element('a', {
+          'class': 'smIcons dummy'
+        }).inject(eBtns);
+      }
+      new Ngn.Btn( //
+        Ngn.Btn.btn2('Delete', 'delete').inject(eBtns), //
+        Ngn.sd.blocks[item.id].deleteAction.bind(Ngn.sd.blocks[item.id]) //
+      );
+      eItem.inject(eLayers);
+    }
+    new Sortables(eLayers, {
+      onStart: function(eMovingLayer) {
+        eMovingLayer.addClass('drag');
+      },
+      onComplete: function(eMovingLayer) {
+        eMovingLayer.removeClass('drag');
+        var ePrevLayer;
+        var id = eMovingLayer.get('data-id');
+        ePrevLayer = eMovingLayer.getPrevious();
+        if (ePrevLayer) {
+          Ngn.sd.blocks[id].el.inject( //
+            Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'before');
+        } else {
+          ePrevLayer = eMovingLayer.getNext();
+          if (ePrevLayer) {
+            Ngn.sd.blocks[id].el.inject( //
+              Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'after');
+          }
+        }
+        // request
+        var ids = this.serialize(0, function(element) {
+          return element.get('data-id');
+        });
+        for (var i = 0; i < ids.length; i++) {
+          Ngn.sd.blocks[ids[i]].updateOrder(i);
+        }
+        new Ngn.Request({
+          url: '/pageBlock/' + Ngn.sd.bannerId + '/json_updateOrder'
+        }).post({
+            ids: ids
+          });
+      }
+    });
+  },
+  getTitle: function(item) {
+    if (item.data.subType == 'image') {
+      return '<span class="ico">' + item.html + '</span>' + Ngn.String.ucfirst(item.data.type);
+    } else if (item.data.type == 'font') {
+      return '<span class="ico">' + '<img src="/sd/img/font.png"></span>' + //
+      '<span class="text">' + (item.html ? item.html : 'empty') + '</span>'
+    } else {
+      return '<span class="ico"></span>unsupported';
+    }
+  },
+  canEdit: function(item) {
+    return Ngn.sd.blocks[item.id].finalData().data.type == 'font';
+  }
+});
+
 /*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
 window.addEvent('sdPanelComplete', function() {
   new Ngn.Btn(Ngn.sd.fbtn('New banner', 'add'), function() {
@@ -17617,16 +17400,32 @@ window.addEvent('sdPanelComplete', function() {
     });
   });
 });
-/*--|/home/user/ngn-env/bc/sd/js/plugins/text.js|--*/
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedText.js|--*/
 Ngn.sd.blockTypes.push({
-  title: 'Font',
+  title: 'Text',
   data: {
-    type: 'font'
+    type: 'animatedText',
+    subType: 'text'
   }
 });
+
+Ngn.sd.BlockBAnimatedText = new Class({
+  Extends: Ngn.sd.BlockBFont,
+  init: function() {
+    this.parent();
+  },
+  updateContent: function() {
+    this.parent();
+    new Ngn.sd.Slides(this.el.getElements('.cont div'));
+  },
+  hasAnimation: function() {
+    return this.data.font.text.length > 1;
+  }
+});
+
 window.addEvent('sdPanelComplete', function() {
   new Ngn.Btn(Ngn.sd.fbtn('Add text', 'text'), function() {
-    var data = Ngn.sd.getBlockType('font');
+    var data = Ngn.sd.getBlockType('animatedText');
     data.data.position = {
       x: 0,
       y: 0
@@ -17637,22 +17436,94 @@ window.addEvent('sdPanelComplete', function() {
     }).setToTheTop().save(true);
   });
 });
-/*--|/home/user/ngn-env/bc/sd/js/plugins/image.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add image', 'image'), null, {
-    fileUpload: {
-      url: '/pageBlock/' + Ngn.sd.bannerId + '/json_createImage',
-      onRequest: function() {
-        Ngn.Request.Iface.loading(true);
-      }.bind(this),
-      onComplete: function(v) {
-        var block = Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), v);
-        block.creationEvent();
-        Ngn.Request.Iface.loading(false);
-      }.bind(this)
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.Slides.js|--*/
+Ngn.sd.Slides = new Class({
+  Implements: Options,
+
+  options: {
+    duration: 1500
+  },
+
+  initialize: function(elements, options) {
+    this.setOptions(options);
+    if (!elements.length) return;
+    var currentIndex = 0, nextIndex;
+    console.debug(elements[0]);
+    for (var i = 1; i < elements.length; i++) {
+      elements[i].setStyle('display', 'none');
     }
+    (function() {
+      if (elements[currentIndex + 1]) {
+        nextIndex = currentIndex + 1;
+      } else {
+        nextIndex = 0;
+      }
+      elements[currentIndex].setStyle('display', 'none');
+      elements[nextIndex].setStyle('display', 'block');
+      currentIndex = nextIndex;
+      if (typeof window.callPhantom === 'function') {
+        window.callPhantom({
+          action: 'frameChange'
+        });
+      }
+    }).periodical(this.options.duration);
+  }
+});
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedImage.js|--*/
+Ngn.sd.blockTypes.push({
+  title: 'Image',
+  data: {
+    type: 'animatedImage'
+  }
+});
+
+Ngn.sd.BlockBAnimatedImage = new Class({
+  Extends: Ngn.sd.BlockB,
+  resizeContentEl: function(size) {
+    this.el.getElements('img').each(function(el) {
+      this._resizeEl(el, size);
+    }.bind(this));
+    this.parent(size);
+  },
+  updateContent: function() {
+    this.parent();
+    new Ngn.sd.Slides(this.el.getElements('.cont div'));
+  }
+});
+
+window.addEvent('sdPanelComplete', function() {
+  new Ngn.Btn(Ngn.sd.fbtn('Add image', 'image'), function() {
+    var data = Ngn.sd.getBlockType('animatedImage');
+    data.data.position = {
+      x: 0,
+      y: 0
+    };
+    Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), {
+      data: data.data,
+      html: ''
+    }).setToTheTop().save(true);
   });
 });
+/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BlockBImage.js|--*/
+Ngn.sd.BlockBImage = new Class({
+  Extends: Ngn.sd.BlockB,
+  replaceContent: function() {
+    this.parent();
+    var eImg = this.el.getElement('img');
+    eImg.set('src', eImg.get('src') /*+ '?' + Math.random(1000)*/);
+  },
+  initControls: function() {
+    this.parent();
+    new Ngn.sd.BlockRotate(this);
+  },
+  resizeContentEl: function(size) {
+    this._resizeEl(this.el.getElement('img'), size);
+    this.parent(size);
+  },
+  initFont: function() {
+  }
+});
+
 /*--|/home/user/ngn-env/bc/sd/js/plugins/background.js|--*/
 Ngn.sd.BlockBBackground = new Class({
   Extends: Ngn.sd.BlockBImage
@@ -17716,63 +17587,6 @@ window.addEvent('sdPanelComplete', function() {
     new Ngn.sd.BackgroundInsertDialog();
   });
 });
-/*--|/home/user/ngn-env/bc/sd/js/plugins/button.js|--*/
-Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-Ngn.sd.addBannerButton = function(buttonUrl) {
-  new Ngn.Request.JSON({
-    url: '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?buttonUrl=' + buttonUrl,
-    onComplete: function() {
-      Ngn.sd.reinit();
-    }
-  }).send();
-};
-
-Ngn.sd.ButtonInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'button',
-    title: 'Insert button',
-    okText: 'Insert',
-    width: 400,
-    height: 300,
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect',
-    dialogClass: 'dialog-images',
-    onRequest: function() {
-      this.initImages();
-    },
-    ok: function() {
-      Ngn.sd.addBannerButton(Ngn.sd.selectedButtonUrl);
-    }.bind(this)
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    Ngn.sd.selectedButtonUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add button', 'button'), function() {
-    new Ngn.sd.ButtonInsertDialog();
-  });
-});
 /*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.ImageInsertDialog.js|--*/
 Ngn.sd.ImageInsertDialog = new Class({
   Extends: Ngn.Dialog,
@@ -17785,6 +17599,7 @@ Ngn.sd.ImageInsertDialog = new Class({
     //url: 'ajax_select',
     //createUrl: 'ajax_select',
     dialogClass: 'dialog-images',
+    createImageJsonAction: 'createImageBlock',
     onRequest: function() {
       this.initImages();
     }
@@ -17800,10 +17615,9 @@ Ngn.sd.ImageInsertDialog = new Class({
     this.insertImage(this.selectedUrl);
   },
   createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_createImageBlock?url=' + url
+    return '/cpanel/' + Ngn.sd.bannerId + '/json_' + this.createImageJsonAction + '?url=' + url
   },
   insertImage: function(url) {
-    console.debug(this.createImageUrl(url));
     new Ngn.Request.JSON({
       url: this.createImageUrl(url),
       onComplete: function() {
@@ -17832,6 +17646,27 @@ Ngn.sd.ImageInsertDialog = new Class({
   }
 });
 
+/*--|/home/user/ngn-env/bc/sd/js/plugins/button.js|--*/
+Ngn.sd.BlockBButton = new Class({
+  Extends: Ngn.sd.BlockBImage
+});
+
+Ngn.sd.ButtonInsertDialog = new Class({
+  Extends: Ngn.sd.ImageInsertDialog,
+  options: {
+    title: 'Insert button',
+    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect'
+  },
+  createImageUrl: function(url) {
+    return '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?url=' + url
+  }
+});
+
+window.addEvent('sdPanelComplete', function() {
+  new Ngn.Btn(Ngn.sd.fbtn('Add button', 'button'), function() {
+    new Ngn.sd.ButtonInsertDialog();
+  });
+});
 /*--|/home/user/ngn-env/bc/sd/js/plugins/clipart.js|--*/
 Ngn.sd.BlockBClipart = new Class({
   Extends: Ngn.sd.BlockBImage
@@ -18142,3 +17977,753 @@ Ngn.Favicon = {
 
   docHead: document.getElementsByTagName("head")[0]
 }
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorBars.js|--*/
+Ngn.sd.BcreatorBars = new Class({
+  Extends: Ngn.sd.Bars,
+  getLayersBar: function() {
+    return new Ngn.sd.BcreatorLayersBar;
+  }
+});
+
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorLayersBar.js|--*/
+Ngn.sd.BcreatorLayersBar = new Class({
+  Extends: Ngn.sd.LayersBar,
+  getTitle: function(item) {
+    if (item.data.type == 'animatedText') {
+
+      return '<span class="ico">' + '<img src="/sd/img/font.png"></span>' + //
+      '<span class="text">' + (item.data.font.text && item.data.font.text[0] ? item.data.font.text[0] : 'empty') + '</span>';
+    }
+    else if (item.data.type == 'animatedImage') {
+      return '<span class="ico">' + //
+      (item.data.images && item.data.images[0] ? ('<img src="' + item.data.images[0] + '">') : '') + //
+      '</span>Image';
+    }
+    return this.parent(item);
+  },
+  canEdit: function(item) {
+    if (item.data.type == 'animatedText' || item.data.type == 'animatedImage') {
+      return true;
+    } else {
+      return this.parent(item);
+    }
+  }
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
+Ngn.Form.El.Color = new Class({
+  Extends: Ngn.Form.El,
+
+  init: function() {
+    var el = this.eRow;
+    var eColor = el.getElement('div.color');
+    var eInput = el.getElement('input').addClass('hexInput');
+    eInput.addEvent('change', function() {
+      eColor.setStyle('background-color', eInput.value);
+    });
+    new Ngn.Rainbow(eInput, {
+      eParent: eInput.getParent(),
+      id: 'rainbow_' + eInput.get('name'),
+      //styles: { // и так работает
+      //  'z-index': this.options.dialog.dialog.getStyle('z-index').toInt() + 1
+      //},
+      imgPath: '/i/img/rainbow/small/',
+      wheel: true,
+      startColor: eInput.value ? new Color(eInput.value).rgb : [255, 255, 255],
+      onChange: function(color) {
+        eColor.setStyle('background-color', color.hex);
+        eInput.value = color.hex;
+        eInput.fireEvent('change', color);
+      },
+      onComplete: function(color) {
+        eColor.setStyle('background-color', color.hex);
+        eInput.value = color.hex;
+        eInput.fireEvent('change', color);
+      }
+    });
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Rainbow.js|--*/
+Ngn.Rainbows = [];
+
+Ngn.Rainbow = new Class({
+  options: {
+    id: 'rainbow',
+    styles: {},
+    prefix: 'moor-',
+    imgPath: 'images/',
+    startColor: [255, 0, 0],
+    wheel: false,
+    onComplete: Function.from(),
+    onChange: Function.from(),
+    eParent: null
+  },
+
+  initialize: function(el, options) {
+    this.element = $(el);
+    if (!this.element) return;
+    this.setOptions(options);
+    if (!this.options.eParent) this.options.eParent = document.body;
+    this.sliderPos = 0;
+    this.pickerPos = {x: 0, y: 0};
+    this.backupColor = this.options.startColor;
+    this.currentColor = this.options.startColor;
+    this.sets = {
+      rgb: [],
+      hsb: [],
+      hex: []
+    };
+    this.pickerClick = this.sliderClick = false;
+    if (!this.layout) this.doLayout();
+    this.OverlayEvents();
+    this.sliderEvents();
+    this.backupEvent();
+    if (this.options.wheel) this.wheelEvents();
+    this.element.addEvent('click', function(e) {
+      this.closeAll().toggle(e);
+    }.bind(this));
+
+    this.layout.overlay.setStyle('background-color', this.options.startColor.rgbToHex());
+    //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
+
+    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
+    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
+
+    this.manualSet(this.options.startColor);
+
+    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
+    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
+    this.sliderPos = this.snippet('arrPos') - this.snippet('arrSize', 'int');
+
+    if (window.khtml) this.hide();
+  },
+
+  toggle: function() {
+    this[this.visible ? 'hide' : 'show']();
+  },
+
+  show: function() {
+    this.rePosition();
+    (function() {
+      this.layout.setStyle('display', 'block');
+    }).delay(100, this);
+    this.visible = true;
+  },
+
+  hide: function() {
+    this.layout.setStyles({'display': 'none'});
+    this.visible = false;
+  },
+
+  closeAll: function() {
+    Ngn.Rainbows.each(function(obj) {
+      obj.hide();
+    });
+
+    return this;
+  },
+
+  manualSet: function(color, type) {
+    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
+    var rgb, hsb, hex;
+
+    if (type == 'rgb') {
+      rgb = color;
+      hsb = color.rgbToHsb();
+      hex = color.rgbToHex();
+    } else if (type == 'hsb') {
+      hsb = color;
+      rgb = color.hsbToRgb();
+      hex = rgb.rgbToHex();
+    } else {
+      hex = color;
+      rgb = color.hexToRgb(true);
+      hsb = rgb.rgbToHsb();
+    }
+
+    this.setRainbow(rgb);
+    this.autoSet(hsb);
+  },
+
+  autoSet: function(hsb) {
+    var curH = this.snippet('curSize', 'int').h;
+    var curW = this.snippet('curSize', 'int').w;
+    var oveH = this.layout.overlay.height;
+    var oveW = this.layout.overlay.width;
+    var sliH = this.layout.slider.height;
+    var arwH = this.snippet('arrSize', 'int');
+    var hue;
+
+    var posx = Math.round(((oveW * hsb[1]) / 100) - curW);
+    var posy = Math.round(-((oveH * hsb[2]) / 100) + oveH - curH);
+
+    var c = Math.round(((sliH * hsb[0]) / 360));
+    c = (c == 360) ? 0 : c;
+    var position = sliH - c + this.snippet('slider') - arwH;
+    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
+
+    this.layout.cursor.setStyles({'top': posy, 'left': posx});
+    this.layout.arrows.setStyle('top', position);
+    this.layout.overlay.setStyle('background-color', hue);
+    this.sliderPos = this.snippet('arrPos') - arwH;
+    this.pickerPos.x = this.snippet('curPos').l + curW;
+    this.pickerPos.y = this.snippet('curPos').t + curH;
+  },
+
+  setRainbow: function(color, type) {
+    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
+    var rgb, hsb, hex;
+
+    if (type == 'rgb') {
+      rgb = color;
+      hsb = color.rgbToHsb();
+      hex = color.rgbToHex();
+    } else if (type == 'hsb') {
+      hsb = color;
+      rgb = color.hsbToRgb();
+      hex = rgb.rgbToHex();
+    } else {
+      hex = color;
+      rgb = color.hexToRgb();
+      hsb = rgb.rgbToHsb();
+    }
+    this.sets = {
+      rgb: rgb,
+      hsb: hsb,
+      hex: hex
+    };
+    if (this.pickerPos.x == null) this.autoSet(hsb);
+    this.RedInput.value = rgb[0];
+    this.GreenInput.value = rgb[1];
+    this.BlueInput.value = rgb[2];
+    this.HueInput.value = hsb[0];
+    this.SatuInput.value = hsb[1];
+    this.BrighInput.value = hsb[2];
+    //this.hexInput.value = hex;
+    this.currentColor = rgb;
+    //this.chooseColor.setStyle('background-color', rgb.rgbToHex());
+  },
+
+  parseColors: function(x, y, z) {
+    var s = Math.round((x * 100) / this.layout.overlay.width);
+    var b = 100 - Math.round((y * 100) / this.layout.overlay.height);
+    var h = 360 - Math.round((z * 360) / this.layout.slider.height) + this.snippet('slider') - this.snippet('arrSize', 'int');
+    h -= this.snippet('arrSize', 'int');
+    h = (h >= 360) ? 0 : (h < 0) ? 0 : h;
+    s = (s > 100) ? 100 : (s < 0) ? 0 : s;
+    b = (b > 100) ? 100 : (b < 0) ? 0 : b;
+
+    return [h, s, b];
+  },
+
+  OverlayEvents: function() {
+    var lim, curH, curW, inputs;
+    curH = this.snippet('curSize', 'int').h;
+    curW = this.snippet('curSize', 'int').w;
+    //inputs = Array.from(this.arrRGB).concat(this.arrHSB, this.hexInput);
+    document.addEvent('click', function() {
+      this.hide(this.layout);
+    }.bind(this));
+    /*
+    inputs.each(function(el) {
+      el.addEvent('keydown', this.eventKeydown.bindWithEvent(this, el));
+      el.addEvent('keyup', this.eventKeyup.bindWithEvent(this, el));
+    }, this);
+    */
+    [this.element, this.layout].each(function(el) {
+      el.addEvents({
+        'click': function(e) {
+          e.preventDefault();
+        },
+        'keyup': function(e) {
+          if (e.key == 'esc' && this.visible) this.hide(this.layout);
+        }.bind(this)
+      }, this);
+    }, this);
+    lim = {
+      //x: [0 - curW, this.layout.overlay.width - curW],
+      //y: [0 - curH, this.layout.overlay.height - curH]
+      x: [0 - curW, 80 - curW],
+      y: [0 - curH, 80 - curH]
+    };
+    this.layout.addEvent('click', function(e) {
+      e.stop();
+    });
+    this.layout.drag = new Drag(this.layout.cursor, {
+      limit: lim,
+      onBeforeStart: this.overlayDrag.bind(this),
+      onStart: this.overlayDrag.bind(this),
+      onDrag: this.overlayDrag.bind(this),
+      snap: 0
+    });
+
+    this.layout.overlay2.addEvent('mousedown', function(e) {
+      this.layout.cursor.setStyles({
+        'top': e.page.y - this.layout.overlay.getTop() - curH,
+        'left': e.page.x - this.layout.overlay.getLeft() - curW
+      });
+      this.layout.drag.start(e);
+    }.bind(this));
+
+    /*
+     this.layout.overlay2.addEvent('dblclick', function(){
+     this.ok();
+     }.bind(this));
+     this.okButton.addEvent('click', function() {
+     this.ok();
+     }.bind(this));
+     */
+
+
+    this.transp.addEvent('click', function() {
+      this.hide();
+      this.fireEvent('onComplete', ['transparent', this]);
+    }.bind(this));
+  },
+
+  ok: function() {
+    if (this.currentColor == this.options.startColor) {
+      this.hide();
+      this.fireEvent('onComplete', [this.sets, this]);
+    } else {
+      this.backupColor = this.currentColor;
+      //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
+      this.hide();
+      this.fireEvent('onComplete', [this.sets, this]);
+    }
+  },
+
+  overlayDrag: function() {
+    var curH = this.snippet('curSize', 'int').h;
+    var curW = this.snippet('curSize', 'int').w;
+    this.pickerPos.x = this.snippet('curPos').l + curW;
+    this.pickerPos.y = this.snippet('curPos').t + curH;
+    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
+    this.fireEvent('onChange', [this.sets, this]);
+  },
+
+  sliderEvents: function() {
+    var arwH = this.snippet('arrSize', 'int'), lim;
+    lim = [0 + this.snippet('slider') - arwH, this.layout.slider.height - arwH + this.snippet('slider')];
+    this.layout.sliderDrag = new Drag(this.layout.arrows, {
+      limit: {y: lim},
+      modifiers: {x: false},
+      onBeforeStart: this.sliderDrag.bind(this),
+      onStart: this.sliderDrag.bind(this),
+      onDrag: this.sliderDrag.bind(this),
+      snap: 0
+    });
+
+    this.layout.slider.addEvent('mousedown', function(e) {
+      this.layout.arrows.setStyle('top', e.page.y - this.layout.slider.getTop() + this.snippet('slider') - arwH);
+      this.layout.sliderDrag.start(e);
+    }.bind(this));
+  },
+
+  sliderDrag: function() {
+    var arwH = this.snippet('arrSize', 'int'), hue;
+
+    this.sliderPos = this.snippet('arrPos') - arwH;
+    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
+    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
+    this.layout.overlay.setStyle('background-color', hue);
+    this.fireEvent('onChange', [this.sets, this]);
+  },
+
+  backupEvent: function() {
+    /*
+    this.layout.backup.addEvent('click', function() {
+      this.manualSet(this.backupColor);
+      this.fireEvent('onChange', [this.sets, this]);
+    }.bind(this));
+    */
+  },
+
+  wheelEvents: function() {
+    var arrColors = Object.append(Array.from(this.arrRGB), this.arrHSB);
+    arrColors.each(function(el) {
+      el.addEvents({
+        'mousewheel': function() {
+          this.eventKeys(el);
+        }.bind(this),
+        'keydown': function() {
+          this.eventKeys(el);
+        }.bind(this)
+      });
+    }, this);
+
+    [this.layout.arrows, this.layout.slider].each(function(el) {
+      el.addEvents({
+        'mousewheel': function() {
+          this.eventKeys([this.arrHSB[0], 'slider']);
+        }.bind(this),
+        'keydown': function() {
+          this.eventKeys([this.arrHSB[0], 'slider']);
+        }.bind(this)
+      });
+    }, this);
+  },
+
+  eventKeys: function(e, el, id) {
+    var wheel, type;
+    id = (!id) ? el.id : this.arrHSB[0];
+
+    if (e.type == 'keydown') {
+      if (e.key == 'up') wheel = 1; else if (e.key == 'down') wheel = -1; else return;
+    } else if (e.type == Element.Events.mousewheel.base) wheel = (e.wheel > 0) ? 1 : -1;
+
+    if (this.arrRGB.contains(el)) type = 'rgb'; else if (this.arrHSB.contains(el)) type = 'hsb'; else type = 'hsb';
+
+    if (type == 'rgb') {
+      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
+      var value = (el.value.toInt() || 0) + wheel;
+      value = (value > 255) ? 255 : (value < 0) ? 0 : value;
+
+      switch (el.className) {
+        case prefix + 'rInput':
+          pass = [value, rgb[1], rgb[2]];
+          break;
+        case prefix + 'gInput':
+          pass = [rgb[0], value, rgb[2]];
+          break;
+        case prefix + 'bInput':
+          pass = [rgb[0], rgb[1], value];
+          break;
+        default :
+          pass = rgb;
+      }
+      this.manualSet(pass);
+      this.fireEvent('onChange', [this.sets, this]);
+    } else {
+      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
+      var value = (el.value.toInt() || 0) + wheel;
+
+      if (el.className.test(/(HueInput)/)) value = (value > 359) ? 0 : (value < 0) ? 0 : value; else value = (value > 100) ? 100 : (value < 0) ? 0 : value;
+
+      switch (el.className) {
+        case prefix + 'HueInput':
+          pass = [value, hsb[1], hsb[2]];
+          break;
+        case prefix + 'SatuInput':
+          pass = [hsb[0], value, hsb[2]];
+          break;
+        case prefix + 'BrighInput':
+          pass = [hsb[0], hsb[1], value];
+          break;
+        default :
+          pass = hsb;
+      }
+
+      this.manualSet(pass, 'hsb');
+      this.fireEvent('onChange', [this.sets, this]);
+    }
+    e.stop();
+  },
+
+  eventKeydown: function(e, el) {
+    var n = e.code, k = e.key;
+    if ((!el.className.test(/hexInput/) && !(n >= 48 && n <= 57)) && (k != 'backspace' && k != 'tab' && k != 'delete' && k != 'left' && k != 'right'))
+      e.stop();
+  },
+
+  eventKeyup: function(e, el) {
+    var n = e.code, k = e.key, pass, prefix, chr = el.value.charAt(0);
+    if (el.value == null) return;
+    if (el.className.test(/hexInput/)) {
+      if (chr != "#" && el.value.length != 6) return;
+      if (chr == '#' && el.value.length != 7) return;
+    } else {
+      if (!(n >= 48 && n <= 57) && (!['backspace', 'tab', 'delete', 'left', 'right'].contains(k)) && el.value.length > 3) return;
+    }
+
+    prefix = this.options.prefix;
+
+    if (el.className.test(/(rInput|gInput|bInput)/)) {
+      if (el.value < 0 || el.value > 255) return;
+      switch (el.className) {
+        case prefix + 'rInput':
+          pass = [el.value, this.sets.rgb[1], this.sets.rgb[2]];
+          break;
+        case prefix + 'gInput':
+          pass = [this.sets.rgb[0], el.value, this.sets.rgb[2]];
+          break;
+        case prefix + 'bInput':
+          pass = [this.sets.rgb[0], this.sets.rgb[1], el.value];
+          break;
+        default :
+          pass = this.sets.rgb;
+      }
+      this.manualSet(pass);
+      this.fireEvent('onChange', [this.sets, this]);
+    } else if (!el.className.test(/hexInput/)) {
+      if (el.className.test(/HueInput/) && el.value < 0 || el.value > 360) return; else if (el.className.test(/HueInput/) && el.value == 360) el.value = 0; else if (el.className.test(/(SatuInput|BrighInput)/) && el.value < 0 || el.value > 100) return;
+      switch (el.className) {
+        case prefix + 'HueInput':
+          pass = [el.value, this.sets.hsb[1], this.sets.hsb[2]];
+          break;
+        case prefix + 'SatuInput':
+          pass = [this.sets.hsb[0], el.value, this.sets.hsb[2]];
+          break;
+        case prefix + 'BrighInput':
+          pass = [this.sets.hsb[0], this.sets.hsb[1], el.value];
+          break;
+        default :
+          pass = this.sets.hsb;
+      }
+      this.manualSet(pass, 'hsb');
+      this.fireEvent('onChange', [this.sets, this]);
+    } else {
+      pass = el.value.hexToRgb(true);
+      if (isNaN(pass[0]) || isNaN(pass[1]) || isNaN(pass[2])) return;
+      if (pass != null) {
+        this.manualSet(pass);
+        this.fireEvent('onChange', [this.sets, this]);
+      }
+    }
+  },
+
+  doLayout: function() {
+    var id = this.options.id, prefix = this.options.prefix;
+    var idPrefix = id + ' .' + prefix;
+
+    this.layout = new Element('div', {
+      'styles': Object.merge({ 'display': 'block', 'position': 'absolute', zIndex: 10}, this.options.styles),
+      'id': id
+    }).inject(this.options.eParent);
+
+    Ngn.Rainbows.push(this);
+
+    var box = new Element('div', {
+      'styles': {'position': 'relative'},
+      'class': prefix + 'box'
+    }).inject(this.layout);
+
+    var div = new Element('div', {
+      'styles': {'position': 'absolute', 'overflow': 'hidden'},
+      'class': prefix + 'overlayBox'
+    }).inject(box);
+
+    var ar = new Element('div', {
+      'styles': {
+        'position': 'absolute'
+        //,'zIndex': 1
+      },
+      'class': prefix + 'arrows'
+    }).inject(box);
+    ar.width = ar.getStyle('width').toInt();
+    ar.height = ar.getStyle('height').toInt();
+
+    var ov = new Element('img', {
+      'styles': {
+        'background-color': '#fff',
+        'position': 'relative'
+        //,'zIndex': 2
+      },
+      'src': this.options.imgPath + 'moor_woverlay.png',
+      'class': prefix + 'overlay'
+    }).inject(div);
+
+    var ov2 = new Element('img', {
+      'styles': {'position': 'absolute', 'top': 0, 'left': 0/*, 'zIndex': 2*/},
+      'src': this.options.imgPath + 'moor_boverlay.png',
+      'class': prefix + 'overlay'
+    }).inject(div);
+
+    if (window.ie6) {
+      div.setStyle('overflow', '');
+      var src = ov.src;
+      ov.src = this.options.imgPath + 'blank.gif';
+      ov.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
+      src = ov2.src;
+      ov2.src = this.options.imgPath + 'blank.gif';
+      ov2.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
+    }
+    ov.width = ov2.width = div.getStyle('width').toInt();
+    ov.height = ov2.height = div.getStyle('height').toInt();
+
+    var cr = new Element('div', {
+      'styles': {'overflow': 'hidden', 'position': 'absolute'/*, 'zIndex': 2*/},
+      'class': prefix + 'cursor'
+    }).inject(div);
+    cr.width = cr.getStyle('width').toInt();
+    cr.height = cr.getStyle('height').toInt();
+
+    var sl = new Element('img', {
+      'styles': {'position': 'absolute'/*, 'z-index': 2, marginLeft: '1px'*/},
+      'src': this.options.imgPath + 'moor_slider.png',
+      'class': prefix + 'slider'
+    }).inject(box);
+    this.layout.slider = document.getElement('#' + idPrefix + 'slider');
+    sl.width = sl.getStyle('width').toInt();
+    sl.height = sl.getStyle('height').toInt();
+
+    new Element('div', {
+      'styles': {'position': 'absolute'},
+      'class': prefix + 'colorBox'
+    }).inject(box);
+
+    /*
+     new Element('div', {
+      'styles': {
+      //'zIndex': 2,
+      'position': 'absolute'
+      },
+      'class': prefix + 'chooseColor'
+    }).inject(box);
+
+    this.layout.backup = new Element('div', {
+      'styles': {
+        //'zIndex': 2,
+        'position': 'absolute', 'cursor': 'pointer'},
+      'class': prefix + 'currentColor'
+    }).inject(box);
+    */
+
+    var R = new Element('label').inject(box).setStyle('position', 'absolute');
+    var G = R.clone().inject(box).addClass(prefix + 'gLabel').appendText('G: ');
+    var B = R.clone().inject(box).addClass(prefix + 'bLabel').appendText('B: ');
+    R.appendText('R: ').addClass(prefix + 'rLabel');
+
+    var inputR = new Element('input');
+    var inputG = inputR.clone().inject(G).addClass(prefix + 'gInput');
+    var inputB = inputR.clone().inject(B).addClass(prefix + 'bInput');
+    inputR.inject(R).addClass(prefix + 'rInput');
+
+    var HU = new Element('label').inject(box).setStyle('position', 'absolute');
+    var SA = HU.clone().inject(box).addClass(prefix + 'SatuLabel').appendText('S: ');
+    var BR = HU.clone().inject(box).addClass(prefix + 'BrighLabel').appendText('B: ');
+    HU.appendText('H: ').addClass(prefix + 'HueLabel');
+
+    var inputHU = new Element('input');
+    var inputSA = inputHU.clone().inject(SA).addClass(prefix + 'SatuInput');
+    var inputBR = inputHU.clone().inject(BR).addClass(prefix + 'BrighInput');
+    inputHU.inject(HU).addClass(prefix + 'HueInput');
+    SA.appendText(' %');
+    BR.appendText(' %');
+    new Element('span', {'styles': {'position': 'absolute'}, 'class': prefix + 'ballino'}).set('html', " &deg;").inject(HU, 'after');
+
+    //var hex = new Element('label').inject(box).setStyle('position', 'absolute').addClass(prefix + 'hexLabel').appendText('#hex: ').adopt(new Element('input').addClass(prefix + 'hexInput'));
+
+    /*
+    var ok = new Element('input', {
+      'styles': {'position': 'absolute'},
+      'type': 'button',
+      'value': 'OK',
+      'class': prefix + 'okButton'
+    }).inject(box);
+    */
+
+    var transp = new Element('a', {'style': {'position': 'absolute'}, 'href': '#', 'class': prefix + 'transp'}).inject(box);
+
+    this.rePosition();
+
+    var overlays = $$('#' + idPrefix + 'overlay');
+    this.layout.overlay = overlays[0];
+
+    this.layout.overlay2 = overlays[1];
+    this.layout.cursor = document.getElement('#' + idPrefix + 'cursor');
+    this.layout.arrows = document.getElement('#' + idPrefix + 'arrows');
+    this.chooseColor = document.getElement('#' + idPrefix + 'chooseColor');
+    //this.layout.backup = document.getElement('#' + idPrefix + 'currentColor');
+    this.RedInput = document.getElement('#' + idPrefix + 'rInput');
+    this.GreenInput = document.getElement('#' + idPrefix + 'gInput');
+    this.BlueInput = document.getElement('#' + idPrefix + 'bInput');
+    this.HueInput = document.getElement('#' + idPrefix + 'HueInput');
+    this.SatuInput = document.getElement('#' + idPrefix + 'SatuInput');
+    this.BrighInput = document.getElement('#' + idPrefix + 'BrighInput');
+    //this.hexInput = document.getElement('#' + idPrefix + 'hexInput');
+
+    this.arrRGB = [this.RedInput, this.GreenInput, this.BlueInput];
+    this.arrHSB = [this.HueInput, this.SatuInput, this.BrighInput];
+    //this.okButton = document.getElement('#' + idPrefix + 'okButton');
+    this.transp = box.getElement('.' + prefix + 'transp');
+
+    if (!window.khtml) this.hide();
+  },
+  rePosition: function() {
+    return;
+    var coords = this.element.getCoordinates();
+    this.layout.setStyles({
+      'left': coords.left,
+      'top': coords.top + coords.height + 1
+    });
+  },
+
+  snippet: function(mode, type) {
+    var size;
+    type = (type) ? type : 'none';
+    switch (mode) {
+      case 'arrPos':
+        var t = this.layout.arrows.getStyle('top').toInt();
+        size = t;
+        break;
+      case 'arrSize':
+        var h = this.layout.arrows.height;
+        h = (type == 'int') ? (h / 2).toInt() : h;
+        size = h;
+        break;
+      case 'curPos':
+        var l = this.layout.cursor.getStyle('left').toInt();
+        var t = this.layout.cursor.getStyle('top').toInt();
+        size = {'l': l, 't': t};
+        break;
+      case 'slider':
+        var t = this.layout.slider.getStyle('marginTop').toInt();
+        size = t;
+        break;
+      default :
+        var h = this.layout.cursor.height;
+        var w = this.layout.cursor.width;
+        h = (type == 'int') ? (h / 2).toInt() : h;
+        w = (type == 'int') ? (w / 2).toInt() : w;
+        size = {w: w, h: h};
+    }
+    ;
+    return size;
+  }
+});
+
+Ngn.Rainbow.implement(new Options);
+Ngn.Rainbow.implement(new Events);
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.Html.js|--*/
+Ngn.FieldSet.Html = new Class({
+  Extends: Ngn.FieldSet,
+
+  getContainer: function() {
+    return this.eContainerInit;
+  },
+
+  initialize: function(container, options) {
+    this.eContainerInit = $(container);
+    this.parent(this.eContainerInit.getParent(), options);
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.FieldSet.js|--*/
+Ngn.Frm.fieldSets = [];
+
+Ngn.Frm.FieldSet = new Class({
+  Extends: Ngn.FieldSet.Html,
+  form: null, // Ngn.Form
+
+  initialize: function(form, container, options) {
+    this.form = form;
+    Ngn.Frm.fieldSets.include(this);
+    this.parent(container, options);
+    this.initVirtualElement(this.eContainer);
+  },
+
+  initInput: function(eInput) {
+    this.form.initActiveEl(eInput);
+  },
+
+  afterAddRow: function(eNewRow) {
+    this.form.addElements(eNewRow);
+  }
+
+});
+
+Ngn.Frm.FieldSet.implement(Ngn.Frm.virtualElement);

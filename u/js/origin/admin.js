@@ -438,6 +438,128 @@ String.extend('uniqueID', function(){
 /*
 ---
 
+name: Object
+
+description: Object generic methods
+
+license: MIT-style license.
+
+requires: Type
+
+provides: [Object, Hash]
+
+...
+*/
+
+(function(){
+
+Object.extend({
+
+	subset: function(object, keys){
+		var results = {};
+		for (var i = 0, l = keys.length; i < l; i++){
+			var k = keys[i];
+			if (k in object) results[k] = object[k];
+		}
+		return results;
+	},
+
+	map: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			results[key] = fn.call(bind, object[key], key, object);
+		}
+		return results;
+	},
+
+	filter: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i], value = object[key];
+			if (fn.call(bind, value, key, object)) results[key] = value;
+		}
+		return results;
+	},
+
+	every: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (!fn.call(bind, object[key], key)) return false;
+		}
+		return true;
+	},
+
+	some: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (fn.call(bind, object[key], key)) return true;
+		}
+		return false;
+	},
+
+	values: function(object){
+		var values = [];
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var k = keys[i];
+			values.push(object[k]);
+		}
+		return values;
+	},
+
+	getLength: function(object){
+		return Object.keys(object).length;
+	},
+
+	keyOf: function(object, value){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (object[key] === value) return key;
+		}
+		return null;
+	},
+
+	contains: function(object, value){
+		return Object.keyOf(object, value) != null;
+	},
+
+	toQueryString: function(object, base){
+		var queryString = [];
+
+		Object.each(object, function(value, key){
+			if (base) key = base + '[' + key + ']';
+			var result;
+			switch (typeOf(value)){
+				case 'object': result = Object.toQueryString(value, key); break;
+				case 'array':
+					var qs = {};
+					value.each(function(val, i){
+						qs[i] = val;
+					});
+					result = Object.toQueryString(qs, key);
+					break;
+				default: result = key + '=' + encodeURIComponent(value);
+			}
+			if (value != null) queryString.push(result);
+		});
+
+		return queryString.join('&');
+	}
+
+});
+
+})();
+
+
+/*
+---
+
 name: Array
 
 description: Contains Array Prototypes like each, contains, and erase.
@@ -1025,128 +1147,6 @@ try {
 
 
 })();
-/*
----
-
-name: Object
-
-description: Object generic methods
-
-license: MIT-style license.
-
-requires: Type
-
-provides: [Object, Hash]
-
-...
-*/
-
-(function(){
-
-Object.extend({
-
-	subset: function(object, keys){
-		var results = {};
-		for (var i = 0, l = keys.length; i < l; i++){
-			var k = keys[i];
-			if (k in object) results[k] = object[k];
-		}
-		return results;
-	},
-
-	map: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			results[key] = fn.call(bind, object[key], key, object);
-		}
-		return results;
-	},
-
-	filter: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i], value = object[key];
-			if (fn.call(bind, value, key, object)) results[key] = value;
-		}
-		return results;
-	},
-
-	every: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (!fn.call(bind, object[key], key)) return false;
-		}
-		return true;
-	},
-
-	some: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (fn.call(bind, object[key], key)) return true;
-		}
-		return false;
-	},
-
-	values: function(object){
-		var values = [];
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var k = keys[i];
-			values.push(object[k]);
-		}
-		return values;
-	},
-
-	getLength: function(object){
-		return Object.keys(object).length;
-	},
-
-	keyOf: function(object, value){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (object[key] === value) return key;
-		}
-		return null;
-	},
-
-	contains: function(object, value){
-		return Object.keyOf(object, value) != null;
-	},
-
-	toQueryString: function(object, base){
-		var queryString = [];
-
-		Object.each(object, function(value, key){
-			if (base) key = base + '[' + key + ']';
-			var result;
-			switch (typeOf(value)){
-				case 'object': result = Object.toQueryString(value, key); break;
-				case 'array':
-					var qs = {};
-					value.each(function(val, i){
-						qs[i] = val;
-					});
-					result = Object.toQueryString(qs, key);
-					break;
-				default: result = key + '=' + encodeURIComponent(value);
-			}
-			if (value != null) queryString.push(result);
-		});
-
-		return queryString.join('&');
-	}
-
-});
-
-})();
-
-
 /*
 ---
 name: Slick.Parser
@@ -3475,323 +3475,6 @@ if (document.createElement('div').getAttributeNode('id')) Element.Properties.id 
 /*
 ---
 
-name: Event
-
-description: Contains the Event Type, to make the event object cross-browser.
-
-license: MIT-style license.
-
-requires: [Window, Document, Array, Function, String, Object]
-
-provides: Event
-
-...
-*/
-
-(function(){
-
-var _keys = {};
-var normalizeWheelSpeed = function(event){
-	var normalized;
-	if (event.wheelDelta){
-		normalized = event.wheelDelta % 120 == 0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
-	} else {
-		var rawAmount = event.deltaY || event.detail || 0;
-		normalized = -(rawAmount % 3 == 0 ? rawAmount / 3 : rawAmount * 10);
-	}
-	return normalized;
-};
-
-var DOMEvent = this.DOMEvent = new Type('DOMEvent', function(event, win){
-	if (!win) win = window;
-	event = event || win.event;
-	if (event.$extended) return event;
-	this.event = event;
-	this.$extended = true;
-	this.shift = event.shiftKey;
-	this.control = event.ctrlKey;
-	this.alt = event.altKey;
-	this.meta = event.metaKey;
-	var type = this.type = event.type;
-	var target = event.target || event.srcElement;
-	while (target && target.nodeType == 3) target = target.parentNode;
-	this.target = document.id(target);
-
-	if (type.indexOf('key') == 0){
-		var code = this.code = (event.which || event.keyCode);
-		if (!this.shift || type != 'keypress') this.key = _keys[code];
-		if (type == 'keydown' || type == 'keyup'){
-			if (code > 111 && code < 124) this.key = 'f' + (code - 111);
-			else if (code > 95 && code < 106) this.key = code - 96;
-		}
-		if (this.key == null) this.key = String.fromCharCode(code).toLowerCase();
-	} else if (type == 'click' || type == 'dblclick' || type == 'contextmenu' || type == 'wheel' || type == 'DOMMouseScroll' || type.indexOf('mouse') == 0){
-		var doc = win.document;
-		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
-		this.page = {
-			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
-			y: (event.pageY != null) ? event.pageY : event.clientY + doc.scrollTop
-		};
-		this.client = {
-			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
-			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
-		};
-		if (type == 'DOMMouseScroll' || type == 'wheel' || type == 'mousewheel') this.wheel = normalizeWheelSpeed(event);
-		this.rightClick = (event.which == 3 || event.button == 2);
-		if (type == 'mouseover' || type == 'mouseout' || type == 'mouseenter' || type == 'mouseleave'){
-			var overTarget = type == 'mouseover' || type == 'mouseenter';
-			var related = event.relatedTarget || event[(overTarget ? 'from' : 'to') + 'Element'];
-			while (related && related.nodeType == 3) related = related.parentNode;
-			this.relatedTarget = document.id(related);
-		}
-	} else if (type.indexOf('touch') == 0 || type.indexOf('gesture') == 0){
-		this.rotation = event.rotation;
-		this.scale = event.scale;
-		this.targetTouches = event.targetTouches;
-		this.changedTouches = event.changedTouches;
-		var touches = this.touches = event.touches;
-		if (touches && touches[0]){
-			var touch = touches[0];
-			this.page = {x: touch.pageX, y: touch.pageY};
-			this.client = {x: touch.clientX, y: touch.clientY};
-		}
-	}
-
-	if (!this.client) this.client = {};
-	if (!this.page) this.page = {};
-});
-
-DOMEvent.implement({
-
-	stop: function(){
-		return this.preventDefault().stopPropagation();
-	},
-
-	stopPropagation: function(){
-		if (this.event.stopPropagation) this.event.stopPropagation();
-		else this.event.cancelBubble = true;
-		return this;
-	},
-
-	preventDefault: function(){
-		if (this.event.preventDefault) this.event.preventDefault();
-		else this.event.returnValue = false;
-		return this;
-	}
-
-});
-
-DOMEvent.defineKey = function(code, key){
-	_keys[code] = key;
-	return this;
-};
-
-DOMEvent.defineKeys = DOMEvent.defineKey.overloadSetter(true);
-
-DOMEvent.defineKeys({
-	'38': 'up', '40': 'down', '37': 'left', '39': 'right',
-	'27': 'esc', '32': 'space', '8': 'backspace', '9': 'tab',
-	'46': 'delete', '13': 'enter'
-});
-
-})();
-
-
-
-
-/*
----
-
-name: Element.Event
-
-description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events, if necessary.
-
-license: MIT-style license.
-
-requires: [Element, Event]
-
-provides: Element.Event
-
-...
-*/
-
-(function(){
-
-Element.Properties.events = {set: function(events){
-	this.addEvents(events);
-}};
-
-[Element, Window, Document].invoke('implement', {
-
-	addEvent: function(type, fn){
-		var events = this.retrieve('events', {});
-		if (!events[type]) events[type] = {keys: [], values: []};
-		if (events[type].keys.contains(fn)) return this;
-		events[type].keys.push(fn);
-		var realType = type,
-			custom = Element.Events[type],
-			condition = fn,
-			self = this;
-		if (custom){
-			if (custom.onAdd) custom.onAdd.call(this, fn, type);
-			if (custom.condition){
-				condition = function(event){
-					if (custom.condition.call(this, event, type)) return fn.call(this, event);
-					return true;
-				};
-			}
-			if (custom.base) realType = Function.convert(custom.base).call(this, type);
-		}
-		var defn = function(){
-			return fn.call(self);
-		};
-		var nativeEvent = Element.NativeEvents[realType];
-		if (nativeEvent){
-			if (nativeEvent == 2){
-				defn = function(event){
-					event = new DOMEvent(event, self.getWindow());
-					if (condition.call(self, event) === false) event.stop();
-				};
-			}
-			this.addListener(realType, defn, arguments[2]);
-		}
-		events[type].values.push(defn);
-		return this;
-	},
-
-	removeEvent: function(type, fn){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		var list = events[type];
-		var index = list.keys.indexOf(fn);
-		if (index == -1) return this;
-		var value = list.values[index];
-		delete list.keys[index];
-		delete list.values[index];
-		var custom = Element.Events[type];
-		if (custom){
-			if (custom.onRemove) custom.onRemove.call(this, fn, type);
-			if (custom.base) type = Function.convert(custom.base).call(this, type);
-		}
-		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
-	},
-
-	addEvents: function(events){
-		for (var event in events) this.addEvent(event, events[event]);
-		return this;
-	},
-
-	removeEvents: function(events){
-		var type;
-		if (typeOf(events) == 'object'){
-			for (type in events) this.removeEvent(type, events[type]);
-			return this;
-		}
-		var attached = this.retrieve('events');
-		if (!attached) return this;
-		if (!events){
-			for (type in attached) this.removeEvents(type);
-			this.eliminate('events');
-		} else if (attached[events]){
-			attached[events].keys.each(function(fn){
-				this.removeEvent(events, fn);
-			}, this);
-			delete attached[events];
-		}
-		return this;
-	},
-
-	fireEvent: function(type, args, delay){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		args = Array.convert(args);
-
-		events[type].keys.each(function(fn){
-			if (delay) fn.delay(delay, this, args);
-			else fn.apply(this, args);
-		}, this);
-		return this;
-	},
-
-	cloneEvents: function(from, type){
-		from = document.id(from);
-		var events = from.retrieve('events');
-		if (!events) return this;
-		if (!type){
-			for (var eventType in events) this.cloneEvents(from, eventType);
-		} else if (events[type]){
-			events[type].keys.each(function(fn){
-				this.addEvent(type, fn);
-			}, this);
-		}
-		return this;
-	}
-
-});
-
-Element.NativeEvents = {
-	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
-	wheel: 2, mousewheel: 2, DOMMouseScroll: 2, //mouse wheel
-	mouseover: 2, mouseout: 2, mousemove: 2, selectstart: 2, selectend: 2, //mouse movement
-	keydown: 2, keypress: 2, keyup: 2, //keyboard
-	orientationchange: 2, // mobile
-	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
-	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
-	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
-	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
-	hashchange: 1, popstate: 2, pageshow: 2, pagehide: 2, // history
-	error: 1, abort: 1, scroll: 1, message: 2 //misc
-};
-
-Element.Events = {
-	mousewheel: {
-		base: 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll'
-	}
-};
-
-var check = function(event){
-	var related = event.relatedTarget;
-	if (related == null) return true;
-	if (!related) return false;
-	return (related != this && related.prefix != 'xul' && typeOf(this) != 'document' && !this.contains(related));
-};
-
-if ('onmouseenter' in document.documentElement){
-	Element.NativeEvents.mouseenter = Element.NativeEvents.mouseleave = 2;
-	Element.MouseenterCheck = check;
-} else {
-	Element.Events.mouseenter = {
-		base: 'mouseover',
-		condition: check
-	};
-
-	Element.Events.mouseleave = {
-		base: 'mouseout',
-		condition: check
-	};
-}
-
-/*<ltIE9>*/
-if (!window.addEventListener){
-	Element.NativeEvents.propertychange = 2;
-	Element.Events.change = {
-		base: function(){
-			var type = this.type;
-			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change';
-		},
-		condition: function(event){
-			return event.type != 'propertychange' || event.event.propertyName == 'checked';
-		}
-	};
-}
-/*</ltIE9>*/
-
-
-
-})();
-/*
----
-
 name: Class
 
 description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
@@ -4245,6 +3928,616 @@ if (typeof process !== 'undefined' && typeof process.nextTick === 'function'){
 		setTimeout(fn, 0);
 	};
 }
+
+})();
+/*
+---
+
+name: Request
+
+description: Powerful all purpose Request Class. Uses XMLHTTPRequest.
+
+license: MIT-style license.
+
+requires: [Object, Element, Chain, Events, Options, Class.Thenable, Browser]
+
+provides: Request
+
+...
+*/
+
+(function(){
+
+var empty = function(){},
+	progressSupport = ('onprogress' in new Browser.Request);
+
+var Request = this.Request = new Class({
+
+	Implements: [Chain, Events, Options, Class.Thenable],
+
+	options: {/*
+		onRequest: function(){},
+		onLoadstart: function(event, xhr){},
+		onProgress: function(event, xhr){},
+		onComplete: function(){},
+		onCancel: function(){},
+		onSuccess: function(responseText, responseXML){},
+		onFailure: function(xhr){},
+		onException: function(headerName, value){},
+		onTimeout: function(){},
+		user: '',
+		password: '',
+		withCredentials: false,*/
+		url: '',
+		data: '',
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest',
+			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+		},
+		async: true,
+		format: false,
+		method: 'post',
+		link: 'ignore',
+		isSuccess: null,
+		emulation: true,
+		urlEncoded: true,
+		encoding: 'utf-8',
+		evalScripts: false,
+		evalResponse: false,
+		timeout: 0,
+		noCache: false
+	},
+
+	initialize: function(options){
+		this.xhr = new Browser.Request();
+		this.setOptions(options);
+		this.headers = this.options.headers;
+	},
+
+	onStateChange: function(){
+		var xhr = this.xhr;
+		if (xhr.readyState != 4 || !this.running) return;
+		this.running = false;
+		this.status = 0;
+		Function.attempt(function(){
+			var status = xhr.status;
+			this.status = (status == 1223) ? 204 : status;
+		}.bind(this));
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
+		if (this.timer){
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+
+		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
+		if (this.options.isSuccess.call(this, this.status))
+			this.success(this.response.text, this.response.xml);
+		else
+			this.failure();
+	},
+
+	isSuccess: function(){
+		var status = this.status;
+		return (status >= 200 && status < 300);
+	},
+
+	isRunning: function(){
+		return !!this.running;
+	},
+
+	processScripts: function(text){
+		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return Browser.exec(text);
+		return text.stripScripts(this.options.evalScripts);
+	},
+
+	success: function(text, xml){
+		this.onSuccess(this.processScripts(text), xml);
+		this.resolve({text: text, xml: xml});
+	},
+
+	onSuccess: function(){
+		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
+	},
+
+	failure: function(){
+		this.onFailure();
+		this.reject({reason: 'failure', xhr: this.xhr});
+	},
+
+	onFailure: function(){
+		this.fireEvent('complete').fireEvent('failure', this.xhr);
+	},
+
+	loadstart: function(event){
+		this.fireEvent('loadstart', [event, this.xhr]);
+	},
+
+	progress: function(event){
+		this.fireEvent('progress', [event, this.xhr]);
+	},
+
+	timeout: function(){
+		this.fireEvent('timeout', this.xhr);
+		this.reject({reason: 'timeout', xhr: this.xhr});
+	},
+
+	setHeader: function(name, value){
+		this.headers[name] = value;
+		return this;
+	},
+
+	getHeader: function(name){
+		return Function.attempt(function(){
+			return this.xhr.getResponseHeader(name);
+		}.bind(this));
+	},
+
+	check: function(){
+		if (!this.running) return true;
+		switch (this.options.link){
+			case 'cancel': this.cancel(); return true;
+			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
+		}
+		return false;
+	},
+
+	send: function(options){
+		if (!this.check(options)) return this;
+
+		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
+		this.running = true;
+
+		var type = typeOf(options);
+		if (type == 'string' || type == 'element') options = {data: options};
+
+		var old = this.options;
+		options = Object.append({data: old.data, url: old.url, method: old.method}, options);
+		var data = options.data, url = String(options.url), method = options.method.toLowerCase();
+
+		switch (typeOf(data)){
+			case 'element': data = document.id(data).toQueryString(); break;
+			case 'object': case 'hash': data = Object.toQueryString(data);
+		}
+
+		if (this.options.format){
+			var format = 'format=' + this.options.format;
+			data = (data) ? format + '&' + data : format;
+		}
+
+		if (this.options.emulation && !['get', 'post'].contains(method)){
+			var _method = '_method=' + method;
+			data = (data) ? _method + '&' + data : _method;
+			method = 'post';
+		}
+
+		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
+			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
+			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
+		}
+
+		if (!url) url = document.location.pathname;
+
+		var trimPosition = url.lastIndexOf('/');
+		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
+
+		if (this.options.noCache)
+			url += (url.indexOf('?') > -1 ? '&' : '?') + String.uniqueID();
+
+		if (data && (method == 'get' || method == 'delete')){
+			url += (url.indexOf('?') > -1 ? '&' : '?') + data;
+			data = null;
+		}
+
+		var xhr = this.xhr;
+		if (progressSupport){
+			xhr.onloadstart = this.loadstart.bind(this);
+			xhr.onprogress = this.progress.bind(this);
+		}
+
+		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
+		if ((this.options.withCredentials) && 'withCredentials' in xhr) xhr.withCredentials = true;
+
+		xhr.onreadystatechange = this.onStateChange.bind(this);
+
+		Object.each(this.headers, function(value, key){
+			try {
+				xhr.setRequestHeader(key, value);
+			} catch (e){
+				this.fireEvent('exception', [key, value]);
+				this.reject({reason: 'exception', xhr: xhr, exception: e});
+			}
+		}, this);
+
+		if (this.getThenableState() !== 'pending'){
+			this.resetThenable({reason: 'send'});
+		}
+		this.fireEvent('request');
+		xhr.send(data);
+		if (!this.options.async) this.onStateChange();
+		else if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
+		return this;
+	},
+
+	cancel: function(){
+		if (!this.running) return this;
+		this.running = false;
+		var xhr = this.xhr;
+		xhr.abort();
+		if (this.timer){
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
+		this.xhr = new Browser.Request();
+		this.fireEvent('cancel');
+		this.reject({reason: 'cancel', xhr: xhr});
+		return this;
+	}
+
+});
+
+var methods = {};
+['get', 'post', 'put', 'delete', 'patch', 'head', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'].each(function(method){
+	methods[method] = function(data){
+		var object = {
+			method: method
+		};
+		if (data != null) object.data = data;
+		return this.send(object);
+	};
+});
+
+Request.implement(methods);
+
+Element.Properties.send = {
+
+	set: function(options){
+		var send = this.get('send').cancel();
+		send.setOptions(options);
+		return this;
+	},
+
+	get: function(){
+		var send = this.retrieve('send');
+		if (!send){
+			send = new Request({
+				data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
+			});
+			this.store('send', send);
+		}
+		return send;
+	}
+
+};
+
+Element.implement({
+
+	send: function(url){
+		var sender = this.get('send');
+		sender.send({data: this, url: url || sender.options.url});
+		return this;
+	}
+
+});
+
+})();
+/*
+---
+
+name: Event
+
+description: Contains the Event Type, to make the event object cross-browser.
+
+license: MIT-style license.
+
+requires: [Window, Document, Array, Function, String, Object]
+
+provides: Event
+
+...
+*/
+
+(function(){
+
+var _keys = {};
+var normalizeWheelSpeed = function(event){
+	var normalized;
+	if (event.wheelDelta){
+		normalized = event.wheelDelta % 120 == 0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
+	} else {
+		var rawAmount = event.deltaY || event.detail || 0;
+		normalized = -(rawAmount % 3 == 0 ? rawAmount / 3 : rawAmount * 10);
+	}
+	return normalized;
+};
+
+var DOMEvent = this.DOMEvent = new Type('DOMEvent', function(event, win){
+	if (!win) win = window;
+	event = event || win.event;
+	if (event.$extended) return event;
+	this.event = event;
+	this.$extended = true;
+	this.shift = event.shiftKey;
+	this.control = event.ctrlKey;
+	this.alt = event.altKey;
+	this.meta = event.metaKey;
+	var type = this.type = event.type;
+	var target = event.target || event.srcElement;
+	while (target && target.nodeType == 3) target = target.parentNode;
+	this.target = document.id(target);
+
+	if (type.indexOf('key') == 0){
+		var code = this.code = (event.which || event.keyCode);
+		if (!this.shift || type != 'keypress') this.key = _keys[code];
+		if (type == 'keydown' || type == 'keyup'){
+			if (code > 111 && code < 124) this.key = 'f' + (code - 111);
+			else if (code > 95 && code < 106) this.key = code - 96;
+		}
+		if (this.key == null) this.key = String.fromCharCode(code).toLowerCase();
+	} else if (type == 'click' || type == 'dblclick' || type == 'contextmenu' || type == 'wheel' || type == 'DOMMouseScroll' || type.indexOf('mouse') == 0){
+		var doc = win.document;
+		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
+		this.page = {
+			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
+			y: (event.pageY != null) ? event.pageY : event.clientY + doc.scrollTop
+		};
+		this.client = {
+			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
+			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
+		};
+		if (type == 'DOMMouseScroll' || type == 'wheel' || type == 'mousewheel') this.wheel = normalizeWheelSpeed(event);
+		this.rightClick = (event.which == 3 || event.button == 2);
+		if (type == 'mouseover' || type == 'mouseout' || type == 'mouseenter' || type == 'mouseleave'){
+			var overTarget = type == 'mouseover' || type == 'mouseenter';
+			var related = event.relatedTarget || event[(overTarget ? 'from' : 'to') + 'Element'];
+			while (related && related.nodeType == 3) related = related.parentNode;
+			this.relatedTarget = document.id(related);
+		}
+	} else if (type.indexOf('touch') == 0 || type.indexOf('gesture') == 0){
+		this.rotation = event.rotation;
+		this.scale = event.scale;
+		this.targetTouches = event.targetTouches;
+		this.changedTouches = event.changedTouches;
+		var touches = this.touches = event.touches;
+		if (touches && touches[0]){
+			var touch = touches[0];
+			this.page = {x: touch.pageX, y: touch.pageY};
+			this.client = {x: touch.clientX, y: touch.clientY};
+		}
+	}
+
+	if (!this.client) this.client = {};
+	if (!this.page) this.page = {};
+});
+
+DOMEvent.implement({
+
+	stop: function(){
+		return this.preventDefault().stopPropagation();
+	},
+
+	stopPropagation: function(){
+		if (this.event.stopPropagation) this.event.stopPropagation();
+		else this.event.cancelBubble = true;
+		return this;
+	},
+
+	preventDefault: function(){
+		if (this.event.preventDefault) this.event.preventDefault();
+		else this.event.returnValue = false;
+		return this;
+	}
+
+});
+
+DOMEvent.defineKey = function(code, key){
+	_keys[code] = key;
+	return this;
+};
+
+DOMEvent.defineKeys = DOMEvent.defineKey.overloadSetter(true);
+
+DOMEvent.defineKeys({
+	'38': 'up', '40': 'down', '37': 'left', '39': 'right',
+	'27': 'esc', '32': 'space', '8': 'backspace', '9': 'tab',
+	'46': 'delete', '13': 'enter'
+});
+
+})();
+
+
+
+
+/*
+---
+
+name: Element.Event
+
+description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events, if necessary.
+
+license: MIT-style license.
+
+requires: [Element, Event]
+
+provides: Element.Event
+
+...
+*/
+
+(function(){
+
+Element.Properties.events = {set: function(events){
+	this.addEvents(events);
+}};
+
+[Element, Window, Document].invoke('implement', {
+
+	addEvent: function(type, fn){
+		var events = this.retrieve('events', {});
+		if (!events[type]) events[type] = {keys: [], values: []};
+		if (events[type].keys.contains(fn)) return this;
+		events[type].keys.push(fn);
+		var realType = type,
+			custom = Element.Events[type],
+			condition = fn,
+			self = this;
+		if (custom){
+			if (custom.onAdd) custom.onAdd.call(this, fn, type);
+			if (custom.condition){
+				condition = function(event){
+					if (custom.condition.call(this, event, type)) return fn.call(this, event);
+					return true;
+				};
+			}
+			if (custom.base) realType = Function.convert(custom.base).call(this, type);
+		}
+		var defn = function(){
+			return fn.call(self);
+		};
+		var nativeEvent = Element.NativeEvents[realType];
+		if (nativeEvent){
+			if (nativeEvent == 2){
+				defn = function(event){
+					event = new DOMEvent(event, self.getWindow());
+					if (condition.call(self, event) === false) event.stop();
+				};
+			}
+			this.addListener(realType, defn, arguments[2]);
+		}
+		events[type].values.push(defn);
+		return this;
+	},
+
+	removeEvent: function(type, fn){
+		var events = this.retrieve('events');
+		if (!events || !events[type]) return this;
+		var list = events[type];
+		var index = list.keys.indexOf(fn);
+		if (index == -1) return this;
+		var value = list.values[index];
+		delete list.keys[index];
+		delete list.values[index];
+		var custom = Element.Events[type];
+		if (custom){
+			if (custom.onRemove) custom.onRemove.call(this, fn, type);
+			if (custom.base) type = Function.convert(custom.base).call(this, type);
+		}
+		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
+	},
+
+	addEvents: function(events){
+		for (var event in events) this.addEvent(event, events[event]);
+		return this;
+	},
+
+	removeEvents: function(events){
+		var type;
+		if (typeOf(events) == 'object'){
+			for (type in events) this.removeEvent(type, events[type]);
+			return this;
+		}
+		var attached = this.retrieve('events');
+		if (!attached) return this;
+		if (!events){
+			for (type in attached) this.removeEvents(type);
+			this.eliminate('events');
+		} else if (attached[events]){
+			attached[events].keys.each(function(fn){
+				this.removeEvent(events, fn);
+			}, this);
+			delete attached[events];
+		}
+		return this;
+	},
+
+	fireEvent: function(type, args, delay){
+		var events = this.retrieve('events');
+		if (!events || !events[type]) return this;
+		args = Array.convert(args);
+
+		events[type].keys.each(function(fn){
+			if (delay) fn.delay(delay, this, args);
+			else fn.apply(this, args);
+		}, this);
+		return this;
+	},
+
+	cloneEvents: function(from, type){
+		from = document.id(from);
+		var events = from.retrieve('events');
+		if (!events) return this;
+		if (!type){
+			for (var eventType in events) this.cloneEvents(from, eventType);
+		} else if (events[type]){
+			events[type].keys.each(function(fn){
+				this.addEvent(type, fn);
+			}, this);
+		}
+		return this;
+	}
+
+});
+
+Element.NativeEvents = {
+	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
+	wheel: 2, mousewheel: 2, DOMMouseScroll: 2, //mouse wheel
+	mouseover: 2, mouseout: 2, mousemove: 2, selectstart: 2, selectend: 2, //mouse movement
+	keydown: 2, keypress: 2, keyup: 2, //keyboard
+	orientationchange: 2, // mobile
+	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
+	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
+	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
+	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
+	hashchange: 1, popstate: 2, pageshow: 2, pagehide: 2, // history
+	error: 1, abort: 1, scroll: 1, message: 2 //misc
+};
+
+Element.Events = {
+	mousewheel: {
+		base: 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll'
+	}
+};
+
+var check = function(event){
+	var related = event.relatedTarget;
+	if (related == null) return true;
+	if (!related) return false;
+	return (related != this && related.prefix != 'xul' && typeOf(this) != 'document' && !this.contains(related));
+};
+
+if ('onmouseenter' in document.documentElement){
+	Element.NativeEvents.mouseenter = Element.NativeEvents.mouseleave = 2;
+	Element.MouseenterCheck = check;
+} else {
+	Element.Events.mouseenter = {
+		base: 'mouseover',
+		condition: check
+	};
+
+	Element.Events.mouseleave = {
+		base: 'mouseout',
+		condition: check
+	};
+}
+
+/*<ltIE9>*/
+if (!window.addEventListener){
+	Element.NativeEvents.propertychange = 2;
+	Element.Events.change = {
+		base: function(){
+			var type = this.type;
+			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change';
+		},
+		condition: function(event){
+			return event.type != 'propertychange' || event.event.propertyName == 'checked';
+		}
+	};
+}
+/*</ltIE9>*/
+
+
 
 })();
 /*
@@ -5156,299 +5449,6 @@ Fx.Transitions.extend({
 		return Math.pow(p, i + 2);
 	});
 });
-/*
----
-
-name: Request
-
-description: Powerful all purpose Request Class. Uses XMLHTTPRequest.
-
-license: MIT-style license.
-
-requires: [Object, Element, Chain, Events, Options, Class.Thenable, Browser]
-
-provides: Request
-
-...
-*/
-
-(function(){
-
-var empty = function(){},
-	progressSupport = ('onprogress' in new Browser.Request);
-
-var Request = this.Request = new Class({
-
-	Implements: [Chain, Events, Options, Class.Thenable],
-
-	options: {/*
-		onRequest: function(){},
-		onLoadstart: function(event, xhr){},
-		onProgress: function(event, xhr){},
-		onComplete: function(){},
-		onCancel: function(){},
-		onSuccess: function(responseText, responseXML){},
-		onFailure: function(xhr){},
-		onException: function(headerName, value){},
-		onTimeout: function(){},
-		user: '',
-		password: '',
-		withCredentials: false,*/
-		url: '',
-		data: '',
-		headers: {
-			'X-Requested-With': 'XMLHttpRequest',
-			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-		},
-		async: true,
-		format: false,
-		method: 'post',
-		link: 'ignore',
-		isSuccess: null,
-		emulation: true,
-		urlEncoded: true,
-		encoding: 'utf-8',
-		evalScripts: false,
-		evalResponse: false,
-		timeout: 0,
-		noCache: false
-	},
-
-	initialize: function(options){
-		this.xhr = new Browser.Request();
-		this.setOptions(options);
-		this.headers = this.options.headers;
-	},
-
-	onStateChange: function(){
-		var xhr = this.xhr;
-		if (xhr.readyState != 4 || !this.running) return;
-		this.running = false;
-		this.status = 0;
-		Function.attempt(function(){
-			var status = xhr.status;
-			this.status = (status == 1223) ? 204 : status;
-		}.bind(this));
-		xhr.onreadystatechange = empty;
-		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
-		if (this.timer){
-			clearTimeout(this.timer);
-			delete this.timer;
-		}
-
-		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
-		if (this.options.isSuccess.call(this, this.status))
-			this.success(this.response.text, this.response.xml);
-		else
-			this.failure();
-	},
-
-	isSuccess: function(){
-		var status = this.status;
-		return (status >= 200 && status < 300);
-	},
-
-	isRunning: function(){
-		return !!this.running;
-	},
-
-	processScripts: function(text){
-		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return Browser.exec(text);
-		return text.stripScripts(this.options.evalScripts);
-	},
-
-	success: function(text, xml){
-		this.onSuccess(this.processScripts(text), xml);
-		this.resolve({text: text, xml: xml});
-	},
-
-	onSuccess: function(){
-		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
-	},
-
-	failure: function(){
-		this.onFailure();
-		this.reject({reason: 'failure', xhr: this.xhr});
-	},
-
-	onFailure: function(){
-		this.fireEvent('complete').fireEvent('failure', this.xhr);
-	},
-
-	loadstart: function(event){
-		this.fireEvent('loadstart', [event, this.xhr]);
-	},
-
-	progress: function(event){
-		this.fireEvent('progress', [event, this.xhr]);
-	},
-
-	timeout: function(){
-		this.fireEvent('timeout', this.xhr);
-		this.reject({reason: 'timeout', xhr: this.xhr});
-	},
-
-	setHeader: function(name, value){
-		this.headers[name] = value;
-		return this;
-	},
-
-	getHeader: function(name){
-		return Function.attempt(function(){
-			return this.xhr.getResponseHeader(name);
-		}.bind(this));
-	},
-
-	check: function(){
-		if (!this.running) return true;
-		switch (this.options.link){
-			case 'cancel': this.cancel(); return true;
-			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
-		}
-		return false;
-	},
-
-	send: function(options){
-		if (!this.check(options)) return this;
-
-		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
-		this.running = true;
-
-		var type = typeOf(options);
-		if (type == 'string' || type == 'element') options = {data: options};
-
-		var old = this.options;
-		options = Object.append({data: old.data, url: old.url, method: old.method}, options);
-		var data = options.data, url = String(options.url), method = options.method.toLowerCase();
-
-		switch (typeOf(data)){
-			case 'element': data = document.id(data).toQueryString(); break;
-			case 'object': case 'hash': data = Object.toQueryString(data);
-		}
-
-		if (this.options.format){
-			var format = 'format=' + this.options.format;
-			data = (data) ? format + '&' + data : format;
-		}
-
-		if (this.options.emulation && !['get', 'post'].contains(method)){
-			var _method = '_method=' + method;
-			data = (data) ? _method + '&' + data : _method;
-			method = 'post';
-		}
-
-		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
-			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
-			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
-		}
-
-		if (!url) url = document.location.pathname;
-
-		var trimPosition = url.lastIndexOf('/');
-		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
-
-		if (this.options.noCache)
-			url += (url.indexOf('?') > -1 ? '&' : '?') + String.uniqueID();
-
-		if (data && (method == 'get' || method == 'delete')){
-			url += (url.indexOf('?') > -1 ? '&' : '?') + data;
-			data = null;
-		}
-
-		var xhr = this.xhr;
-		if (progressSupport){
-			xhr.onloadstart = this.loadstart.bind(this);
-			xhr.onprogress = this.progress.bind(this);
-		}
-
-		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
-		if ((this.options.withCredentials) && 'withCredentials' in xhr) xhr.withCredentials = true;
-
-		xhr.onreadystatechange = this.onStateChange.bind(this);
-
-		Object.each(this.headers, function(value, key){
-			try {
-				xhr.setRequestHeader(key, value);
-			} catch (e){
-				this.fireEvent('exception', [key, value]);
-				this.reject({reason: 'exception', xhr: xhr, exception: e});
-			}
-		}, this);
-
-		if (this.getThenableState() !== 'pending'){
-			this.resetThenable({reason: 'send'});
-		}
-		this.fireEvent('request');
-		xhr.send(data);
-		if (!this.options.async) this.onStateChange();
-		else if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
-		return this;
-	},
-
-	cancel: function(){
-		if (!this.running) return this;
-		this.running = false;
-		var xhr = this.xhr;
-		xhr.abort();
-		if (this.timer){
-			clearTimeout(this.timer);
-			delete this.timer;
-		}
-		xhr.onreadystatechange = empty;
-		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
-		this.xhr = new Browser.Request();
-		this.fireEvent('cancel');
-		this.reject({reason: 'cancel', xhr: xhr});
-		return this;
-	}
-
-});
-
-var methods = {};
-['get', 'post', 'put', 'delete', 'patch', 'head', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'].each(function(method){
-	methods[method] = function(data){
-		var object = {
-			method: method
-		};
-		if (data != null) object.data = data;
-		return this.send(object);
-	};
-});
-
-Request.implement(methods);
-
-Element.Properties.send = {
-
-	set: function(options){
-		var send = this.get('send').cancel();
-		send.setOptions(options);
-		return this;
-	},
-
-	get: function(){
-		var send = this.retrieve('send');
-		if (!send){
-			send = new Request({
-				data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
-			});
-			this.store('send', send);
-		}
-		return send;
-	}
-
-};
-
-Element.implement({
-
-	send: function(url){
-		var sender = this.get('send');
-		sender.send({data: this, url: url || sender.options.url});
-		return this;
-	}
-
-});
-
-})();
 /*
 ---
 
@@ -6467,6 +6467,868 @@ Element.implement({
 	}
 
 });
+/*
+---
+
+script: Object.Extras.js
+
+name: Object.Extras
+
+description: Extra Object generics, like getFromPath which allows a path notation to child elements.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+
+requires:
+  - Core/Object
+  - MooTools.More
+
+provides: [Object.Extras]
+
+...
+*/
+
+(function(){
+
+var defined = function(value){
+	return value != null;
+};
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+Object.extend({
+
+	getFromPath: function(source, parts){
+		if (typeof parts == 'string') parts = parts.split('.');
+		for (var i = 0, l = parts.length; i < l; i++){
+			if (hasOwnProperty.call(source, parts[i])) source = source[parts[i]];
+			else return null;
+		}
+		return source;
+	},
+
+	cleanValues: function(object, method){
+		method = method || defined;
+		for (var key in object) if (!method(object[key])){
+			delete object[key];
+		}
+		return object;
+	},
+
+	erase: function(object, key){
+		if (hasOwnProperty.call(object, key)) delete object[key];
+		return object;
+	},
+
+	run: function(object){
+		var args = Array.slice(arguments, 1);
+		for (var key in object) if (object[key].apply){
+			object[key].apply(object, args);
+		}
+		return object;
+	}
+
+});
+
+})();
+/*
+---
+
+script: Locale.js
+
+name: Locale
+
+description: Provides methods for localization.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+  - Arian Stolwijk
+
+requires:
+  - Core/Events
+  - Object.Extras
+  - MooTools.More
+
+provides: [Locale, Lang]
+
+...
+*/
+
+(function(){
+
+var current = null,
+	locales = {},
+	inherits = {};
+
+var getSet = function(set){
+	if (instanceOf(set, Locale.Set)) return set;
+	else return locales[set];
+};
+
+var Locale = this.Locale = {
+
+	define: function(locale, set, key, value){
+		var name;
+		if (instanceOf(locale, Locale.Set)){
+			name = locale.name;
+			if (name) locales[name] = locale;
+		} else {
+			name = locale;
+			if (!locales[name]) locales[name] = new Locale.Set(name);
+			locale = locales[name];
+		}
+
+		if (set) locale.define(set, key, value);
+
+		
+
+		if (!current) current = locale;
+
+		return locale;
+	},
+
+	use: function(locale){
+		locale = getSet(locale);
+
+		if (locale){
+			current = locale;
+
+			this.fireEvent('change', locale);
+
+			
+		}
+
+		return this;
+	},
+
+	getCurrent: function(){
+		return current;
+	},
+
+	get: function(key, args){
+		return (current) ? current.get(key, args) : '';
+	},
+
+	inherit: function(locale, inherits, set){
+		locale = getSet(locale);
+
+		if (locale) locale.inherit(inherits, set);
+		return this;
+	},
+
+	list: function(){
+		return Object.keys(locales);
+	}
+
+};
+
+Object.append(Locale, new Events);
+
+Locale.Set = new Class({
+
+	sets: {},
+
+	inherits: {
+		locales: [],
+		sets: {}
+	},
+
+	initialize: function(name){
+		this.name = name || '';
+	},
+
+	define: function(set, key, value){
+		var defineData = this.sets[set];
+		if (!defineData) defineData = {};
+
+		if (key){
+			if (typeOf(key) == 'object') defineData = Object.merge(defineData, key);
+			else defineData[key] = value;
+		}
+		this.sets[set] = defineData;
+
+		return this;
+	},
+
+	get: function(key, args, _base){
+		var value = Object.getFromPath(this.sets, key);
+		if (value != null){
+			var type = typeOf(value);
+			if (type == 'function') value = value.apply(null, Array.convert(args));
+			else if (type == 'object') value = Object.clone(value);
+			return value;
+		}
+
+		// get value of inherited locales
+		var index = key.indexOf('.'),
+			set = index < 0 ? key : key.substr(0, index),
+			names = (this.inherits.sets[set] || []).combine(this.inherits.locales).include('en-US');
+		if (!_base) _base = [];
+
+		for (var i = 0, l = names.length; i < l; i++){
+			if (_base.contains(names[i])) continue;
+			_base.include(names[i]);
+
+			var locale = locales[names[i]];
+			if (!locale) continue;
+
+			value = locale.get(key, args, _base);
+			if (value != null) return value;
+		}
+
+		return '';
+	},
+
+	inherit: function(names, set){
+		names = Array.convert(names);
+
+		if (set && !this.inherits.sets[set]) this.inherits.sets[set] = [];
+
+		var l = names.length;
+		while (l--) (set ? this.inherits.sets[set] : this.inherits.locales).unshift(names[l]);
+
+		return this;
+	}
+
+});
+
+
+
+})();
+/*
+---
+
+name: Locale.en-US.Date
+
+description: Date messages for US English.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+
+requires:
+  - Locale
+
+provides: [Locale.en-US.Date]
+
+...
+*/
+
+Locale.define('en-US', 'Date', {
+
+	months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+	months_abbr: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+	days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+	days_abbr: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+
+	// Culture's date order: MM/DD/YYYY
+	dateOrder: ['month', 'date', 'year'],
+	shortDate: '%m/%d/%Y',
+	shortTime: '%I:%M%p',
+	AM: 'AM',
+	PM: 'PM',
+	firstDayOfWeek: 0,
+
+	// Date.Extras
+	ordinal: function(dayOfMonth){
+		// 1st, 2nd, 3rd, etc.
+		return (dayOfMonth > 3 && dayOfMonth < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th'][Math.min(dayOfMonth % 10, 4)];
+	},
+
+	lessThanMinuteAgo: 'less than a minute ago',
+	minuteAgo: 'about a minute ago',
+	minutesAgo: '{delta} minutes ago',
+	hourAgo: 'about an hour ago',
+	hoursAgo: 'about {delta} hours ago',
+	dayAgo: '1 day ago',
+	daysAgo: '{delta} days ago',
+	weekAgo: '1 week ago',
+	weeksAgo: '{delta} weeks ago',
+	monthAgo: '1 month ago',
+	monthsAgo: '{delta} months ago',
+	yearAgo: '1 year ago',
+	yearsAgo: '{delta} years ago',
+
+	lessThanMinuteUntil: 'less than a minute from now',
+	minuteUntil: 'about a minute from now',
+	minutesUntil: '{delta} minutes from now',
+	hourUntil: 'about an hour from now',
+	hoursUntil: 'about {delta} hours from now',
+	dayUntil: '1 day from now',
+	daysUntil: '{delta} days from now',
+	weekUntil: '1 week from now',
+	weeksUntil: '{delta} weeks from now',
+	monthUntil: '1 month from now',
+	monthsUntil: '{delta} months from now',
+	yearUntil: '1 year from now',
+	yearsUntil: '{delta} years from now'
+
+});
+/*
+---
+
+script: Date.js
+
+name: Date
+
+description: Extends the Date native object to include methods useful in managing dates.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+  - Nicholas Barthelemy - https://svn.nbarthelemy.com/date-js/
+  - Harald Kirshner - mail [at] digitarald.de; http://digitarald.de
+  - Scott Kyle - scott [at] appden.com; http://appden.com
+
+requires:
+  - Core/Array
+  - Core/String
+  - Core/Number
+  - MooTools.More
+  - Locale
+  - Locale.en-US.Date
+
+provides: [Date]
+
+...
+*/
+
+(function(){
+
+var Date = this.Date;
+
+var DateMethods = Date.Methods = {
+	ms: 'Milliseconds',
+	year: 'FullYear',
+	min: 'Minutes',
+	mo: 'Month',
+	sec: 'Seconds',
+	hr: 'Hours'
+};
+
+[
+	'Date', 'Day', 'FullYear', 'Hours', 'Milliseconds', 'Minutes', 'Month', 'Seconds', 'Time', 'TimezoneOffset',
+	'Week', 'Timezone', 'GMTOffset', 'DayOfYear', 'LastMonth', 'LastDayOfMonth', 'UTCDate', 'UTCDay', 'UTCFullYear',
+	'AMPM', 'Ordinal', 'UTCHours', 'UTCMilliseconds', 'UTCMinutes', 'UTCMonth', 'UTCSeconds', 'UTCMilliseconds'
+].each(function(method){
+	Date.Methods[method.toLowerCase()] = method;
+});
+
+var pad = function(n, digits, string){
+	if (digits == 1) return n;
+	return n < Math.pow(10, digits - 1) ? (string || '0') + pad(n, digits - 1, string) : n;
+};
+
+Date.implement({
+
+	set: function(prop, value){
+		prop = prop.toLowerCase();
+		var method = DateMethods[prop] && 'set' + DateMethods[prop];
+		if (method && this[method]) this[method](value);
+		return this;
+	}.overloadSetter(),
+
+	get: function(prop){
+		prop = prop.toLowerCase();
+		var method = DateMethods[prop] && 'get' + DateMethods[prop];
+		if (method && this[method]) return this[method]();
+		return null;
+	}.overloadGetter(),
+
+	clone: function(){
+		return new Date(this.get('time'));
+	},
+
+	increment: function(interval, times){
+		interval = interval || 'day';
+		times = times != null ? times : 1;
+
+		switch (interval){
+			case 'year':
+				return this.increment('month', times * 12);
+			case 'month':
+				var d = this.get('date');
+				this.set('date', 1).set('mo', this.get('mo') + times);
+				return this.set('date', d.min(this.get('lastdayofmonth')));
+			case 'week':
+				return this.increment('day', times * 7);
+			case 'day':
+				return this.set('date', this.get('date') + times);
+		}
+
+		if (!Date.units[interval]) throw new Error(interval + ' is not a supported interval');
+
+		return this.set('time', this.get('time') + times * Date.units[interval]());
+	},
+
+	decrement: function(interval, times){
+		return this.increment(interval, -1 * (times != null ? times : 1));
+	},
+
+	isLeapYear: function(){
+		return Date.isLeapYear(this.get('year'));
+	},
+
+	clearTime: function(){
+		return this.set({hr: 0, min: 0, sec: 0, ms: 0});
+	},
+
+	diff: function(date, resolution){
+		if (typeOf(date) == 'string') date = Date.parse(date);
+
+		return ((date - this) / Date.units[resolution || 'day'](3, 3)).round(); // non-leap year, 30-day month
+	},
+
+	getLastDayOfMonth: function(){
+		return Date.daysInMonth(this.get('mo'), this.get('year'));
+	},
+
+	getDayOfYear: function(){
+		return (Date.UTC(this.get('year'), this.get('mo'), this.get('date') + 1)
+			- Date.UTC(this.get('year'), 0, 1)) / Date.units.day();
+	},
+
+	setDay: function(day, firstDayOfWeek){
+		if (firstDayOfWeek == null){
+			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
+			if (firstDayOfWeek === '') firstDayOfWeek = 1;
+		}
+
+		day = (7 + Date.parseDay(day, true) - firstDayOfWeek) % 7;
+		var currentDay = (7 + this.get('day') - firstDayOfWeek) % 7;
+
+		return this.increment('day', day - currentDay);
+	},
+
+	getWeek: function(firstDayOfWeek){
+		if (firstDayOfWeek == null){
+			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
+			if (firstDayOfWeek === '') firstDayOfWeek = 1;
+		}
+
+		var date = this,
+			dayOfWeek = (7 + date.get('day') - firstDayOfWeek) % 7,
+			dividend = 0,
+			firstDayOfYear;
+
+		if (firstDayOfWeek == 1){
+			// ISO-8601, week belongs to year that has the most days of the week (i.e. has the thursday of the week)
+			var month = date.get('month'),
+				startOfWeek = date.get('date') - dayOfWeek;
+
+			if (month == 11 && startOfWeek > 28) return 1; // Week 1 of next year
+
+			if (month == 0 && startOfWeek < -2){
+				// Use a date from last year to determine the week
+				date = new Date(date).decrement('day', dayOfWeek);
+				dayOfWeek = 0;
+			}
+
+			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day') || 7;
+			if (firstDayOfYear > 4) dividend = -7; // First week of the year is not week 1
+		} else {
+			// In other cultures the first week of the year is always week 1 and the last week always 53 or 54.
+			// Days in the same week can have a different weeknumber if the week spreads across two years.
+			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day');
+		}
+
+		dividend += date.get('dayofyear');
+		dividend += 6 - dayOfWeek; // Add days so we calculate the current date's week as a full week
+		dividend += (7 + firstDayOfYear - firstDayOfWeek) % 7; // Make up for first week of the year not being a full week
+
+		return (dividend / 7);
+	},
+
+	getOrdinal: function(day){
+		return Date.getMsg('ordinal', day || this.get('date'));
+	},
+
+	getTimezone: function(){
+		return this.toString()
+			.replace(/^.*? ([A-Z]{3}).[0-9]{4}.*$/, '$1')
+			.replace(/^.*?\(([A-Z])[a-z]+ ([A-Z])[a-z]+ ([A-Z])[a-z]+\)$/, '$1$2$3');
+	},
+
+	getGMTOffset: function(){
+		var off = this.get('timezoneOffset');
+		return ((off > 0) ? '-' : '+') + pad((off.abs() / 60).floor(), 2) + pad(off % 60, 2);
+	},
+
+	setAMPM: function(ampm){
+		ampm = ampm.toUpperCase();
+		var hr = this.get('hr');
+		if (hr > 11 && ampm == 'AM') return this.decrement('hour', 12);
+		else if (hr < 12 && ampm == 'PM') return this.increment('hour', 12);
+		return this;
+	},
+
+	getAMPM: function(){
+		return (this.get('hr') < 12) ? 'AM' : 'PM';
+	},
+
+	parse: function(str){
+		this.set('time', Date.parse(str));
+		return this;
+	},
+
+	isValid: function(date){
+		if (!date) date = this;
+		return typeOf(date) == 'date' && !isNaN(date.valueOf());
+	},
+
+	format: function(format){
+		if (!this.isValid()) return 'invalid date';
+
+		if (!format) format = '%x %X';
+		if (typeof format == 'string') format = formats[format.toLowerCase()] || format;
+		if (typeof format == 'function') return format(this);
+
+		var d = this;
+		return format.replace(/%([a-z%])/gi,
+			function($0, $1){
+				switch ($1){
+					case 'a': return Date.getMsg('days_abbr')[d.get('day')];
+					case 'A': return Date.getMsg('days')[d.get('day')];
+					case 'b': return Date.getMsg('months_abbr')[d.get('month')];
+					case 'B': return Date.getMsg('months')[d.get('month')];
+					case 'c': return d.format('%a %b %d %H:%M:%S %Y');
+					case 'd': return pad(d.get('date'), 2);
+					case 'e': return pad(d.get('date'), 2, ' ');
+					case 'H': return pad(d.get('hr'), 2);
+					case 'I': return pad((d.get('hr') % 12) || 12, 2);
+					case 'j': return pad(d.get('dayofyear'), 3);
+					case 'k': return pad(d.get('hr'), 2, ' ');
+					case 'l': return pad((d.get('hr') % 12) || 12, 2, ' ');
+					case 'L': return pad(d.get('ms'), 3);
+					case 'm': return pad((d.get('mo') + 1), 2);
+					case 'M': return pad(d.get('min'), 2);
+					case 'o': return d.get('ordinal');
+					case 'p': return Date.getMsg(d.get('ampm'));
+					case 's': return Math.round(d / 1000);
+					case 'S': return pad(d.get('seconds'), 2);
+					case 'T': return d.format('%H:%M:%S');
+					case 'U': return pad(d.get('week'), 2);
+					case 'w': return d.get('day');
+					case 'x': return d.format(Date.getMsg('shortDate'));
+					case 'X': return d.format(Date.getMsg('shortTime'));
+					case 'y': return d.get('year').toString().substr(2);
+					case 'Y': return d.get('year');
+					case 'z': return d.get('GMTOffset');
+					case 'Z': return d.get('Timezone');
+				}
+				return $1;
+			}
+		);
+	},
+
+	toISOString: function(){
+		return this.format('iso8601');
+	}
+
+}).alias({
+	toJSON: 'toISOString',
+	compare: 'diff',
+	strftime: 'format'
+});
+
+// The day and month abbreviations are standardized, so we cannot use simply %a and %b because they will get localized
+var rfcDayAbbr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+	rfcMonthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+var formats = {
+	db: '%Y-%m-%d %H:%M:%S',
+	compact: '%Y%m%dT%H%M%S',
+	'short': '%d %b %H:%M',
+	'long': '%B %d, %Y %H:%M',
+	rfc822: function(date){
+		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %Z');
+	},
+	rfc2822: function(date){
+		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %z');
+	},
+	iso8601: function(date){
+		return (
+			date.getUTCFullYear() + '-' +
+			pad(date.getUTCMonth() + 1, 2) + '-' +
+			pad(date.getUTCDate(), 2) + 'T' +
+			pad(date.getUTCHours(), 2) + ':' +
+			pad(date.getUTCMinutes(), 2) + ':' +
+			pad(date.getUTCSeconds(), 2) + '.' +
+			pad(date.getUTCMilliseconds(), 3) + 'Z'
+		);
+	}
+};
+
+var parsePatterns = [],
+	nativeParse = Date.parse;
+
+var parseWord = function(type, word, num){
+	var ret = -1,
+		translated = Date.getMsg(type + 's');
+	switch (typeOf(word)){
+		case 'object':
+			ret = translated[word.get(type)];
+			break;
+		case 'number':
+			ret = translated[word];
+			if (!ret) throw new Error('Invalid ' + type + ' index: ' + word);
+			break;
+		case 'string':
+			var match = translated.filter(function(name){
+				return this.test(name);
+			}, new RegExp('^' + word, 'i'));
+			if (!match.length) throw new Error('Invalid ' + type + ' string');
+			if (match.length > 1) throw new Error('Ambiguous ' + type);
+			ret = match[0];
+	}
+
+	return (num) ? translated.indexOf(ret) : ret;
+};
+
+var startCentury = 1900,
+	startYear = 70;
+
+Date.extend({
+
+	getMsg: function(key, args){
+		return Locale.get('Date.' + key, args);
+	},
+
+	units: {
+		ms: Function.convert(1),
+		second: Function.convert(1000),
+		minute: Function.convert(60000),
+		hour: Function.convert(3600000),
+		day: Function.convert(86400000),
+		week: Function.convert(608400000),
+		month: function(month, year){
+			var d = new Date;
+			return Date.daysInMonth(month != null ? month : d.get('mo'), year != null ? year : d.get('year')) * 86400000;
+		},
+		year: function(year){
+			year = year || new Date().get('year');
+			return Date.isLeapYear(year) ? 31622400000 : 31536000000;
+		}
+	},
+
+	daysInMonth: function(month, year){
+		return [31, Date.isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+	},
+
+	isLeapYear: function(year){
+		return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
+	},
+
+	parse: function(from){
+		var t = typeOf(from);
+		if (t == 'number') return new Date(from);
+		if (t != 'string') return from;
+		from = from.clean();
+		if (!from.length) return null;
+
+		var parsed;
+		parsePatterns.some(function(pattern){
+			var bits = pattern.re.exec(from);
+			return (bits) ? (parsed = pattern.handler(bits)) : false;
+		});
+
+		if (!(parsed && parsed.isValid())){
+			parsed = new Date(nativeParse(from));
+			if (!(parsed && parsed.isValid())) parsed = new Date(from.toInt());
+		}
+		return parsed;
+	},
+
+	parseDay: function(day, num){
+		return parseWord('day', day, num);
+	},
+
+	parseMonth: function(month, num){
+		return parseWord('month', month, num);
+	},
+
+	parseUTC: function(value){
+		var localDate = new Date(value);
+		var utcSeconds = Date.UTC(
+			localDate.get('year'),
+			localDate.get('mo'),
+			localDate.get('date'),
+			localDate.get('hr'),
+			localDate.get('min'),
+			localDate.get('sec'),
+			localDate.get('ms')
+		);
+		return new Date(utcSeconds);
+	},
+
+	orderIndex: function(unit){
+		return Date.getMsg('dateOrder').indexOf(unit) + 1;
+	},
+
+	defineFormat: function(name, format){
+		formats[name] = format;
+		return this;
+	},
+
+	
+
+	defineParser: function(pattern){
+		parsePatterns.push((pattern.re && pattern.handler) ? pattern : build(pattern));
+		return this;
+	},
+
+	defineParsers: function(){
+		Array.flatten(arguments).each(Date.defineParser);
+		return this;
+	},
+
+	define2DigitYearStart: function(year){
+		startYear = year % 100;
+		startCentury = year - startYear;
+		return this;
+	}
+
+}).extend({
+	defineFormats: Date.defineFormat.overloadSetter()
+});
+
+var regexOf = function(type){
+	return new RegExp('(?:' + Date.getMsg(type).map(function(name){
+		return name.substr(0, 3);
+	}).join('|') + ')[a-z]*');
+};
+
+var replacers = function(key){
+	switch (key){
+		case 'T':
+			return '%H:%M:%S';
+		case 'x': // iso8601 covers yyyy-mm-dd, so just check if month is first
+			return ((Date.orderIndex('month') == 1) ? '%m[-./]%d' : '%d[-./]%m') + '([-./]%y)?';
+		case 'X':
+			return '%H([.:]%M)?([.:]%S([.:]%s)?)? ?%p? ?%z?';
+	}
+	return null;
+};
+
+var keys = {
+	d: /[0-2]?[0-9]|3[01]/,
+	H: /[01]?[0-9]|2[0-3]/,
+	I: /0?[1-9]|1[0-2]/,
+	M: /[0-5]?\d/,
+	s: /\d+/,
+	o: /[a-z]*/,
+	p: /[ap]\.?m\.?/,
+	y: /\d{2}|\d{4}/,
+	Y: /\d{4}/,
+	z: /Z|[+-]\d{2}(?::?\d{2})?/
+};
+
+keys.m = keys.I;
+keys.S = keys.M;
+
+var currentLanguage;
+
+var recompile = function(language){
+	currentLanguage = language;
+
+	keys.a = keys.A = regexOf('days');
+	keys.b = keys.B = regexOf('months');
+
+	parsePatterns.each(function(pattern, i){
+		if (pattern.format) parsePatterns[i] = build(pattern.format);
+	});
+};
+
+var build = function(format){
+	if (!currentLanguage) return {format: format};
+
+	var parsed = [];
+	var re = (format.source || format) // allow format to be regex
+	.replace(/%([a-z])/gi,
+		function($0, $1){
+			return replacers($1) || $0;
+		}
+	).replace(/\((?!\?)/g, '(?:') // make all groups non-capturing
+	.replace(/ (?!\?|\*)/g, ',? ') // be forgiving with spaces and commas
+	.replace(/%([a-z%])/gi,
+		function($0, $1){
+			var p = keys[$1];
+			if (!p) return $1;
+			parsed.push($1);
+			return '(' + p.source + ')';
+		}
+	).replace(/\[a-z\]/gi, '[a-z\\u00c0-\\uffff;\&]'); // handle unicode words
+
+	return {
+		format: format,
+		re: new RegExp('^' + re + '$', 'i'),
+		handler: function(bits){
+			bits = bits.slice(1).associate(parsed);
+			var date = new Date().clearTime(),
+				year = bits.y || bits.Y;
+
+			if (year != null) handle.call(date, 'y', year); // need to start in the right year
+			if ('d' in bits) handle.call(date, 'd', 1);
+			if ('m' in bits || bits.b || bits.B) handle.call(date, 'm', 1);
+
+			for (var key in bits) handle.call(date, key, bits[key]);
+			return date;
+		}
+	};
+};
+
+var handle = function(key, value){
+	if (!value) return this;
+
+	switch (key){
+		case 'a': case 'A': return this.set('day', Date.parseDay(value, true));
+		case 'b': case 'B': return this.set('mo', Date.parseMonth(value, true));
+		case 'd': return this.set('date', value);
+		case 'H': case 'I': return this.set('hr', value);
+		case 'm': return this.set('mo', value - 1);
+		case 'M': return this.set('min', value);
+		case 'p': return this.set('ampm', value.replace(/\./g, ''));
+		case 'S': return this.set('sec', value);
+		case 's': return this.set('ms', ('0.' + value) * 1000);
+		case 'w': return this.set('day', value);
+		case 'Y': return this.set('year', value);
+		case 'y':
+			value = +value;
+			if (value < 100) value += startCentury + (value < startYear ? 100 : 0);
+			return this.set('year', value);
+		case 'z':
+			if (value == 'Z') value = '+00';
+			var offset = value.match(/([+-])(\d{2}):?(\d{2})?/);
+			offset = (offset[1] + '1') * (offset[2] * 60 + (+offset[3] || 0)) + this.getTimezoneOffset();
+			return this.set('time', this - offset * 60000);
+	}
+
+	return this;
+};
+
+Date.defineParsers(
+	'%Y([-./]%m([-./]%d((T| )%X)?)?)?', // "1999-12-31", "1999-12-31 11:59pm", "1999-12-31 23:59:59", ISO8601
+	'%Y%m%d(T%H(%M%S?)?)?', // "19991231", "19991231T1159", compact
+	'%x( %X)?', // "12/31", "12.31.99", "12-31-1999", "12/31/2008 11:59 PM"
+	'%d%o( %b( %Y)?)?( %X)?', // "31st", "31st December", "31 Dec 1999", "31 Dec 1999 11:59pm"
+	'%b( %d%o)?( %Y)?( %X)?', // Same as above with month and day switched
+	'%Y %b( %d%o( %X)?)?', // Same as above with year coming first
+	'%o %b %d %X %z %Y', // "Thu Oct 22 08:11:23 +0000 2009"
+	'%T', // %H:%M:%S
+	'%H:%M( ?%p)?' // "11:05pm", "11:05 am" and "11:05"
+);
+
+Locale.addEvent('change', function(language){
+	if (Locale.get('Date')) recompile(language);
+}).fireEvent('change', Locale.getCurrent());
+
+})();
 /*
 ---
 
@@ -7561,6 +8423,256 @@ Element.implement({
 /*
 ---
 
+script: Sortables.js
+
+name: Sortables
+
+description: Class for creating a drag and drop sorting interface for lists of items.
+
+license: MIT-style license
+
+authors:
+  - Tom Occhino
+
+requires:
+  - Core/Fx.Morph
+  - Drag.Move
+
+provides: [Sortables]
+
+...
+*/
+(function(){
+
+var Sortables = this.Sortables = new Class({
+
+	Implements: [Events, Options],
+
+	options: {/*
+		onSort: function(element, clone){},
+		onStart: function(element, clone){},
+		onComplete: function(element){},*/
+		opacity: 1,
+		clone: false,
+		revert: false,
+		handle: false,
+		dragOptions: {},
+		unDraggableTags: ['button', 'input', 'a', 'textarea', 'select', 'option']
+	},
+
+	initialize: function(lists, options){
+		this.setOptions(options);
+
+		this.elements = [];
+		this.lists = [];
+		this.idle = true;
+
+		this.addLists($$(document.id(lists) || lists));
+
+		if (!this.options.clone) this.options.revert = false;
+		if (this.options.revert) this.effect = new Fx.Morph(null, Object.merge({
+			duration: 250,
+			link: 'cancel'
+		}, this.options.revert));
+	},
+
+	attach: function(){
+		this.addLists(this.lists);
+		return this;
+	},
+
+	detach: function(){
+		this.lists = this.removeLists(this.lists);
+		return this;
+	},
+
+	addItems: function(){
+		Array.flatten(arguments).each(function(element){
+			this.elements.push(element);
+			var start = element.retrieve('sortables:start', function(event){
+				this.start.call(this, event, element);
+			}.bind(this));
+			(this.options.handle ? element.getElement(this.options.handle) || element : element).addEvent('mousedown', start);
+		}, this);
+		return this;
+	},
+
+	addLists: function(){
+		Array.flatten(arguments).each(function(list){
+			this.lists.include(list);
+			this.addItems(list.getChildren());
+		}, this);
+		return this;
+	},
+
+	removeItems: function(){
+		return $$(Array.flatten(arguments).map(function(element){
+			this.elements.erase(element);
+			var start = element.retrieve('sortables:start');
+			(this.options.handle ? element.getElement(this.options.handle) || element : element).removeEvent('mousedown', start);
+
+			return element;
+		}, this));
+	},
+
+	removeLists: function(){
+		return $$(Array.flatten(arguments).map(function(list){
+			this.lists.erase(list);
+			this.removeItems(list.getChildren());
+
+			return list;
+		}, this));
+	},
+
+	getDroppableCoordinates: function(element){
+		var offsetParent = element.getOffsetParent();
+		var position = element.getPosition(offsetParent);
+		var scroll = {
+			w: window.getScroll(),
+			offsetParent: offsetParent.getScroll()
+		};
+		position.x += scroll.offsetParent.x;
+		position.y += scroll.offsetParent.y;
+
+		if (offsetParent.getStyle('position') == 'fixed'){
+			position.x -= scroll.w.x;
+			position.y -= scroll.w.y;
+		}
+
+		return position;
+	},
+
+	getClone: function(event, element){
+		if (!this.options.clone) return new Element(element.tagName).inject(document.body);
+		if (typeOf(this.options.clone) == 'function') return this.options.clone.call(this, event, element, this.list);
+		var clone = element.clone(true).setStyles({
+			margin: 0,
+			position: 'absolute',
+			visibility: 'hidden',
+			width: element.getStyle('width')
+		}).addEvent('mousedown', function(event){
+			element.fireEvent('mousedown', event);
+		});
+		//prevent the duplicated radio inputs from unchecking the real one
+		if (clone.get('html').test('radio')){
+			clone.getElements('input[type=radio]').each(function(input, i){
+				input.set('name', 'clone_' + i);
+				if (input.get('checked')) element.getElements('input[type=radio]')[i].set('checked', true);
+			});
+		}
+
+		return clone.inject(this.list).setPosition(this.getDroppableCoordinates(this.element));
+	},
+
+	getDroppables: function(){
+		var droppables = this.list.getChildren().erase(this.clone).erase(this.element);
+		if (!this.options.constrain) droppables.append(this.lists).erase(this.list);
+		return droppables;
+	},
+
+	insert: function(dragging, element){
+		var where = 'inside';
+		if (this.lists.contains(element)){
+			this.list = element;
+			this.drag.droppables = this.getDroppables();
+		} else {
+			where = this.element.getAllPrevious().contains(element) ? 'before' : 'after';
+		}
+		this.element.inject(element, where);
+		this.fireEvent('sort', [this.element, this.clone]);
+	},
+
+	start: function(event, element){
+		if (
+			!this.idle ||
+			event.rightClick ||
+			(!this.options.handle && this.options.unDraggableTags.contains(event.target.get('tag')))
+		) return;
+
+		this.idle = false;
+		this.element = element;
+		this.opacity = element.getStyle('opacity');
+		this.list = element.getParent();
+		this.clone = this.getClone(event, element);
+
+		this.drag = new Drag.Move(this.clone, Object.merge({
+			
+			droppables: this.getDroppables()
+		}, this.options.dragOptions)).addEvents({
+			onSnap: function(){
+				event.stop();
+				this.clone.setStyle('visibility', 'visible');
+				this.element.setStyle('opacity', this.options.opacity || 0);
+				this.fireEvent('start', [this.element, this.clone]);
+			}.bind(this),
+			onEnter: this.insert.bind(this),
+			onCancel: this.end.bind(this),
+			onComplete: this.end.bind(this)
+		});
+
+		this.clone.inject(this.element, 'before');
+		this.drag.start(event);
+	},
+
+	end: function(){
+		this.drag.detach();
+		this.element.setStyle('opacity', this.opacity);
+		var self = this;
+		if (this.effect){
+			var dim = this.element.getStyles('width', 'height'),
+				clone = this.clone,
+				pos = clone.computePosition(this.getDroppableCoordinates(clone));
+
+			var destroy = function(){
+				this.removeEvent('cancel', destroy);
+				clone.destroy();
+				self.reset();
+			};
+
+			this.effect.element = clone;
+			this.effect.start({
+				top: pos.top,
+				left: pos.left,
+				width: dim.width,
+				height: dim.height,
+				opacity: 0.25
+			}).addEvent('cancel', destroy).chain(destroy);
+		} else {
+			this.clone.destroy();
+			self.reset();
+		}
+
+	},
+
+	reset: function(){
+		this.idle = true;
+		this.fireEvent('complete', this.element);
+	},
+
+	serialize: function(){
+		var params = Array.link(arguments, {
+			modifier: Type.isFunction,
+			index: function(obj){
+				return obj != null;
+			}
+		});
+		var serial = this.lists.map(function(list){
+			return list.getChildren().map(params.modifier || function(element){
+				return element.get('id');
+			}, this);
+		}, this);
+
+		var index = params.index;
+		if (this.lists.length == 1) index = 0;
+		return (index || index === 0) && index >= 0 && index < this.lists.length ? serial[index] : serial;
+	}
+
+});
+
+})();
+/*
+---
+
 name: Element.Delegation
 
 description: Extends the Element native object to include the delegate method for more efficient event management.
@@ -7765,238 +8877,6 @@ var delegation = {
 /*
 ---
 
-script: Object.Extras.js
-
-name: Object.Extras
-
-description: Extra Object generics, like getFromPath which allows a path notation to child elements.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-
-requires:
-  - Core/Object
-  - MooTools.More
-
-provides: [Object.Extras]
-
-...
-*/
-
-(function(){
-
-var defined = function(value){
-	return value != null;
-};
-
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-Object.extend({
-
-	getFromPath: function(source, parts){
-		if (typeof parts == 'string') parts = parts.split('.');
-		for (var i = 0, l = parts.length; i < l; i++){
-			if (hasOwnProperty.call(source, parts[i])) source = source[parts[i]];
-			else return null;
-		}
-		return source;
-	},
-
-	cleanValues: function(object, method){
-		method = method || defined;
-		for (var key in object) if (!method(object[key])){
-			delete object[key];
-		}
-		return object;
-	},
-
-	erase: function(object, key){
-		if (hasOwnProperty.call(object, key)) delete object[key];
-		return object;
-	},
-
-	run: function(object){
-		var args = Array.slice(arguments, 1);
-		for (var key in object) if (object[key].apply){
-			object[key].apply(object, args);
-		}
-		return object;
-	}
-
-});
-
-})();
-/*
----
-
-script: Locale.js
-
-name: Locale
-
-description: Provides methods for localization.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-  - Arian Stolwijk
-
-requires:
-  - Core/Events
-  - Object.Extras
-  - MooTools.More
-
-provides: [Locale, Lang]
-
-...
-*/
-
-(function(){
-
-var current = null,
-	locales = {},
-	inherits = {};
-
-var getSet = function(set){
-	if (instanceOf(set, Locale.Set)) return set;
-	else return locales[set];
-};
-
-var Locale = this.Locale = {
-
-	define: function(locale, set, key, value){
-		var name;
-		if (instanceOf(locale, Locale.Set)){
-			name = locale.name;
-			if (name) locales[name] = locale;
-		} else {
-			name = locale;
-			if (!locales[name]) locales[name] = new Locale.Set(name);
-			locale = locales[name];
-		}
-
-		if (set) locale.define(set, key, value);
-
-		
-
-		if (!current) current = locale;
-
-		return locale;
-	},
-
-	use: function(locale){
-		locale = getSet(locale);
-
-		if (locale){
-			current = locale;
-
-			this.fireEvent('change', locale);
-
-			
-		}
-
-		return this;
-	},
-
-	getCurrent: function(){
-		return current;
-	},
-
-	get: function(key, args){
-		return (current) ? current.get(key, args) : '';
-	},
-
-	inherit: function(locale, inherits, set){
-		locale = getSet(locale);
-
-		if (locale) locale.inherit(inherits, set);
-		return this;
-	},
-
-	list: function(){
-		return Object.keys(locales);
-	}
-
-};
-
-Object.append(Locale, new Events);
-
-Locale.Set = new Class({
-
-	sets: {},
-
-	inherits: {
-		locales: [],
-		sets: {}
-	},
-
-	initialize: function(name){
-		this.name = name || '';
-	},
-
-	define: function(set, key, value){
-		var defineData = this.sets[set];
-		if (!defineData) defineData = {};
-
-		if (key){
-			if (typeOf(key) == 'object') defineData = Object.merge(defineData, key);
-			else defineData[key] = value;
-		}
-		this.sets[set] = defineData;
-
-		return this;
-	},
-
-	get: function(key, args, _base){
-		var value = Object.getFromPath(this.sets, key);
-		if (value != null){
-			var type = typeOf(value);
-			if (type == 'function') value = value.apply(null, Array.convert(args));
-			else if (type == 'object') value = Object.clone(value);
-			return value;
-		}
-
-		// get value of inherited locales
-		var index = key.indexOf('.'),
-			set = index < 0 ? key : key.substr(0, index),
-			names = (this.inherits.sets[set] || []).combine(this.inherits.locales).include('en-US');
-		if (!_base) _base = [];
-
-		for (var i = 0, l = names.length; i < l; i++){
-			if (_base.contains(names[i])) continue;
-			_base.include(names[i]);
-
-			var locale = locales[names[i]];
-			if (!locale) continue;
-
-			value = locale.get(key, args, _base);
-			if (value != null) return value;
-		}
-
-		return '';
-	},
-
-	inherit: function(names, set){
-		names = Array.convert(names);
-
-		if (set && !this.inherits.sets[set]) this.inherits.sets[set] = [];
-
-		var l = names.length;
-		while (l--) (set ? this.inherits.sets[set] : this.inherits.locales).unshift(names[l]);
-
-		return this;
-	}
-
-});
-
-
-
-})();
-/*
----
-
 script: Class.Binds.js
 
 name: Class.Binds
@@ -8031,636 +8911,6 @@ Class.Mutators.initialize = function(initialize){
 		return initialize.apply(this, arguments);
 	};
 };
-/*
----
-
-name: Locale.en-US.Date
-
-description: Date messages for US English.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-
-requires:
-  - Locale
-
-provides: [Locale.en-US.Date]
-
-...
-*/
-
-Locale.define('en-US', 'Date', {
-
-	months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-	months_abbr: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-	days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-	days_abbr: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-
-	// Culture's date order: MM/DD/YYYY
-	dateOrder: ['month', 'date', 'year'],
-	shortDate: '%m/%d/%Y',
-	shortTime: '%I:%M%p',
-	AM: 'AM',
-	PM: 'PM',
-	firstDayOfWeek: 0,
-
-	// Date.Extras
-	ordinal: function(dayOfMonth){
-		// 1st, 2nd, 3rd, etc.
-		return (dayOfMonth > 3 && dayOfMonth < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th'][Math.min(dayOfMonth % 10, 4)];
-	},
-
-	lessThanMinuteAgo: 'less than a minute ago',
-	minuteAgo: 'about a minute ago',
-	minutesAgo: '{delta} minutes ago',
-	hourAgo: 'about an hour ago',
-	hoursAgo: 'about {delta} hours ago',
-	dayAgo: '1 day ago',
-	daysAgo: '{delta} days ago',
-	weekAgo: '1 week ago',
-	weeksAgo: '{delta} weeks ago',
-	monthAgo: '1 month ago',
-	monthsAgo: '{delta} months ago',
-	yearAgo: '1 year ago',
-	yearsAgo: '{delta} years ago',
-
-	lessThanMinuteUntil: 'less than a minute from now',
-	minuteUntil: 'about a minute from now',
-	minutesUntil: '{delta} minutes from now',
-	hourUntil: 'about an hour from now',
-	hoursUntil: 'about {delta} hours from now',
-	dayUntil: '1 day from now',
-	daysUntil: '{delta} days from now',
-	weekUntil: '1 week from now',
-	weeksUntil: '{delta} weeks from now',
-	monthUntil: '1 month from now',
-	monthsUntil: '{delta} months from now',
-	yearUntil: '1 year from now',
-	yearsUntil: '{delta} years from now'
-
-});
-/*
----
-
-script: Date.js
-
-name: Date
-
-description: Extends the Date native object to include methods useful in managing dates.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-  - Nicholas Barthelemy - https://svn.nbarthelemy.com/date-js/
-  - Harald Kirshner - mail [at] digitarald.de; http://digitarald.de
-  - Scott Kyle - scott [at] appden.com; http://appden.com
-
-requires:
-  - Core/Array
-  - Core/String
-  - Core/Number
-  - MooTools.More
-  - Locale
-  - Locale.en-US.Date
-
-provides: [Date]
-
-...
-*/
-
-(function(){
-
-var Date = this.Date;
-
-var DateMethods = Date.Methods = {
-	ms: 'Milliseconds',
-	year: 'FullYear',
-	min: 'Minutes',
-	mo: 'Month',
-	sec: 'Seconds',
-	hr: 'Hours'
-};
-
-[
-	'Date', 'Day', 'FullYear', 'Hours', 'Milliseconds', 'Minutes', 'Month', 'Seconds', 'Time', 'TimezoneOffset',
-	'Week', 'Timezone', 'GMTOffset', 'DayOfYear', 'LastMonth', 'LastDayOfMonth', 'UTCDate', 'UTCDay', 'UTCFullYear',
-	'AMPM', 'Ordinal', 'UTCHours', 'UTCMilliseconds', 'UTCMinutes', 'UTCMonth', 'UTCSeconds', 'UTCMilliseconds'
-].each(function(method){
-	Date.Methods[method.toLowerCase()] = method;
-});
-
-var pad = function(n, digits, string){
-	if (digits == 1) return n;
-	return n < Math.pow(10, digits - 1) ? (string || '0') + pad(n, digits - 1, string) : n;
-};
-
-Date.implement({
-
-	set: function(prop, value){
-		prop = prop.toLowerCase();
-		var method = DateMethods[prop] && 'set' + DateMethods[prop];
-		if (method && this[method]) this[method](value);
-		return this;
-	}.overloadSetter(),
-
-	get: function(prop){
-		prop = prop.toLowerCase();
-		var method = DateMethods[prop] && 'get' + DateMethods[prop];
-		if (method && this[method]) return this[method]();
-		return null;
-	}.overloadGetter(),
-
-	clone: function(){
-		return new Date(this.get('time'));
-	},
-
-	increment: function(interval, times){
-		interval = interval || 'day';
-		times = times != null ? times : 1;
-
-		switch (interval){
-			case 'year':
-				return this.increment('month', times * 12);
-			case 'month':
-				var d = this.get('date');
-				this.set('date', 1).set('mo', this.get('mo') + times);
-				return this.set('date', d.min(this.get('lastdayofmonth')));
-			case 'week':
-				return this.increment('day', times * 7);
-			case 'day':
-				return this.set('date', this.get('date') + times);
-		}
-
-		if (!Date.units[interval]) throw new Error(interval + ' is not a supported interval');
-
-		return this.set('time', this.get('time') + times * Date.units[interval]());
-	},
-
-	decrement: function(interval, times){
-		return this.increment(interval, -1 * (times != null ? times : 1));
-	},
-
-	isLeapYear: function(){
-		return Date.isLeapYear(this.get('year'));
-	},
-
-	clearTime: function(){
-		return this.set({hr: 0, min: 0, sec: 0, ms: 0});
-	},
-
-	diff: function(date, resolution){
-		if (typeOf(date) == 'string') date = Date.parse(date);
-
-		return ((date - this) / Date.units[resolution || 'day'](3, 3)).round(); // non-leap year, 30-day month
-	},
-
-	getLastDayOfMonth: function(){
-		return Date.daysInMonth(this.get('mo'), this.get('year'));
-	},
-
-	getDayOfYear: function(){
-		return (Date.UTC(this.get('year'), this.get('mo'), this.get('date') + 1)
-			- Date.UTC(this.get('year'), 0, 1)) / Date.units.day();
-	},
-
-	setDay: function(day, firstDayOfWeek){
-		if (firstDayOfWeek == null){
-			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
-			if (firstDayOfWeek === '') firstDayOfWeek = 1;
-		}
-
-		day = (7 + Date.parseDay(day, true) - firstDayOfWeek) % 7;
-		var currentDay = (7 + this.get('day') - firstDayOfWeek) % 7;
-
-		return this.increment('day', day - currentDay);
-	},
-
-	getWeek: function(firstDayOfWeek){
-		if (firstDayOfWeek == null){
-			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
-			if (firstDayOfWeek === '') firstDayOfWeek = 1;
-		}
-
-		var date = this,
-			dayOfWeek = (7 + date.get('day') - firstDayOfWeek) % 7,
-			dividend = 0,
-			firstDayOfYear;
-
-		if (firstDayOfWeek == 1){
-			// ISO-8601, week belongs to year that has the most days of the week (i.e. has the thursday of the week)
-			var month = date.get('month'),
-				startOfWeek = date.get('date') - dayOfWeek;
-
-			if (month == 11 && startOfWeek > 28) return 1; // Week 1 of next year
-
-			if (month == 0 && startOfWeek < -2){
-				// Use a date from last year to determine the week
-				date = new Date(date).decrement('day', dayOfWeek);
-				dayOfWeek = 0;
-			}
-
-			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day') || 7;
-			if (firstDayOfYear > 4) dividend = -7; // First week of the year is not week 1
-		} else {
-			// In other cultures the first week of the year is always week 1 and the last week always 53 or 54.
-			// Days in the same week can have a different weeknumber if the week spreads across two years.
-			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day');
-		}
-
-		dividend += date.get('dayofyear');
-		dividend += 6 - dayOfWeek; // Add days so we calculate the current date's week as a full week
-		dividend += (7 + firstDayOfYear - firstDayOfWeek) % 7; // Make up for first week of the year not being a full week
-
-		return (dividend / 7);
-	},
-
-	getOrdinal: function(day){
-		return Date.getMsg('ordinal', day || this.get('date'));
-	},
-
-	getTimezone: function(){
-		return this.toString()
-			.replace(/^.*? ([A-Z]{3}).[0-9]{4}.*$/, '$1')
-			.replace(/^.*?\(([A-Z])[a-z]+ ([A-Z])[a-z]+ ([A-Z])[a-z]+\)$/, '$1$2$3');
-	},
-
-	getGMTOffset: function(){
-		var off = this.get('timezoneOffset');
-		return ((off > 0) ? '-' : '+') + pad((off.abs() / 60).floor(), 2) + pad(off % 60, 2);
-	},
-
-	setAMPM: function(ampm){
-		ampm = ampm.toUpperCase();
-		var hr = this.get('hr');
-		if (hr > 11 && ampm == 'AM') return this.decrement('hour', 12);
-		else if (hr < 12 && ampm == 'PM') return this.increment('hour', 12);
-		return this;
-	},
-
-	getAMPM: function(){
-		return (this.get('hr') < 12) ? 'AM' : 'PM';
-	},
-
-	parse: function(str){
-		this.set('time', Date.parse(str));
-		return this;
-	},
-
-	isValid: function(date){
-		if (!date) date = this;
-		return typeOf(date) == 'date' && !isNaN(date.valueOf());
-	},
-
-	format: function(format){
-		if (!this.isValid()) return 'invalid date';
-
-		if (!format) format = '%x %X';
-		if (typeof format == 'string') format = formats[format.toLowerCase()] || format;
-		if (typeof format == 'function') return format(this);
-
-		var d = this;
-		return format.replace(/%([a-z%])/gi,
-			function($0, $1){
-				switch ($1){
-					case 'a': return Date.getMsg('days_abbr')[d.get('day')];
-					case 'A': return Date.getMsg('days')[d.get('day')];
-					case 'b': return Date.getMsg('months_abbr')[d.get('month')];
-					case 'B': return Date.getMsg('months')[d.get('month')];
-					case 'c': return d.format('%a %b %d %H:%M:%S %Y');
-					case 'd': return pad(d.get('date'), 2);
-					case 'e': return pad(d.get('date'), 2, ' ');
-					case 'H': return pad(d.get('hr'), 2);
-					case 'I': return pad((d.get('hr') % 12) || 12, 2);
-					case 'j': return pad(d.get('dayofyear'), 3);
-					case 'k': return pad(d.get('hr'), 2, ' ');
-					case 'l': return pad((d.get('hr') % 12) || 12, 2, ' ');
-					case 'L': return pad(d.get('ms'), 3);
-					case 'm': return pad((d.get('mo') + 1), 2);
-					case 'M': return pad(d.get('min'), 2);
-					case 'o': return d.get('ordinal');
-					case 'p': return Date.getMsg(d.get('ampm'));
-					case 's': return Math.round(d / 1000);
-					case 'S': return pad(d.get('seconds'), 2);
-					case 'T': return d.format('%H:%M:%S');
-					case 'U': return pad(d.get('week'), 2);
-					case 'w': return d.get('day');
-					case 'x': return d.format(Date.getMsg('shortDate'));
-					case 'X': return d.format(Date.getMsg('shortTime'));
-					case 'y': return d.get('year').toString().substr(2);
-					case 'Y': return d.get('year');
-					case 'z': return d.get('GMTOffset');
-					case 'Z': return d.get('Timezone');
-				}
-				return $1;
-			}
-		);
-	},
-
-	toISOString: function(){
-		return this.format('iso8601');
-	}
-
-}).alias({
-	toJSON: 'toISOString',
-	compare: 'diff',
-	strftime: 'format'
-});
-
-// The day and month abbreviations are standardized, so we cannot use simply %a and %b because they will get localized
-var rfcDayAbbr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-	rfcMonthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-var formats = {
-	db: '%Y-%m-%d %H:%M:%S',
-	compact: '%Y%m%dT%H%M%S',
-	'short': '%d %b %H:%M',
-	'long': '%B %d, %Y %H:%M',
-	rfc822: function(date){
-		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %Z');
-	},
-	rfc2822: function(date){
-		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %z');
-	},
-	iso8601: function(date){
-		return (
-			date.getUTCFullYear() + '-' +
-			pad(date.getUTCMonth() + 1, 2) + '-' +
-			pad(date.getUTCDate(), 2) + 'T' +
-			pad(date.getUTCHours(), 2) + ':' +
-			pad(date.getUTCMinutes(), 2) + ':' +
-			pad(date.getUTCSeconds(), 2) + '.' +
-			pad(date.getUTCMilliseconds(), 3) + 'Z'
-		);
-	}
-};
-
-var parsePatterns = [],
-	nativeParse = Date.parse;
-
-var parseWord = function(type, word, num){
-	var ret = -1,
-		translated = Date.getMsg(type + 's');
-	switch (typeOf(word)){
-		case 'object':
-			ret = translated[word.get(type)];
-			break;
-		case 'number':
-			ret = translated[word];
-			if (!ret) throw new Error('Invalid ' + type + ' index: ' + word);
-			break;
-		case 'string':
-			var match = translated.filter(function(name){
-				return this.test(name);
-			}, new RegExp('^' + word, 'i'));
-			if (!match.length) throw new Error('Invalid ' + type + ' string');
-			if (match.length > 1) throw new Error('Ambiguous ' + type);
-			ret = match[0];
-	}
-
-	return (num) ? translated.indexOf(ret) : ret;
-};
-
-var startCentury = 1900,
-	startYear = 70;
-
-Date.extend({
-
-	getMsg: function(key, args){
-		return Locale.get('Date.' + key, args);
-	},
-
-	units: {
-		ms: Function.convert(1),
-		second: Function.convert(1000),
-		minute: Function.convert(60000),
-		hour: Function.convert(3600000),
-		day: Function.convert(86400000),
-		week: Function.convert(608400000),
-		month: function(month, year){
-			var d = new Date;
-			return Date.daysInMonth(month != null ? month : d.get('mo'), year != null ? year : d.get('year')) * 86400000;
-		},
-		year: function(year){
-			year = year || new Date().get('year');
-			return Date.isLeapYear(year) ? 31622400000 : 31536000000;
-		}
-	},
-
-	daysInMonth: function(month, year){
-		return [31, Date.isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
-	},
-
-	isLeapYear: function(year){
-		return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
-	},
-
-	parse: function(from){
-		var t = typeOf(from);
-		if (t == 'number') return new Date(from);
-		if (t != 'string') return from;
-		from = from.clean();
-		if (!from.length) return null;
-
-		var parsed;
-		parsePatterns.some(function(pattern){
-			var bits = pattern.re.exec(from);
-			return (bits) ? (parsed = pattern.handler(bits)) : false;
-		});
-
-		if (!(parsed && parsed.isValid())){
-			parsed = new Date(nativeParse(from));
-			if (!(parsed && parsed.isValid())) parsed = new Date(from.toInt());
-		}
-		return parsed;
-	},
-
-	parseDay: function(day, num){
-		return parseWord('day', day, num);
-	},
-
-	parseMonth: function(month, num){
-		return parseWord('month', month, num);
-	},
-
-	parseUTC: function(value){
-		var localDate = new Date(value);
-		var utcSeconds = Date.UTC(
-			localDate.get('year'),
-			localDate.get('mo'),
-			localDate.get('date'),
-			localDate.get('hr'),
-			localDate.get('min'),
-			localDate.get('sec'),
-			localDate.get('ms')
-		);
-		return new Date(utcSeconds);
-	},
-
-	orderIndex: function(unit){
-		return Date.getMsg('dateOrder').indexOf(unit) + 1;
-	},
-
-	defineFormat: function(name, format){
-		formats[name] = format;
-		return this;
-	},
-
-	
-
-	defineParser: function(pattern){
-		parsePatterns.push((pattern.re && pattern.handler) ? pattern : build(pattern));
-		return this;
-	},
-
-	defineParsers: function(){
-		Array.flatten(arguments).each(Date.defineParser);
-		return this;
-	},
-
-	define2DigitYearStart: function(year){
-		startYear = year % 100;
-		startCentury = year - startYear;
-		return this;
-	}
-
-}).extend({
-	defineFormats: Date.defineFormat.overloadSetter()
-});
-
-var regexOf = function(type){
-	return new RegExp('(?:' + Date.getMsg(type).map(function(name){
-		return name.substr(0, 3);
-	}).join('|') + ')[a-z]*');
-};
-
-var replacers = function(key){
-	switch (key){
-		case 'T':
-			return '%H:%M:%S';
-		case 'x': // iso8601 covers yyyy-mm-dd, so just check if month is first
-			return ((Date.orderIndex('month') == 1) ? '%m[-./]%d' : '%d[-./]%m') + '([-./]%y)?';
-		case 'X':
-			return '%H([.:]%M)?([.:]%S([.:]%s)?)? ?%p? ?%z?';
-	}
-	return null;
-};
-
-var keys = {
-	d: /[0-2]?[0-9]|3[01]/,
-	H: /[01]?[0-9]|2[0-3]/,
-	I: /0?[1-9]|1[0-2]/,
-	M: /[0-5]?\d/,
-	s: /\d+/,
-	o: /[a-z]*/,
-	p: /[ap]\.?m\.?/,
-	y: /\d{2}|\d{4}/,
-	Y: /\d{4}/,
-	z: /Z|[+-]\d{2}(?::?\d{2})?/
-};
-
-keys.m = keys.I;
-keys.S = keys.M;
-
-var currentLanguage;
-
-var recompile = function(language){
-	currentLanguage = language;
-
-	keys.a = keys.A = regexOf('days');
-	keys.b = keys.B = regexOf('months');
-
-	parsePatterns.each(function(pattern, i){
-		if (pattern.format) parsePatterns[i] = build(pattern.format);
-	});
-};
-
-var build = function(format){
-	if (!currentLanguage) return {format: format};
-
-	var parsed = [];
-	var re = (format.source || format) // allow format to be regex
-	.replace(/%([a-z])/gi,
-		function($0, $1){
-			return replacers($1) || $0;
-		}
-	).replace(/\((?!\?)/g, '(?:') // make all groups non-capturing
-	.replace(/ (?!\?|\*)/g, ',? ') // be forgiving with spaces and commas
-	.replace(/%([a-z%])/gi,
-		function($0, $1){
-			var p = keys[$1];
-			if (!p) return $1;
-			parsed.push($1);
-			return '(' + p.source + ')';
-		}
-	).replace(/\[a-z\]/gi, '[a-z\\u00c0-\\uffff;\&]'); // handle unicode words
-
-	return {
-		format: format,
-		re: new RegExp('^' + re + '$', 'i'),
-		handler: function(bits){
-			bits = bits.slice(1).associate(parsed);
-			var date = new Date().clearTime(),
-				year = bits.y || bits.Y;
-
-			if (year != null) handle.call(date, 'y', year); // need to start in the right year
-			if ('d' in bits) handle.call(date, 'd', 1);
-			if ('m' in bits || bits.b || bits.B) handle.call(date, 'm', 1);
-
-			for (var key in bits) handle.call(date, key, bits[key]);
-			return date;
-		}
-	};
-};
-
-var handle = function(key, value){
-	if (!value) return this;
-
-	switch (key){
-		case 'a': case 'A': return this.set('day', Date.parseDay(value, true));
-		case 'b': case 'B': return this.set('mo', Date.parseMonth(value, true));
-		case 'd': return this.set('date', value);
-		case 'H': case 'I': return this.set('hr', value);
-		case 'm': return this.set('mo', value - 1);
-		case 'M': return this.set('min', value);
-		case 'p': return this.set('ampm', value.replace(/\./g, ''));
-		case 'S': return this.set('sec', value);
-		case 's': return this.set('ms', ('0.' + value) * 1000);
-		case 'w': return this.set('day', value);
-		case 'Y': return this.set('year', value);
-		case 'y':
-			value = +value;
-			if (value < 100) value += startCentury + (value < startYear ? 100 : 0);
-			return this.set('year', value);
-		case 'z':
-			if (value == 'Z') value = '+00';
-			var offset = value.match(/([+-])(\d{2}):?(\d{2})?/);
-			offset = (offset[1] + '1') * (offset[2] * 60 + (+offset[3] || 0)) + this.getTimezoneOffset();
-			return this.set('time', this - offset * 60000);
-	}
-
-	return this;
-};
-
-Date.defineParsers(
-	'%Y([-./]%m([-./]%d((T| )%X)?)?)?', // "1999-12-31", "1999-12-31 11:59pm", "1999-12-31 23:59:59", ISO8601
-	'%Y%m%d(T%H(%M%S?)?)?', // "19991231", "19991231T1159", compact
-	'%x( %X)?', // "12/31", "12.31.99", "12-31-1999", "12/31/2008 11:59 PM"
-	'%d%o( %b( %Y)?)?( %X)?', // "31st", "31st December", "31 Dec 1999", "31 Dec 1999 11:59pm"
-	'%b( %d%o)?( %Y)?( %X)?', // Same as above with month and day switched
-	'%Y %b( %d%o( %X)?)?', // Same as above with year coming first
-	'%o %b %d %X %z %Y', // "Thu Oct 22 08:11:23 +0000 2009"
-	'%T', // %H:%M:%S
-	'%H:%M( ?%p)?' // "11:05pm", "11:05 am" and "11:05"
-);
-
-Locale.addEvent('change', function(language){
-	if (Locale.get('Date')) recompile(language);
-}).fireEvent('change', Locale.getCurrent());
-
-})();
 /*
 ---
 
@@ -10264,6 +10514,60 @@ Swiff.remote = function(obj, fn){
 })();
 /*
 ---
+
+script: Group.js
+
+name: Group
+
+description: Class for monitoring collections of events
+
+license: MIT-style license
+
+authors:
+  - Valerio Proietti
+
+requires:
+  - Core/Events
+  - MooTools.More
+
+provides: [Group]
+
+...
+*/
+
+(function(){
+
+var Group = this.Group = new Class({
+
+	initialize: function(){
+		this.instances = Array.flatten(arguments);
+	},
+
+	addEvent: function(type, fn){
+		var instances = this.instances,
+			len = instances.length,
+			togo = len,
+			args = new Array(len),
+			self = this;
+
+		instances.each(function(instance, i){
+			instance.addEvent(type, function(){
+				if (!args[i]) togo--;
+				args[i] = arguments;
+				if (!togo){
+					fn.call(self, instances, instance, args);
+					togo = len;
+					args = new Array(len);
+				}
+			});
+		});
+	}
+
+});
+
+})();
+/*
+---
 name: Table
 description: LUA-Style table implementation.
 license: MIT-style license
@@ -11837,6 +12141,84 @@ Ngn.Request.File = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.elementExtras.js|--*/
+Element.implement({
+  values: function() {
+    var r = {};
+    this.getElements('input').each(function(el) {
+      if (el.get('type') == 'radio') {
+        if (el.get('checked')) {
+          r = el.get('value');
+        }
+      } else if (el.get('type') == 'checkbox') {
+        if (el.get('checked')) {
+          r[el.get('name')] = el.get('value');
+        }
+      } else {
+        r[el.get('name')] = el.get('value');
+      }
+    });
+    return r;
+  },
+  getSizeWithMarginBorder: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + parseInt(this.getStyle('border-left-width')) + parseInt(this.getStyle('border-right-width')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + parseInt(this.getStyle('border-top-width')) + parseInt(this.getStyle('border-bottom-width')) + s.y
+    };
+  },
+  getSizeWithMargin: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + s.y
+    };
+  },
+  getSizeWithoutBorders: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('border-left-width')) - parseInt(this.getStyle('border-right-width')),
+      y: s.y - parseInt(this.getStyle('border-top-width')) - parseInt(this.getStyle('border-bottom-width'))
+    };
+  },
+  getSizeWithoutPadding: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('padding-left')) - parseInt(this.getStyle('padding-right')),
+      y: s.y - parseInt(this.getStyle('padding-top')) - parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  setSize: function(s) {
+    if (!s.x && !s.y) throw new Error('No sizes defined');
+    if (s.x) this.setStyle('width', s.x + 'px');
+    if (s.y) this.setStyle('height', s.y + 'px');
+    this.fireEvent('resize');
+  },
+  setValue: function(v) {
+    this.set('value', v);
+    this.fireEvent('change');
+  },
+  getPadding: function() {
+    return {
+      x: parseInt(this.getStyle('padding-left')) + parseInt(this.getStyle('padding-right')),
+      y: parseInt(this.getStyle('padding-top')) + parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  storeAppend: function(k, v) {
+    var r = this.retrieve(k);
+    this.store(k, r ? r.append(v) : r = [v]);
+  },
+  setTip: function(title) {
+    if (!Ngn.tips) Ngn.initTips(this);
+    if (this.retrieve('tip:native')) {
+      Ngn.tips.hide(this);
+      this.store('tip:title', title);
+    } else {
+      Ngn.tips.attach(this);
+    }
+  }
+});
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.js|--*/
 Ngn.Frm = {};
 Ngn.Frm.init = {}; // объект для хранения динамических функций иниыиализации
@@ -12087,6 +12469,7 @@ Ngn.Frm.storable = function(eInput) {
   });
 }
 
+// @requiresBefore i/js/ngn/core/Ngn.elementExtras.js
 Ngn.Frm.virtualElement = {
   // abstract toggleDisabled: function(flag) {},
   parentForm: null,
@@ -12419,6 +12802,8 @@ Ngn.Form = new Class({
   initHtml5Upload: function() {
     this.uploadType = 'html5';
     this.eForm.getElements('input[type=file]').each(function(eInput) {
+      if (eInput.retrieve('uploadInitialized')) return;
+      eInput.store('uploadInitialized', true);
       var cls = eInput.get('multiple') ? 'multiUpload' : 'upload';
       var eInputValidator = new Element('input', {
         type: 'hidden'
@@ -12429,7 +12814,8 @@ Ngn.Form = new Class({
       if (eInput.get('data-file')) eInputValidator.set('value', 1);
       var name = eInput.get('name');
       var uploadOptions = {
-        url: this.uploadOptions.url.replace('{fn}', name.replace(']', '').replace('[', '')),
+        url: this.uploadOptions.url.replace('{fn}', name),
+        //url: this.uploadOptions.url.replace('{fn}', name.replace(']', '').replace('[', '')),
         loadedFiles: this.uploadOptions.loadedFiles,
         fileEvents: {
           change: function() {
@@ -12538,6 +12924,7 @@ Ngn.Form = new Class({
     eRow.getElements('.element').each(function(el) {
       Ngn.Form.ElInit.factory(this, Ngn.Form.getElType(el));
     }.bind(this));
+    this.initHtml5Upload();
   },
 
   initFileNav: function() {
@@ -14162,6 +14549,7 @@ Ngn.Form.Upload = new Class({
   },
 
   initialize: function(form, eInput, options) {
+    console.trace('***');
     this.form = form;
     this.eInput = document.id(eInput);
     this.eCaption = this.eInput.getParent('.element').getElement('.help');
@@ -14440,63 +14828,6 @@ Ngn.Frm.headerToggleFx = function(btns) {
     });
   });
 };
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.VisibilityCondition.js|--*/
-Ngn.Frm.VisibilityCondition = new Class({
-
-  initialize: function(eForm, sectionName, condFieldName, cond) {
-    this.sectionName = sectionName;
-    this.initSectionSelector();
-    this.eSection = eForm.getElement(this.sectionSelector);
-    if (!this.eSection) {
-      console.debug('Element "' + this.sectionSelector + '" does not exists');
-      return;
-    }
-    /*
-     this.fx = new Fx.Slide(this.eSection, {
-     duration: 200,
-     transition: Fx.Transitions.Pow.easeOut
-     });
-     this.fx.hide();
-     */
-    var toggleSection = function(v, isFx) {
-      // v необходима для использования в условии $d['cond']
-      var flag = (eval(cond));
-      if (!flag) {
-        // Если скрываем секцию, необходимо снять все required css-классы в её полях
-        this.eSection.getElements('.required').each(function(el) {
-          el.removeClass('required');
-          el.addClass('required-disabled');
-        });
-      } else {
-        this.eSection.getElements('.required-disabled').each(function(el) {
-          el.removeClass('required-disabled');
-          el.addClass('required');
-        });
-      }
-      if (isFx && 0) {
-        // если нужно завернуть не развёрнутую до конца секцию,
-        // нужно просто скрыть её
-        if (flag == this.fx.open)
-          flag ? (function() {
-            this.fx.show();
-          }).delay(200, this) : (function() {
-            this.fx.hide();
-          }).delay(200, this); else
-          flag ? this.fx.slideIn() : this.fx.slideOut();
-      } else {
-        this.eSection.setStyle('display', flag ? 'block' : 'none');
-        this.eSection.getElements(Ngn.Frm.selector).each(function(el) {
-          el.set('disabled', !flag);
-        });
-      }
-    }.bind(this);
-    toggleSection(Ngn.Frm.getValueByName(condFieldName), false);
-    Ngn.Frm.addEvent('change', condFieldName, toggleSection, true);
-    Ngn.Frm.addEvent('focus', condFieldName, toggleSection, true);
-  }
-
-});
-
 /*--|/home/user/ngn-env/ngn/i/js/ngn/trash/Ngn.IframeFormRequest.js|--*/
 Ngn.IframeFormRequest = new Class({
 
@@ -14694,6 +15025,980 @@ Ngn.cp.ddFieldType.Properties = new Class({
   }
 
 });
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Items.js|--*/
+Ngn.Items = new Class({
+  Implements: [Options, Events],
+  
+  options: {
+    idParam: 'id',
+    mainElementSelector: '.mainContent',
+    eItems: 'items',
+    itemElementSelector: '.item',
+    deleteAction: 'delete',
+    isSorting: false,
+    itemsLayout: 'details',
+    reloadOnDelete: false,
+    disableInit: false
+  },
+  
+  initialize: function(options) {
+    this.setOptions(options);
+    this.options.itemDoubleParent = this.options.itemsLayout == 'tile' ? false : true;
+    if (!this.options.disableInit) this.init();
+    return this;
+  },
+
+  init: function() {
+    this.initItems();
+  },
+  
+  getId: function(eItem) {
+    if (!eItem.get('id')) console.debug(eItem);
+    return eItem.get('id').split('_')[1];
+  },
+
+  toolBtnAction: function(cls, action) {
+    for (var i=0; i<this.esItems.length; i++) {
+      var id = this.getId(this.esItems[i]);
+      Ngn.addBtnAction('.tools a[.'+cls+']', action.pass(id), this.esItems[i]);
+    }
+  },
+  
+  initItems: function() {
+    this.eItems = $(this.options.eItems);
+    var esItems = this.eItems.getElements(this.options.itemElementSelector);
+    this.esItems = {};
+    for (var i=0; i<esItems.length; i++) {
+      var id = this.getId(esItems[i]);
+      this.esItems[id] = esItems[i];
+      this.esItems[id].store('itemId', id);
+    }
+    this.initToolActions();
+  },
+
+  loading: function(id, flag) {
+    if (!this.esItems[id]) return;
+    flag ? this.esItems[id].addClass('loading') : this.esItems[id].removeClass('loading');
+  },
+
+  initToolActions: function() {
+    this.addBtnsActions([
+      ['.delete', function(id, eBtn, eItem) {
+        new Ngn.Dialog.Confirm.Mem({
+          id: 'itemsDelete',
+          notAskSomeTime: true,
+          onOkClose: function() {
+            this.loading(id, true);
+            var g = {};
+            g[this.options.idParam] = id;
+            new Request({
+              url: this.getLink() + '?a=ajax_' + this.options.deleteAction,
+              onComplete: function() {
+                this.options.reloadOnDelete ? this.reload() : eItem.destroy();
+              }.bind(this)
+            }).GET(g);
+          }.bind(this)
+        });
+      }.bind(this)],
+      ['a[class~=flagOn],a[class~=flagOff]', function(id, eBtn) {
+        /*
+        var eFlagName = eBtn.getElement('i');
+        var flagName = eFlagName.get('title');
+        eFlagName.removeProperty('title');
+        el.addEvent('click', function(e){
+          var flag = eBtn.get('class').match(/flagOn/) ? true : false;
+          e.preventDefault();
+          //eLoading.addClass('loading');
+          var post = {};
+          post[this.options.idParam] = id;
+          post.k = flagName;
+          post.v = flag ? 0 : 1;
+          new Request({
+            url: window.location.pathname + '?a=ajax_updateDirect',
+            onComplete: function() {
+              eBtn.removeClass(flag ? 'flagOn' : 'flagOff');
+              eBtn.addClass(flag ? 'flagOff' : 'flagOn');
+              //eLoading.removeClass('loading');
+            }
+          }).GET(post);
+        }.bind(this));
+        */
+      }.bind(this)]
+    ]);
+    this.addBtnAction();
+  },
+
+  switcherClasses: [],
+
+  _addBtnAction: function(eItem, selector, action) {
+    if (!eItem) return;
+    var eBtn = eItem.getElement(selector);
+    if (!eBtn) return;
+    eBtn.addEvent('click', function(e){
+      e.preventDefault();
+      action(eItem.retrieve('itemId'), eBtn, eItem);
+    }.bind(this));
+  },
+
+  addBtnAction: function(selector, action) {
+    Object.every(this.esItems, function(eItem) {
+      this._addBtnAction(eItem, selector, action);
+    }.bind(this));
+  },
+  
+  addBtnsActions: function(actions) {
+    for (var i in this.esItems) {
+      var eItem = this.esItems[i];
+      for (var j=0; j<actions.length; j++) {
+        this._addBtnAction(eItem, actions[j][0], actions[j][1]);
+      }
+    }
+  },
+  
+  reload: function() {
+    Ngn.Request.Iface.loading(true);
+    new Request({
+      url: window.location.pathname + '?a=ajax_reload',
+      onComplete: function(html) {
+        this.eItems.empty();
+        this.eItems.set('html', html);
+        this.init();
+        Ngn.cp.initTooltips();
+        Ngn.Request.Iface.loading(false);
+        this.fireEvent('reloadComplete');
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Items.Table.js|--*/
+/**
+ * Компонент для вывода и редактирования табличных данных
+ */
+Ngn.Items.Table = new Class({
+  Extends: Ngn.Items,
+
+  options: {
+    eItems: 'itemsTable', // контейнер таблицы
+    itemElementSelector: 'tbody tr', // селектор строки
+    isSorting: true,
+    handle: '.dragBox',
+    onMoveComplete: Function.from(),
+    basePath: window.location.pathname
+  },
+
+  initSorting: function() {
+    if (!this.options.isSorting) return;
+    var sortablesOptions = {};
+    if (this.options.handle) {
+      sortablesOptions.handle = this.options.handle;
+      var dragBoxes = this.eItems.getElements(this.options.handle);
+      dragBoxes.each(function(el) {
+        el.addEvent('mouseover', function() {
+          el.addClass('over');
+        });
+        el.addEvent('mouseout', function() {
+          el.removeClass('over');
+        });
+      });
+    }
+    this.ST = new Sortables(this.eItemsTableBody, sortablesOptions);
+    this.dragStarts = false;
+    this.orderState = this.ST.serialize().join(',');
+    this.ST.addEvent('complete', function(el, clone) {
+      el.removeClass('move');
+      // Если в процессе переноса или если положение не изменилось
+      if (!this.dragStarts || this.orderState == this.ST.serialize().join(',')) return;
+      el.addClass('loading');
+      new Request({
+        url: this.options.basePath + '?a=ajax_reorder',
+        onComplete: function() {
+          this.dragStarts = false;
+          //this.orderState = this.ST.serialize(false, function(el) { return el.get('data-id') }).join(',');
+          this.orderState = this.ST.serialize().join(',');
+          el.removeClass('loading');
+          this.fireEvent('moveComplete');
+        }.bind(this)
+      }).POST({
+          'ids': this.ST.serialize(false, function(el) {
+            return el.get('data-id');
+          })
+        });
+    }.bind(this));
+    this.ST.addEvent('start', function(el, clone) {
+      this.dragStarts = true;
+      el.addClass('move');
+    }.bind(this));
+    if (!this.options.handle) {
+      // Подсвечивать строку только в том случае если нет специального бокса дял переноса
+      this.eItemsTableBody.addEvents({
+        'mousedown': function(e) {
+          this.eItemsTableBody.set('styles', {'cursor': 'move'});
+        }.bind(this),
+        'mouseup': function(e) {
+          this.eItemsTableBody.set('styles', {'cursor': 'auto'});
+        }.bind(this)
+      });
+      this.eItemsTableBody.getElements('tr').each(function(el, i) {
+        el.addEvents({
+          'mousedown': function(e) {
+            el.addClass('move');
+          },
+          'mouseup': function(e) {
+            el.removeClass('move');
+          }
+        });
+      });
+    }
+  },
+
+  initItems: function() {
+    this.parent();
+    this.eItemsTableBody = this.eItems.getElement('tbody');
+    Ngn.Html.fixEmptyTds(this.eItemsTableBody);
+    this.initSorting();
+  }
+
+});
+
+Ngn.ColResizer = new Class({
+
+  initialize: function(eHandler, n, grid) {
+    var initW;
+    var eWidth = grid.esTh[n - 1];
+    if (!eWidth) return;
+    new Drag(eHandler, {
+      modifiers: {
+        x: 'left'
+      },
+      snap: 0,
+      onStart: function() {
+        eWidth.store('initW', eWidth.getSize().x);
+        grid.initThSizes();
+      },
+      onDrag: function() {
+        var offset = parseInt(eHandler.getStyle('left'));
+        eWidth.setStyle('width', (eWidth.retrieve('initW') + offset) + 'px');
+      }.bind(this)
+    });
+  }
+
+});
+
+Ngn.Items.toolActions = {
+
+  switcher: {
+    init: function(items, cls, row) {
+      row.tools[cls].on = !!parseInt(row.tools[cls].on);
+      if (!Ngn.Items.toolActions.switcher.switchers[cls]) throw new Error('Ngn.Items.switcher[' + cls + '] not defined');
+      var switcher = Ngn.Items.toolActions.switcher.switchers[cls];
+      if (switcher.initRowEl) switcher.initRowEl(row);
+      var switcherOpts = switcher.getOptions(items, row);
+      var el = new Element('a', {
+        'href': '#',
+        'class': 'iconBtn ' + (row.tools[cls].on ? switcherOpts.classOn : switcherOpts.classOff),
+        'html': '<i></i>',
+        'title': row.tools[cls].on ? switcherOpts.titleOn : switcherOpts.titleOff
+      }).inject(new Element('td').inject(row.eTools));
+      var switcher = new Ngn.SwitcherLink(el, switcherOpts);
+      //switcher.addEvent('click', items.loading.pass([row.id, true], items));
+      switcher.addEvent('click', function() {
+        items.loading(row.id, true);
+      });
+      switcher.addEvent('complete', items.loading.pass([row.id, false], items));
+    },
+    switchers: {
+      active: {
+        /**
+         * @param items Ngn.Items
+         * @param row
+         * @returns {{classOn: string, classOff: string, linkOn: string, linkOff: string, onComplete: onComplete}}
+         */
+        getOptions: function(items, row) {
+          return {
+            classOn: 'activate',
+            classOff: 'deactivate',
+            linkOn: items.getLink() + '?a=ajax_activate&' + items.options.idParam + '=' + row.id,
+            linkOff: items.getLink() + '?a=ajax_deactivate&' + items.options.idParam + '=' + row.id,
+            onComplete: function(enabled) {
+              items.fireEvent('reloadComplete', row.id);
+              enabled ? items.esItems[row.id].removeClass('nonActive') : items.esItems[row.id].addClass('nonActive');
+            }
+          };
+        },
+        initRowEl: function(row) {
+          if (!parseInt(row.active)) row.el.addClass('nonActive');
+        }
+      }
+    }
+  },
+
+  inlineTextEdit: {
+    init: function(items, cls, row) {
+      Ngn.Items.toolActions.inlineTextEdit.initTd(items, cls, row, row.tools[cls].elN + 1);
+    },
+    initTd: function(items, cls, row, n) {
+      var data = Object.values(row.data);
+      var eTd = row.el.getChildren('td')[n];
+      if (!eTd) throw new Ngn.EmptyError('eTd');
+      eTd.set('html', '');
+      eTd.store('eText', new Element('div', {
+        html: data[n - 1]
+      }).inject(eTd));
+      eTd.store('eInput', new Element('input', {
+        value: data[n - 1],
+        styles: {
+          display: 'none',
+          'border': '0px',
+          width: '100px'
+        }
+      }).inject(eTd));
+      var saving = false;
+      var save = function(from) {
+        if (saving) return;
+        saving = true;
+        var r = {};
+        r[items.options.idParam] = row.id;
+        r[row.tools[cls].paramName] = eTd.retrieve('eInput').get('value');
+        if (eTd.retrieve('eText').get('html') != r[row.tools[cls].paramName]) {
+          eTd.retrieve('eText').set('html', r[row.tools[cls].paramName]);
+          new Ngn.Request.JSON({
+            url: items.options.basePath + '?a=' + row.tools[cls].action,
+            onComplete: function() {
+              saving = false;
+              items.reload();
+            }
+          }).post(r);
+        } else {
+          (function() {
+            saving = false;
+          }).delay(100);
+        }
+        Ngn.Items.toolActions.inlineTextEdit.switchInput(eTd, from);
+      };
+      eTd.retrieve('eInput').addEvent('blur', save.pass('blur'));
+      eTd.retrieve('eInput').addEvent('keypress', function(e) {
+        if (e.key != 'enter') return;
+        e.preventDefault();
+        save('enter');
+      });
+      eTd.store('edit', false);
+      items.createToolBtn(cls, row, Ngn.Items.toolActions.inlineTextEdit.switchInput.pass(eTd));
+    },
+    switchInput: function(eTd, from) {
+      if (eTd.retrieve('edit')) {
+        eTd.retrieve('eInput').setStyle('display', 'none');
+        eTd.retrieve('eText').setStyle('display', 'block');
+        eTd.store('edit', false);
+      } else {
+        eTd.retrieve('eInput').setStyle('display', 'block');
+        eTd.retrieve('eInput').focus();
+        eTd.retrieve('eText').setStyle('display', 'none');
+        eTd.store('edit', true);
+      }
+    }
+  }
+
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Html.js|--*/
+Ngn.Html = {};
+
+Ngn.Html.fixEmptyTds = function(el) {
+  var tds = el.getElements('td');
+  for (var i = 0; i < tds.length; i++)
+    if (!tds[i].get('html').trim()) tds[i].set('html', '&nbsp;');
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.SwitcherLink.js|--*/
+Ngn.SwitcherLink = new Class({
+
+  Implements: [Options, Events],
+
+  options: {
+    textSelector: null,
+    classOn: '',
+    classOff: '',
+    linkOn: '',
+    linkOff: '',
+    titleOn: 'Включить',
+    titleOff: 'Выключить',
+    onClick: Function.from(),
+    onComplete: Function.from()
+  },
+
+  initialize: function(el, options) {
+    this.setOptions(options);
+    this.el = $(el) || el;
+    if (this.options.textSelector) this.text = this.el.getElement(this.options.textSelector);
+    if (this.el.hasClass(this.options.classOn)) {
+      Ngn.Element.setTip(this.el, this.options.titleOff);
+      if (this.text) this.text.set('text', this.options.titleOff);
+    } else {
+      Ngn.Element.setTip(this.el, this.options.titleOn);
+      if (this.text) this.text.set('text', this.options.titleOn);
+    }
+    this.setTip(this.el.hasClass(this.options.classOn));
+    this.el.addEvent('click', function(e) {
+      e.preventDefault();
+      this.click();
+    }.bind(this));
+  },
+
+  click: function() {
+    var enabled = this.el.hasClass(this.options.classOn);
+    this.fireEvent('click');
+    new Request({
+      url: enabled ? this.options.linkOff : this.options.linkOn,
+      onComplete: function(data) {
+        this.setTip(!enabled);
+        this.fireEvent('complete', !enabled);
+      }.bind(this)
+    }).get();
+  },
+
+  setTip: function(enabled) {
+    if (enabled) {
+      this.el.removeClass(this.options.classOff);
+      this.el.addClass(this.options.classOn);
+      Ngn.Element.setTip(this.el, this.options.titleOff);
+      if (this.text) this.text.set('text', this.options.titleOff);
+    } else {
+      this.el.removeClass(this.options.classOn);
+      this.el.addClass(this.options.classOff);
+      Ngn.Element.setTip(this.el, this.options.titleOn);
+      if (this.text) this.text.set('text', this.options.titleOn);
+    }
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.EmptyError.js|--*/
+Ngn.EmptyError = new Class({
+  Extends: Error,
+
+  initialize: function(v) {
+    this.message = '"' + v + '" can not be empty';
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.js|--*/
+/**
+ * Компонент для вывода и редактирования табличных данных
+ */
+Ngn.Grid = new Class({
+  Extends: Ngn.Items.Table,
+
+  options: {
+    //data: {
+    //  head: [ 'title1' ],
+    //  body: [ { tools: {}, data: [] } ]
+    //},
+    isSorting: false,
+    tools: {},
+    formatters: {},
+    itemElementSelector: 'tbody .item',
+    checkboxes: false,
+    filterPath: null,
+    id: null,
+    toolActions: {},
+    toolLinks: {},
+    eParent: 'table',
+    fromDialog: false,
+    listAction: null,
+    listAjaxAction: 'json_getItems',
+    valueContainerClass: 'v',
+    basePath: window.location.pathname,
+    resizeble: false
+  },
+
+  btns: {},
+
+  init: function() {
+    if (!this.options.eParent) throw new Ngn.EmptyError('this.options.eParent');
+    if (this.options.basePath == '/') this.options.basePath = '';
+    if (this.options.basePath) this.options.id = Ngn.String.hashCode(this.options.basePath);
+    this.eParent = $(this.options.eParent);
+    this.initMenu();
+    this.options.eItems = Elements.from('<table width="100%" cellpadding="0" cellspacing="0" class="items itemsTable' + (this.options.resizeble ? ' resizeble' : '') + '"><thead><tr></tr></thead><tbody></tbody></table>')[0].inject(this.eParent);
+    this.eHeadTr = this.options.eItems.getElement('thead tr');
+    if (this.options.checkboxes) {
+      Elements.from('<th class="tools"><input type="checkbox" id="checkAll" title="Выделить всё" class="tooltip" /></th>')[0].inject(this.eHeadTr);
+    } else {
+      Elements.from('<th></th>')[0].inject(this.eHeadTr);
+    }
+    if (this.options.data) this.initInterface(this.options.data);
+  },
+
+  initMenu: function() {
+    var grid = this, action;
+    Ngn.loading
+    this.eMenu = Elements.from('<div class="itemsTableMenu dgray"><div class="clear"></div></div>')[0].inject(this.eParent);
+    if (!this.options.menu) return;
+    for (var i = 0; i < this.options.menu.length; i++) {
+      (function() {
+        var v = grid.options.menu[i];
+        var keys = Object.keys(v.action);
+        if (keys.length && Ngn.Arr.inn('$constructor', keys)) {
+          // класс Ngn.GridBtnAction.*
+          action = new v.action(grid);
+          action.id = v.cls;
+        } else {
+          if (typeof(v.action) == 'function') {
+            // ф-я function(grid) {}
+            action = { action: v.action };
+          } else {
+            action = v.action ? { action: v.action } : null;
+          }
+          if (action) {
+            action.id = v.cls;
+            action.args = grid;
+          }
+        }
+        var cls = v.cls;
+        v.cls = 'btn ' + v.cls;
+        grid.btns[cls] = new Ngn.Btn(Ngn.Btn.btn(v).inject(this.eMenu, 'top'), action, v.options || {});
+      }.bind(this))();
+    }
+  },
+
+  dataLoaded: function(data) {
+    this.options.data = data;
+    this.init();
+    this.initInterface(this.options.data);
+  },
+
+  initThSizes: function() {
+    this.eHeadTr.getElements('th').each(function(el) {
+      el.setStyle('width', el.getSize().x + 'px');
+    });
+  },
+
+  getLink: function(ajax) {
+    var action = ajax ? this.options.listAjaxAction : this.options.listAction;
+    if (!action) if (ajax) throw new Ngn.EmptyError('action');
+    return this.options.basePath + (action ? '/' + action : '') + (this.options.filterPath ? this.options.filterPath.toPathString() : '') + (this.currentPage == 1 ? '' : '/pg' + this.currentPage);
+  },
+
+  reload: function(itemId, skipLoader) {
+    if (itemId && !skipLoader) this.loading(itemId, true); // показываем, что строчка обновляется
+    Ngn.Request.Iface.loading(true);
+    new Ngn.Request.JSON({
+      url: this.getLink(true),
+      onComplete: function(r) {
+        if (!this.options.fromDialog) {
+          if (window.history.pushState) window.history.pushState(null, null, this.getLink(false));
+        }
+        this.initInterface(r, true);
+        this.fireEvent('reloadComplete', r);
+        Ngn.Request.Iface.loading(false);
+        this.rowFlash(itemId);
+      }.bind(this)
+    }).send();
+    return this;
+  },
+
+  rowFlash: function(itemId) {
+    if (!this.esItems[itemId]) return;
+    var fx = new Fx.Tween(this.esItems[itemId], {
+      duration: 200,
+      onComplete: function() {
+        fx.setOptions({duration: 3000});
+        fx.start('background-color', '#FFFFFF');
+      }
+    });
+    fx.start('background-color', '#FFB900');
+  },
+
+  initInterface: function(data, fromAjax) {
+    if (data.head) this.initHead(data.head);
+    if (data.body) this.initBody(data.body);
+    if (data.pagination) this.initPagination(data.pagination, fromAjax);
+    this.initItems();
+    if (this.options.resizeble) {
+      if (!this.options.id) throw new Ngn.EmptyError('this.options.id');
+      this.resizeble = new Ngn.Grid.Resizeble(this);
+      window.addEvent('resize', function() {
+        this.resizeble.resizeLastCol();
+      }.bind(this));
+    }
+  },
+
+  initHead: function(head) {
+    head = Ngn.Object.fromArray(head);
+    this.esTh = [];
+    this.eHeadTr.set('html', '');
+    new Element('th').inject(this.eHeadTr);
+    for (var i in head) {
+      var eTh = new Element('th', {html: head[i]}).inject(this.eHeadTr);
+      this.esTh[i] = eTh;
+    }
+    return this;
+  },
+
+  initBody: function(rows) {
+    if (!rows) throw new Ngn.EmptyError('rows');
+    rows = Ngn.Object.fromArray(rows);
+    var eBody = this.options.eItems.getElement('tbody');
+    eBody.set('html', '');
+    for (var k in rows) {
+      var row = rows[k];
+      if (!row.data) throw new Error('Row ' + k + ' has no data');
+      var eRow = new Element('tr', {
+        'class': 'item' + (row.rowClass ? ' ' + row.rowClass : ''),
+        'id': 'item_' + row.id,
+        'data-id': row.id
+      }).inject(eBody);
+      var eTools = new Element('td', {
+        'class': 'tools',
+        'html': '<table cellpadding="0" cellspacing="0"><tr></tr></table>'
+      }).inject(eRow);
+      eTools = eTools.getElement('tr');
+      row.el = eRow;
+      row.eTools = eTools;
+      if (this.options.checkboxes) {
+        Elements.from('<td><input type="checkbox" name="itemIds[]" value="' + row.id + '"/></td>')[0].inject(eTools);
+      } else {
+        Elements.from('<td></td>')[0].inject(eTools);
+      }
+      if (this.options.isSorting) Elements.from('<td><div class="dragBox"></div></td>')[0].inject(eTools);
+      var n = 0;
+      for (var name in Ngn.Object.fromArray(row.data)) {
+        var prop = {};
+        if (typeOf(row.data[name]) == 'object') {
+          var value = row.data[name][0];
+          prop['class'] = row.data[name][1];
+        } else {
+          value = row.data[name];
+        }
+        if (this.options.formatters[name]) value = this.options.formatters[name]();
+        prop.html = this.replaceHtmlValue(value);
+        new Element('td', prop).
+          addClass('n_' + name).
+          addClass(this.options.valueContainerClass).set('data-n', n).inject(eRow);
+        n++;
+      }
+      row.tools = Object.merge(row.tools || {}, this.options.tools);
+      for (var cls in Ngn.Object.fromArray(row.tools)) {
+        if (typeOf(row.tools[cls]) == 'object') {
+          if (!row.tools[cls].type) throw new Error('row.tools[cls].type must be defined');
+          if (Ngn.Items.toolActions[row.tools[cls].type]) {
+            Ngn.Items.toolActions[row.tools[cls].type].init(this, cls, row);
+          } else {
+            throw new Error(row.tools[cls].type + ' toolAction not defined');
+          }
+        } else {
+          if (Ngn.Items.toolActions[cls]) {
+            Ngn.Items.toolActions[cls].init(this, cls, row);
+          } else {
+            this.createToolBtn(cls, row);
+          }
+        }
+      }
+    }
+    return this;
+  },
+
+  currentPage: 1,
+
+  replaceLink: function(link, ajax) {
+    if (ajax) {
+      return link.replace(new RegExp('/' + this.options.listAjaxAction + '/', 'g'), this.options.listAction ? '/' + this.options.listAction + '/' : '/');
+    } else {
+      return link.replace(new RegExp('/' + this.options.listAction + '/', 'g'), '/' + this.options.listAjaxAction + '/');
+    }
+  },
+
+  initPagination: function(data, fromAjax) {
+    if (this.ePagination) this.ePagination.dispose();
+    this.ePagination = Elements.from('<div class="pNums"><div class="bookmarks">' + data.pNums + '</div></div>')[0].inject(this.eMenu, 'top');
+    new Element('div', {
+      'class': 'total',
+      html: 'Всего записей: ' + data.itemsTotal
+    }).inject(this.ePagination);
+    this.ePagination.getElements('a').each(function(el) {
+      if (fromAjax) el.store('href', el.get('href'));
+      el.set('href', this.replaceLink(el.get('href'), fromAjax));
+      if (!fromAjax) el.store('href', el.get('href'));
+      el.addEvent('click', function(e) {
+        new Event(e).stop();
+        Ngn.Request.Iface.loading(true);
+        this.currentPage = el.get('href').replace(/.*pg(\d+)/, '$1');
+        new Ngn.Request.JSON({
+          url: el.retrieve('href'),
+          onComplete: function(r) {
+            Ngn.Request.Iface.loading(false);
+            this.initInterface(r, true);
+          }.bind(this)
+        }).send();
+      }.bind(this));
+    }.bind(this));
+  },
+
+  replaceHtmlValue: function(v) {
+    if (typeof(v) != 'string') return v;
+    return v.replace(new RegExp(this.options.listAjaxAction, 'g'), this.options.listAction);
+  },
+
+  createToolBtn: function(cls, row, action) {
+    action = action || this.options.toolActions[cls] || false;
+    var el = new Element('a', {
+      'href': this.options.toolLinks[cls] ? this.options.toolLinks[cls](row) : '#',
+      'class': 'iconBtn ' + cls,
+      'html': '<i></i>',
+      'title': row.tools[cls]
+    }).inject(new Element('td').inject(row.eTools));
+    if (action) {
+      // Только если экшн определён, биндим на элемент клик (new Ngn.Btn)
+      action = action.bind(this);
+      new Ngn.Btn(el, function() {
+        action(row, this);
+      });
+    }
+    return el;
+  },
+
+  idP: function(id) {
+    var p = {};
+    p[this.options.idParam] = id;
+    return p;
+  }
+
+});
+
+Ngn.Grid.defaultDialogOpts = {
+  width: 500,
+  height: 300,
+  reduceHeight: true
+};
+
+Ngn.Grid.menu = {};
+
+Ngn.GridBtnAction = new Class({
+  Extends: Ngn.Btn.Action,
+  initialize: function(grid) {
+    this.grid = grid;
+    this.classAction = true;
+  }
+});
+
+Ngn.GridBtnAction.New = new Class({
+  Extends: Ngn.GridBtnAction,
+  action: function() {
+    new Ngn.Dialog.RequestForm(this.getDialogOptions());
+  },
+  getDialogOptions: function() {
+    return Object.merge({
+      id: 'CHANGE_ME',
+      dialogClass: 'dialog fieldFullWidth',
+      url: this.grid.options.basePath + '/json_new',
+      title: false,
+      onOkClose: function() {
+        this.grid.reload();
+      }.bind(this)
+    }, Ngn.Grid.defaultDialogOpts)
+  }
+});
+
+Ngn.Grid.menu['new'] = {
+  title: 'Создать',
+  cls: 'add',
+  action: Ngn.GridBtnAction.New
+};
+Ngn.Grid.defaultMenu = [Ngn.Grid.menu['new']];
+
+Ngn.Grid.toolActions = {};
+Ngn.Grid.toolActions.edit = function(row, opt) {
+  new Ngn.Dialog.RequestForm(Object.merge({
+    id: 'CHANGE_ME',
+    url: this.options.basePath + '?a=json_edit&id=' + row.id,
+    width: 500,
+    height: 300,
+    title: false,
+    onOkClose: function() {
+      this.reload(row.id);
+    }.bind(this)
+  }, Ngn.Grid.defaultDialogOpts));
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.Resizeble.js|--*/
+Ngn.Grid.Resizeble = new Class({
+  Implements: [Options, Events],
+
+  firstResizebleColN: 1,
+  defaultColWidth: 50,
+  debug: false,
+  maxColWidth: 350,
+
+  /**
+   * @param Ngn.Grid
+   * @param options
+   */
+  initialize: function(grid, options) {
+    this.setOptions(options);
+    this.grid = grid;
+    if (this.debug) this.addDubugCells();
+    this.initWrappers();
+    this.initHandlers();
+  },
+
+  getTrParsents: function() {
+    return this.grid.eParent.getChildren('table').getChildren()[0];
+  },
+
+  getWrWidth: function(n) {
+    var w = Ngn.Storage.get('gridColWidth' + this.grid.options.id + n);
+    if (w > this.options.maxColWidth) w = this.options.maxColWidth;
+    return w || this.defaultColWidth;
+  },
+
+  getRows: function() {
+    var rows = [];
+    this.getTrParsents().each(function(el) {
+      el.getChildren().each(function(eTr) {
+        if (eTr.hasClass('debug')) return;
+        rows.push(eTr);
+      });
+    });
+    return rows;
+  },
+
+  initWrappers: function() {
+    this.getRows().each(function(eTr) {
+      eTr.getChildren().each(function(eTd, n) {
+        if (n < this.firstResizebleColN) return;
+        var html = eTd.get('html');
+        eTd.set('html', '');
+        if (this.debug) this.debugCells[n].set('html', this.getWrWidth(n));
+        new Element('div', {
+          html: '<div class="cont">' + html + '</div>',
+          'class': 'wr',
+          styles: {
+            width: this.getWrWidth(n) + 'px'
+          }
+        }).inject(eTd);
+      }.bind(this));
+    }.bind(this));
+  },
+
+  initHandlers: function() {
+    this.cols = this.getTrParsents()[0].getChildren()[0].getChildren('th');
+    this.cols.each(function(eTh, n) {
+      if (n < this.firstResizebleColN + 1) return;
+      var eHandler = new Element('div', {
+        'class': 'handler'
+      }).inject(eTh, 'top');
+      var col = new Ngn.Grid.Resizeble.Col(this, n, eHandler);
+      if (n == this.cols.length - 1) this.resizebleLastCol = col;
+    }.bind(this));
+    this.resizeLastCol();
+  },
+
+  resizeLastCol: function() {
+    if (this.resizebleLastCol) this.resizebleLastCol.resizeLast();
+  },
+
+  debugCells: [],
+
+  addDubugCells: function() {
+    var eTbody = this.getTrParsents()[1];
+    var cols = eTbody.getChildren()[0].getChildren();
+    var eTr = new Element('tr', {'class': 'debug'});
+    eTr.inject(eTbody);
+    for (var i = 0; i < cols.length; i++) {
+      this.debugCells[i] = new Element('td').inject(eTr);
+    }
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.Resizeble.Col.js|--*/
+Ngn.Grid.Resizeble.Col = new Class({
+
+  initialize: function(resizeble, colN, eHandler) {
+    this.resizeble = resizeble;
+    if (!this.resizeble.grid.options.id) throw new Error('cat use resizeble on grid without id option');
+    this.colN = colN;
+    this.drag = new Drag(new Element('div'), {
+      handle: eHandler,
+      onStart: function(el, e) {
+        this.startPosition = e.page.x;
+        this.startW = this.getElements(1)[0].getSize().x;
+      }.bind(this),
+      onDrag: function(el, e) {
+        var delta = this.startPosition - e.page.x;
+        var els = this.getElements(1);
+        for (var i = 0; i < els.length; i++) {
+          var w = this.startW - delta;
+          if (!els[i]) throw new Error('why?');
+          els[i].setStyle('width', w + 'px');
+          if (this.resizeble.debug) this.resizeble.debugCells[this.colN - 1].set('html', w);
+        }
+        this.resizeble.resizeLastCol();
+      }.bind(this),
+      onComplete: function() {
+        Ngn.Storage.set('gridColWidth' + this.resizeble.grid.options.id + (this.colN - 1), parseInt(this.getElements(1)[0].getStyle('width')));
+      }.bind(this),
+      snap: 0
+    });
+  },
+
+  getMaxParentWidth: function() {
+    var x1 = window.getSize().x;
+    var x2 = this.resizeble.grid.eParent.getSize().x;
+    return x1 < x2 ? x1 : x2;
+  },
+
+  resizeLast: function() {
+    if (this.colN != this.resizeble.cols.length - 1) throw new Error('U can not use this method on non last col (' + this.colN + '). Total: ' + this.resizeble.cols.length);
+    var els = this.getElements();
+    var display = els[0].getStyle('display');
+    this.setColCellsStyle('display', 'none');
+    var parentWithoutLastColW = this.getMaxParentWidth();
+    var tableW = this.resizeble.grid.eParent.getElement('table').getSize().x;
+    this.setColCellsStyle('display', display);
+    this.setColCellsStyle('width', parentWithoutLastColW - tableW);
+  },
+
+  setColCellsStyle: function(k, v) {
+    var els = this.getElements();
+    for (var i = 0; i < els.length; i++) els[i].setStyle(k, v);
+  },
+
+  getElements: function(offset) {
+    var els = [];
+    offset = offset || 0;
+    this.resizeble.getRows().each(function(eTr) {
+      eTr.getChildren('td,th').each(function(el, n) {
+        if (n == this.colN - offset) {
+          els.push(el.getElement('.wr'));
+        }
+      }.bind(this));
+    }.bind(this));
+    return els;
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Object.js|--*/
+Ngn.Object = {};
+
+Ngn.Object.fromString = function(s, value) {
+  var a = s.split('.');
+  for (var i = 0; i < a.length; i++) {
+    var ss = a.slice(0, i + 1).join('.');
+    eval('var def = ' + ss + ' === undefined');
+    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
+  }
+  if (value) eval(s + ' = value');
+};
+
+Ngn.Object.fromArray = function(arr) {
+  if (typeOf(arr) == 'object') return arr;
+  var r = {};
+  for (var i = 0; i < arr.length; ++i) r[i] = arr[i];
+  return r;
+};
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
 Ngn.Dialog.RequestFormBase = new Class({
   Extends: Ngn.Dialog,
@@ -14936,26 +16241,459 @@ Ngn.Frm.Saver = new Class({
   }
   
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.initConfigManager.js|--*/
-Ngn.initConfigManager = function() {
-  document.getElements('a[class~=delete]').each(function(el, n) {
-    var name = el.get('title');
-    el.set('title', 'Удалить');
-    el.addEvent('click', function(e){
-      e.preventDefault();
-      if (!confirm('Вы уверены?')) return;
-      eValue = $('value_' + name2id(name).replace('k_', ''));
-      eValue.addClass('loader');
-      new Request({
-        url: window.location.pathname,
-        onComplete: function(data) {
-        eValue.dispose();
-        }.bind(this)
-      }).GET({
-        action: 'ajax_deleteValue',
-        name: name
-      });
-      el.set('title', '');
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdGrid.js|--*/
+Ngn.DdGrid = new Class({
+  Extends: Ngn.Grid,
+
+  options: {
+    reloadOnDelete: false
+  },
+
+  fieldNames: [],
+
+  initInterface: function(data, fromAjax) {
+    this.fieldNames = data.fieldNames;
+    this.parent(data, fromAjax);
+  },
+
+  selectChange: function() {
+    new Ngn.Request.Loading({
+      url: this.getLink() + '?a=ajax_updateField&field=' + el.get('name') + '&value=' + el.get('value') + '&' + this.options.idParam + '=' + itemId,
+      onComplete: function() {
+        this.reload(itemId);
+      }.bind(this)
+    }).send();
+  },
+
+  initItems: function() {
+    this.options.eItems.getElements('select').each(function(el) {
+      var itemId = el.getParent('.item').get('data-id');
+      el.addEvent('change', function() {
+        this.selectChange(el, itemId);
+      }.bind(this));
+    }.bind(this));
+
+
+    /*
+     this.options.eItems.getElements('.iconFlag').each(function(el) {
+     var itemId = el.getParent('.item').get('data-id');
+     var field = this.fieldNames[el.getParent('.' + this.options.valueContainerClass).get('data-n')];
+     var title = el.get('title');
+     if (title.test('/')) {
+     var r = title.split('/');
+     var titleOn = r[0];
+     var titleOff = r[1];
+     } else {
+     var titleOn = title + ' (включить)';
+     var titleOff = title + ' (выключить)';
+     }
+     new Ngn.SwitcherLink(el, {
+     classOn: 'flagOn',
+     classOff: 'flagOff',
+     titleOn: titleOn,
+     titleOff: titleOff,
+     linkOn: this.getLink() + '?a=ajax_changeState&field=' + field + '&state=1&' + this.options.idParam + '=' + itemId,
+     linkOff: this.getLink() + '?a=ajax_changeState&field=' + field + '&state=0&' + this.options.idParam + '=' + itemId,
+     onComplete: function(enabled) {
+     this.loading(itemId, false);
+     this.fireEvent('reloadComplete', itemId);
+     }.bind(this),
+     onClick: function() {
+     this.loading(itemId, true);
+     }.bind(this)
+     });
+     }.bind(this));
+     */
+    this.parent();
+  },
+
+  initMenu: function() {
+    this.parent();
+    var timeoutId = 0;
+    var eSearch = new Element('input').inject(this.eMenu.getElement('.clear'), 'before');
+    eSearch.addEvent('keyup', function() {
+      clearTimeout(timeoutId);
+      timeoutId = this.loadSearchResults.delay(1000, this, eSearch.get('value'));
+    }.bind(this));
+  },
+
+  word: null,
+
+  loadSearchResults: function(word) {
+    if (this.word == word) return;
+    this.word = word;
+    Ngn.Request.Iface.loading(true);
+    new Ngn.Request.JSON({
+      url: this.options.basePath + '/json_search?word=' + word,
+      onComplete: function(r) {
+        this.initInterface(r, true);
+        Ngn.Request.Iface.loading(false);
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdFilterPath.js|--*/
+Ngn.DdFilterPath = new Class({
+
+  // "/path/to/page/param1/param2" - здесь n=3
+  initialize: function(n) {
+    this.n = n;
+    this.setPg(window.location.pathname);
+    this.chunks = [];
+    this.filters = {};
+    var p = window.location.pathname.split('/');
+    var chunks = p.slice(this.n + 1, p.length);
+    for (var i = 0; i < chunks.length; i++) {
+      if (!chunks[i].contains('.')) continue;
+      this.chunks.push(chunks[i]);
+    }
+    for (i = 0; i < this.chunks.length; i++) {
+      p = this.chunks[i].split('.');
+      if (p.length == 3) {
+        this._addFilter(p[0], p[1], p[2]);
+      } else if (p.length == 2) {
+        this._addFilter(p[0], 'default', p[1]);
+      } else {
+        // ignore
+      }
+    }
+  },
+
+  reset: function() {
+    this.filters = {};
+  },
+
+  _addFilter: function(type, name, value, multiple) {
+    if (!this.filters[type]) this.filters[type] = {};
+    this.filters[type][name] = value;
+  },
+
+  toPathString: function(path) {
+    var s = '';
+    for (var type in this.filters) {
+      for (var name in this.filters[type]) {
+        s += '/' + type + '.' + (name == 'default' ? '' : name + '.') + this.filters[type][name];
+      }
+    }
+    if (this.pg > 1) s += '/pg' + this.pg;
+    return s;
+  },
+
+  addFilter: function(type, name, value) {
+    if (!type) throw new Error('type not defined');
+    if (value === '' || value === false) {
+      delete this.filters[type][name];
+    } else {
+      this._addFilter(type, name, value);
+    }
+  },
+
+  removeFilter: function(type, name) {
+    if (!this.filters[type][name]) return;
+    this.addFilter(type, name, '');
+  },
+
+  setPg: function(path) {
+    this.pg = path.test(/\/pg\d+/) ? parseInt(path.replace(/.*\/pg(\d+).*/, '$1')) : 1;
+  }
+
+});
+
+Ngn.DdFilterPath.date = {};
+Ngn.DdFilterPath.date.toObj = function(str) {
+  var m = str.match(/(\d+);(\d+);(\d+)-(\d+);(\d+);(\d+)/);
+  if (!m) return false;
+  return {
+    from: [m[1], m[2], m[3]],
+    to: [m[4], m[5], m[6]]
+  };
+};
+Ngn.DdFilterPath.date.toStr = function(obj) {
+  return obj.from.join(';') + '-' + obj.to.join(';');
+};
+
+Ngn.DdFilterPath.Interface = new Class({
+  Implements: [Options],
+
+  options: {
+    groupToggler: true
+  },
+
+  /**
+   * @param Ngn.Grid
+   * @param Ngn.DdForm
+   */
+  initialize: function(grid, filtersForm, options) {
+    this.setOptions(options);
+    this.translate = {};
+    this.grid = grid;
+    if (!this.grid.options.filterPath) throw new Error('Grid must be initialized with filterPath option');
+    this.filterPath = this.grid.options.filterPath;
+    this.filtersForm = filtersForm;
+    new Element('input', {type: 'reset', value: ' Сбросить фильтры ', 'class': 'resetAll'}).inject(this.filtersForm.eForm, 'top').addEvent('click', function(e) {
+      this.filterPath.reset();
+      this.grid.reload();
+      this.resetMarkers();
+    }.bind(this));
+    if (this.options.groupToggler) this.groupToggler = new Ngn.GroupToggler(this.filtersForm.eForm);
+    this.initFromPath();
+    this.initEvents(this.filtersForm.eForm);
+    this.filtersForm.addEvent('newElement', this.initEvents.bind(this));
+  },
+
+  initFromPath: function() {
+    var pathType, name, value;
+    for (pathType in this.filterPath.filters) {
+      for (name in this.filterPath.filters[pathType]) {
+        value = this.filterPath.filters[pathType][name];
+        if (pathType == 'd') {
+          this.filtersForm.els.dateCreate.setValue(Ngn.DdFilterPath.date.toObj(value));
+          this.addMarker('dateCreate');
+        } else {
+          value = value.split(',');
+          var els = Ngn.Frm.getElements(name);
+          for (var i = 0; i < els.length; i++) {
+            if (els[i].get('type') == 'checkbox') {
+              if (Ngn.Arr.inn(els[i].get('value'), value)) els[i].set('checked', true);
+            } else {
+              els[i].set('value', value);
+            }
+          }
+          this.addMarker(name);
+        }
+      }
+    }
+  },
+
+  initEvents: function(eParent) {
+    eParent.getElements('select.allowReload,input[type=checkbox]').each(function(el) {
+      el.addEvent('change', function() {
+        var name, value;
+        if (el.get('type') == 'checkbox' && el.getParent('.tagsTreeSelect')) {
+          var pathFilterTypeDataEl = el.getParent('.tagsTreeSelect');
+          var values = Ngn.Frm.toObj(pathFilterTypeDataEl);
+          name = pathFilterTypeDataEl.get('data-name');
+          value = values[name] ? values[name].join(',') : false;
+        } else {
+          pathFilterTypeDataEl = el;
+          name = el.get('data-name') || el.get('name');
+          value = el.get('value');
+        }
+        value ? this.addMarker(name) : this.removeMarker(name);
+        this.filterPath.addFilter(pathFilterTypeDataEl.get('data-pathFilterType'), name, value);
+        this.grid.reload();
+      }.bind(this));
+    }.bind(this));
+    eParent.getElements('.type_dateRange input').each(function(eInput) {
+      eInput.addEvent('change', function() {
+        this.filterPath.addFilter('d', 'default', eInput.get('value'));
+        this.addMarker('dateCreate');
+        this.grid.reload();
+      }.bind(this));
+      /*
+       return;
+       el.getElement('.ok').addEvent('click', function() {
+       var d = Ngn.Frm.toObj(el);
+       console.debug(d);
+
+       return;
+       if (Object.eq(d.from, d.to)) {
+       if (Object.isEmpty(d.from)) {
+       this.filterPath.removeFilter('d', 'default');
+       } else {
+       this.filterPath.addFilter('d', 'default', d.from.join(';'));
+       }
+       } else {
+       this.filterPath.addFilter('d', 'default', d.from.join(';') + '-' + d.to.join(';'));
+       }
+       this.addMarker('dateCreate');
+       this.grid.reload();
+       }.bind(this));
+       el.getElement('.reset').addEvent('click', function() {
+       Ngn.Frm.getElements('from').each(function(el) {
+       el.set('value', '');
+       });
+       Ngn.Frm.getElements('to').each(function(el) {
+       el.set('value', '');
+       });
+       this.filterPath.removeFilter('d', 'default');
+       this.removeMarker('dateCreate');
+       this.grid.reload();
+       }.bind(this));
+       el.getElement('.today').addEvent('click', function() {
+       var d = new Date();
+       var today = [d.getDate(), d.getMonth() + 1, d.getFullYear()];
+       Ngn.Frm.getElements('from').each(function(el, n) {
+       el.set('value', today[n]);
+       });
+       Ngn.Frm.getElements('to').each(function(el, n) {
+       el.set('value', today[n]);
+       });
+       });
+       */
+    }.bind(this));
+    eParent.getElements('.type_num input').each(function(el) {
+      new Element('input', { type: 'button', value: 'ok' }).inject(el, 'after').addEvent('click', function() {
+        this.filterPath.addFilter('v', el.get('name'), el.get('value'));
+        this.grid.reload();
+      }.bind(this));
+    }.bind(this));
+  },
+
+  initPagination: function() {
+    if (!this.grid.ePagination) return;
+    this.grid.ePagination.getElements('a').each(function(el) {
+      el.addEvent('click', function(e) {
+        e.preventDefault();
+        this.filterPath.setPg(el.get('href'));
+        this.grid.reload();
+      }.bind(this));
+    }.bind(this));
+    this.grid.addEvent('reloadComplete', function(r) {
+      this.grid.ePagination.set('html', '');
+      if (r.pNums) {
+        this.grid.ePagination.set('html', r.pNums);
+        this.initPagination();
+      }
+    }.bind(this));
+  },
+
+  resetMarkers: function() {
+    this.filtersForm.eForm.getElements('.element .label').each(function(el) {
+      el.removeClass('sel');
     });
-  });
+  },
+
+  addMarker: function(name) {
+    if (!name) throw new Error('name not defined');
+    this.filtersForm.eForm.getElement('.element.name_' + name).getElement('.label').addClass('sel');
+  },
+
+  removeMarker: function(name) {
+    this.filtersForm.eForm.getElement('.element.name_' + name).getElement('.label').removeClass('sel');
+  }
+
+});
+
+Ngn.DdFilterPath.getUrl = function() {
+  return window.location.pathname.replace(/(.*)\/pg\d+/, '$1');
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.GroupToggler.js|--*/
+Ngn.GroupToggler = new Class({
+  Implements: [Options],
+
+  options: {
+    groupId: 'default',
+    itemIdParam: function(eItem) {
+      return eItem.get('class').replace(/.*name_(\w+).*/, '$1');
+    },
+    itemSelector: '.element',
+    btnSelector: '.label',
+    bodySelector: '.field-wrapper',
+    //storage: true,
+    openForever: false,
+    displayValue: 'block'
+  },
+
+  initialize: function(eCont, options) {
+    this.setOptions(options);
+    eCont.getElements(this.options.itemSelector).each(function(eItem) {
+      var eBtn = eItem.getElement(this.options.btnSelector);
+      if (!eBtn) return;
+      eBtn.addClass('pseudoLink').addClass('dgray');
+      var eBody = eItem.getElement(this.options.bodySelector);
+      if (this.options.openForever) {
+        eBody.setStyle('display', 'none');
+      } else {
+        var id = this.options.itemIdParam(eItem);
+        eBody.setStyle('display', this.display(id));
+      }
+      eBtn.addEvent('click', function(e) {
+        e.preventDefault();
+        if (this.options.openForever) {
+          eBody.setStyle('display', this.options.displayValue);
+          eBtn.dispose();
+          eItem.getElements('.temp').each(function(el){
+            el.dispose();
+          })
+        } else {
+          eBody.setStyle('display', this.display(id, true));
+          Ngn.Storage.set(this.id(id), !this.get(id));
+        }
+      }.bind(this));
+    }.bind(this));
+  },
+
+  get: function(id) {
+    return Ngn.Storage.get(this.id(id)) ? true : false;
+  },
+
+  display: function(id, invert) {
+    return this.get(id) ? (invert ? 'none' : this.options.displayValue) : (invert ? this.options.displayValue : 'none');
+  },
+
+  id: function(id) {
+    return this.options.groupId + id;
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Url.js|--*/
+Ngn.Url = {};
+
+Ngn.Url.getPath = function(n) {
+  if (n === 0) return './';
+  var p = window.location.pathname.split('/');
+  var s = '';
+  if (!n) n = p.length - 1;
+  for (var i = 1; i <= n; i++) {
+    s += '/' + (p[i] ? p[i] : 0);
+    if (n === i) break;
+  }
+  return s;
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdGrid.Admin.js|--*/
+// @requiresBefore Ngn.DdFilterPath, Ngn.Url
+
+Ngn.DdGrid.Admin = new Class({
+  Extends: Ngn.DdGrid,
+  options: {
+    resizeble: true,
+    basePath: Ngn.Url.getPath(3),
+    filterPath: new Ngn.DdFilterPath(4),
+    listAction: 'editContent',
+    // idParam: 'itemId',
+    toolActions: {
+      edit: function(row) {
+        new Ngn.Dialog.RequestForm({
+          url: Ngn.Url.getPath(4) + '?a=json_edit&itemId=' + row.id,
+          reduceHeight: true,
+          title: false,
+          onOkClose: function() {
+            this.reload(row.id);
+          }.bind(this)
+        });
+      }
+    },
+    toolLinks: {
+      edit: function(row) {
+        return Ngn.Url.getPath(4) + '?a=edit&itemId=' + row.id;
+      }
+    }
+  }
+  //initPagination: function(data, fromAjax) {
+  //  this.parent(data, fromAjax);
+  //  this.ePagination.inject(document.getElement('.pagePath'), 'top').addClass('pNumsTop');
+  //}
+});
+
+/**
+ * @param strName
+ * @param options
+ * @returns Ngn.DdGrid.Admin
+ */
+Ngn.DdGrid.Admin.factory = function(strName, options) {
+  var cls = eval('Ngn.DdGrid.Admin.' + Ngn.String.ucfirst(strName));
+  return cls ? new cls(options) : new Ngn.DdGrid.Admin(options);
 };

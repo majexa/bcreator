@@ -164,7 +164,7 @@ html, body, #page {
 	text-decoration: none;
 }
 
-.header .right .menu ul li.active a {
+.header .right .menu ul > li.active > a {
 	background: #004ECF;
 	border-radius: 5px;
 	color: #FFFFFF;

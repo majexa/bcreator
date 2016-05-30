@@ -1,0 +1,22 @@
+#panel .logo {
+background-image: url(/m/img/logo.png);
+width: 121px;
+height: 44px;
+margin: 8px 10px 0 10px ;
+}
+.type_animatedText .cont div {
+position: absolute;
+top: 0;
+left: 0;
+}
+.type_animatedImage .cont div {
+position: absolute;
+top: 0;
+left: 0;
+}
+.settingsDialog .fieldSet .field-wrapper {
+width: 160px;
+}
+.settingsDialog input[type=file] {
+width: 130px;
+}
