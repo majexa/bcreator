@@ -7,7 +7,7 @@ Ngn.Frm.FieldSetBcreatorImages = new Class({
       caption: this.options.deleteTitle,
       cls: 'delete'
     }, function() {
-      if (!confirm('Are you shure?')) return;
+      if (!confirm('Are you sure?')) return;
       Ngn.Request.Iface.loading(true);
       new Ngn.Request.JSON({
         url: fieldSet.options.deleteImageUrl.replace('{n}', index),
