@@ -12661,7 +12661,6 @@ Ngn.Form.Upload = new Class({
   },
 
   initialize: function(form, eInput, options) {
-    console.trace('***');
     this.form = form;
     this.eInput = document.id(eInput);
     this.eCaption = this.eInput.getParent('.element').getElement('.help');
@@ -12686,14 +12685,14 @@ Ngn.Form.Upload = new Class({
       onRequest: function() {
         this.inProgress = true;
         this.eProgress.setStyles({display: 'block', width: 0});
-        this.eCaption.set('html', 'Происходит загрузка');
+        this.eCaption.set('html', Locale.get('Core.uploading'));
       }.bind(this),
       onProgress: function(event) {
         var loaded = event.loaded, total = event.total;
         var proc = parseInt(loaded / total * 100, 10).limit(0, 100);
         if (!proc) return;
         this.eProgress.setStyle('width', proc + '%');
-        if (proc == 100) this.eCaption.set('html', 'Загрузка завершена');
+        if (proc == 100) this.eCaption.set('html', Locale.get('Core.uploadComplete'));
         else if (proc) this.eCaption.set('html', proc + '%');
       }.bind(this),
       onComplete: function(r) {

@@ -14529,7 +14529,6 @@ Ngn.Form.Upload = new Class({
   },
 
   initialize: function(form, eInput, options) {
-    console.trace('***');
     this.form = form;
     this.eInput = document.id(eInput);
     this.eCaption = this.eInput.getParent('.element').getElement('.help');
@@ -14554,14 +14553,14 @@ Ngn.Form.Upload = new Class({
       onRequest: function() {
         this.inProgress = true;
         this.eProgress.setStyles({display: 'block', width: 0});
-        this.eCaption.set('html', 'Происходит загрузка');
+        this.eCaption.set('html', Locale.get('Core.uploading'));
       }.bind(this),
       onProgress: function(event) {
         var loaded = event.loaded, total = event.total;
         var proc = parseInt(loaded / total * 100, 10).limit(0, 100);
         if (!proc) return;
         this.eProgress.setStyle('width', proc + '%');
-        if (proc == 100) this.eCaption.set('html', 'Загрузка завершена');
+        if (proc == 100) this.eCaption.set('html', Locale.get('Core.uploadComplete'));
         else if (proc) this.eCaption.set('html', proc + '%');
       }.bind(this),
       onComplete: function(r) {
@@ -15001,7 +15000,7 @@ Ngn.Frm.Saver = new Class({
   
 });
 /*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
-Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete"});
+Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete"});
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.js|--*/
 // @requiresBefore s2/js/locale/core
