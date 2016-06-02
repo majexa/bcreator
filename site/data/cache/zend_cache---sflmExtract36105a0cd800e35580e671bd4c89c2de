@@ -1,4 +1,4 @@
-s:264846:"
+s:264852:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -6756,7 +6756,7 @@ Ngn.sd.LayersBar = new Class({
     }
   },
   canEdit: function(item) {
-    return Ngn.sd.blocks[item.id].finalData().data.type == 'font';
+    return Ngn.sd.blocks[item._data.id].finalData().data.type == 'font';
   }
 });
 

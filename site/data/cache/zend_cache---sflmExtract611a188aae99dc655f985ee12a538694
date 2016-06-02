@@ -1,4 +1,4 @@
-
+s:830:"
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.Frm.FieldSetBcreatorImages.js|--*/
 Ngn.Frm.FieldSetBcreatorImages = new Class({
   Extends: Ngn.Frm.FieldSet,
@@ -25,3 +25,4 @@ Ngn.Frm.FieldSetBcreatorImages = new Class({
   }
 
 });
+";
