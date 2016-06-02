@@ -1,8 +1,6 @@
-.validation-advice {
-color: #f00;
-margin-top: 10px;
-text-align: center;
-}
 .advice-wrapper {
 clear: both;
+color: #f00;
+padding-top: 10px;
+text-align: center;
 }

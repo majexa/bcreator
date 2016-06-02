@@ -1,4 +1,3 @@
-var Ngn = {};
 /*
 ---
 
@@ -4602,6 +4601,7 @@ Locale.addEvent('change', function(language){
 }).fireEvent('change', Locale.getCurrent());
 
 })();
+var Ngn = {};
 /*
 ---
 
@@ -14372,6 +14372,19 @@ Ngn.Dialog.Error = new Class({
   buildMessage: function(msg) {
     //throw new Error(this.options.error.message);
     //return this.parent('<p>' + this.options.error.message + ' <i>Code: ' + this.options.error.code + '</i></p>' + '<p>' + this.options.error.trace + '</p>');
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Textarea.js|--*/
+Ngn.Form.El.Textarea = new Class({
+  Extends: Ngn.Form.El,
+
+  resizebleOptions: {},
+
+  init: function() {
+    if (this.form.options.dialog && this.form.options.dialog.options.vResize) return;
+    //new Ngn.ResizableTextarea(this.eRow); // реализовать настройку в Ngn.Form.ElInit...
   }
 
 });
