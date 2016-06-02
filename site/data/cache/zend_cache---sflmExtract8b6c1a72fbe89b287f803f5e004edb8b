@@ -1,4 +1,4 @@
-
+s:23236:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
 Ngn.Form.El.Color = new Class({
   Extends: Ngn.Form.El,
@@ -675,3 +675,4 @@ Ngn.Rainbow = new Class({
 
 Ngn.Rainbow.implement(new Options);
 Ngn.Rainbow.implement(new Events);
+";

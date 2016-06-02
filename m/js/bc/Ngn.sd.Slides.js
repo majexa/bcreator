@@ -9,7 +9,6 @@ Ngn.sd.Slides = new Class({
     this.setOptions(options);
     if (!elements.length) return;
     var currentIndex = 0, nextIndex;
-    console.debug(elements[0]);
     for (var i = 1; i < elements.length; i++) {
       elements[i].setStyle('display', 'none');
     }
