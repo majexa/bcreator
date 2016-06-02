@@ -4,3 +4,8 @@ color: #f00;
 padding-top: 10px;
 text-align: center;
 }
+.pseudoLink {
+text-decoration: none;
+cursor: pointer;
+border-bottom: 1px dotted;
+}
