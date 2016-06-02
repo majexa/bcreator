@@ -1,4 +1,4 @@
-
+s:1772:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.Html.js|--*/
 Ngn.FieldSet.Html = new Class({
   Extends: Ngn.FieldSet,
@@ -65,3 +65,4 @@ Ngn.Frm.FieldSetBcreatorImages = new Class({
   }
 
 });
+";

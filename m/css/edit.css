@@ -21,11 +21,11 @@ width: 160px;
 width: 130px;
 }
 
-.mid-float-box {
+.settingsDialog:not .mid-float-box {
 border: 1px solid #414141;
 background: #fff;
 }
-.dialog-footer .foot-wrap {
+.settingsDialog:not .dialog-footer .foot-wrap {
 border-top: 1px solid #efefef;
 padding-top: 10px;
 margin-top: 5px;
