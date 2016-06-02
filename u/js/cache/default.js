@@ -1,3 +1,4 @@
+var Ngn = {};
 /*
 ---
 
@@ -4601,7 +4602,6 @@ Locale.addEvent('change', function(language){
 }).fireEvent('change', Locale.getCurrent());
 
 })();
-var Ngn = {};
 /*
 ---
 
