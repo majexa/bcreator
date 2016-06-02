@@ -609,6 +609,92 @@ Array.implement({
 /*
 ---
 
+name: String
+
+description: Contains String Prototypes like camelCase, capitalize, test, and toInt.
+
+license: MIT-style license.
+
+requires: [Type, Array]
+
+provides: String
+
+...
+*/
+
+String.implement({
+
+	//<!ES6>
+	contains: function(string, index){
+		return (index ? String(this).slice(index) : String(this)).indexOf(string) > -1;
+	},
+	//</!ES6>
+
+	test: function(regex, params){
+		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
+	},
+
+	trim: function(){
+		return String(this).replace(/^\s+|\s+$/g, '');
+	},
+
+	clean: function(){
+		return String(this).replace(/\s+/g, ' ').trim();
+	},
+
+	camelCase: function(){
+		return String(this).replace(/-\D/g, function(match){
+			return match.charAt(1).toUpperCase();
+		});
+	},
+
+	hyphenate: function(){
+		return String(this).replace(/[A-Z]/g, function(match){
+			return ('-' + match.charAt(0).toLowerCase());
+		});
+	},
+
+	capitalize: function(){
+		return String(this).replace(/\b[a-z]/g, function(match){
+			return match.toUpperCase();
+		});
+	},
+
+	escapeRegExp: function(){
+		return String(this).replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+	},
+
+	toInt: function(base){
+		return parseInt(this, base || 10);
+	},
+
+	toFloat: function(){
+		return parseFloat(this);
+	},
+
+	hexToRgb: function(array){
+		var hex = String(this).match(/^#?(\w{1,2})(\w{1,2})(\w{1,2})$/);
+		return (hex) ? hex.slice(1).hexToRgb(array) : null;
+	},
+
+	rgbToHex: function(array){
+		var rgb = String(this).match(/\d{1,3}/g);
+		return (rgb) ? rgb.rgbToHex(array) : null;
+	},
+
+	substitute: function(object, regexp){
+		return String(this).replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
+			if (match.charAt(0) == '\\') return match.slice(1);
+			return (object[name] != null) ? object[name] : '';
+		});
+	}
+
+});
+
+
+/*
+---
+
 name: Function
 
 description: Contains Function Prototypes like create, bind, pass, and delay.
@@ -744,89 +830,625 @@ Number.implement(methods);
 /*
 ---
 
-name: String
+name: Class
 
-description: Contains String Prototypes like camelCase, capitalize, test, and toInt.
+description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
 
 license: MIT-style license.
 
-requires: [Type, Array]
+requires: [Array, String, Function, Number]
 
-provides: String
+provides: Class
 
 ...
 */
 
-String.implement({
+(function(){
 
-	//<!ES6>
-	contains: function(string, index){
-		return (index ? String(this).slice(index) : String(this)).indexOf(string) > -1;
+var Class = this.Class = new Type('Class', function(params){
+	if (instanceOf(params, Function)) params = {initialize: params};
+
+	var newClass = function(){
+		reset(this);
+		if (newClass.$prototyping) return this;
+		this.$caller = null;
+		this.$family = null;
+		var value = (this.initialize) ? this.initialize.apply(this, arguments) : this;
+		this.$caller = this.caller = null;
+		return value;
+	}.extend(this).implement(params);
+
+	newClass.$constructor = Class;
+	newClass.prototype.$constructor = newClass;
+	newClass.prototype.parent = parent;
+
+	return newClass;
+});
+
+var parent = function(){
+	if (!this.$caller) throw new Error('The method "parent" cannot be called.');
+	var name = this.$caller.$name,
+		parent = this.$caller.$owner.parent,
+		previous = (parent) ? parent.prototype[name] : null;
+	if (!previous) throw new Error('The method "' + name + '" has no parent.');
+	return previous.apply(this, arguments);
+};
+
+var reset = function(object){
+	for (var key in object){
+		var value = object[key];
+		switch (typeOf(value)){
+			case 'object':
+				var F = function(){};
+				F.prototype = value;
+				object[key] = reset(new F);
+				break;
+			case 'array': object[key] = value.clone(); break;
+		}
+	}
+	return object;
+};
+
+var wrap = function(self, key, method){
+	if (method.$origin) method = method.$origin;
+	var wrapper = function(){
+		if (method.$protected && this.$caller == null) throw new Error('The method "' + key + '" cannot be called.');
+		var caller = this.caller, current = this.$caller;
+		this.caller = current; this.$caller = wrapper;
+		var result = method.apply(this, arguments);
+		this.$caller = current; this.caller = caller;
+		return result;
+	}.extend({$owner: self, $origin: method, $name: key});
+	return wrapper;
+};
+
+var implement = function(key, value, retain){
+	if (Class.Mutators.hasOwnProperty(key)){
+		value = Class.Mutators[key].call(this, value);
+		if (value == null) return this;
+	}
+
+	if (typeOf(value) == 'function'){
+		if (value.$hidden) return this;
+		this.prototype[key] = (retain) ? value : wrap(this, key, value);
+	} else {
+		Object.merge(this.prototype, key, value);
+	}
+
+	return this;
+};
+
+var getInstance = function(klass){
+	klass.$prototyping = true;
+	var proto = new klass;
+	delete klass.$prototyping;
+	return proto;
+};
+
+Class.implement('implement', implement.overloadSetter());
+
+Class.Mutators = {
+
+	Extends: function(parent){
+		this.parent = parent;
+		this.prototype = getInstance(parent);
 	},
-	//</!ES6>
 
-	test: function(regex, params){
-		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
+	Implements: function(items){
+		Array.convert(items).each(function(item){
+			var instance = new item;
+			for (var key in instance) implement.call(this, key, instance[key], true);
+		}, this);
+	}
+};
+
+})();
+/*
+---
+
+name: Class.Extras
+
+description: Contains Utility Classes that can be implemented into your own Classes to ease the execution of many common tasks.
+
+license: MIT-style license.
+
+requires: Class
+
+provides: [Class.Extras, Chain, Events, Options]
+
+...
+*/
+
+(function(){
+
+this.Chain = new Class({
+
+	$chain: [],
+
+	chain: function(){
+		this.$chain.append(Array.flatten(arguments));
+		return this;
 	},
 
-	trim: function(){
-		return String(this).replace(/^\s+|\s+$/g, '');
+	callChain: function(){
+		return (this.$chain.length) ? this.$chain.shift().apply(this, arguments) : false;
 	},
 
-	clean: function(){
-		return String(this).replace(/\s+/g, ' ').trim();
+	clearChain: function(){
+		this.$chain.empty();
+		return this;
+	}
+
+});
+
+var removeOn = function(string){
+	return string.replace(/^on([A-Z])/, function(full, first){
+		return first.toLowerCase();
+	});
+};
+
+this.Events = new Class({
+
+	$events: {},
+
+	addEvent: function(type, fn, internal){
+		type = removeOn(type);
+
+		
+
+		this.$events[type] = (this.$events[type] || []).include(fn);
+		if (internal) fn.internal = true;
+		return this;
 	},
 
-	camelCase: function(){
-		return String(this).replace(/-\D/g, function(match){
-			return match.charAt(1).toUpperCase();
+	addEvents: function(events){
+		for (var type in events) this.addEvent(type, events[type]);
+		return this;
+	},
+
+	fireEvent: function(type, args, delay){
+		type = removeOn(type);
+		var events = this.$events[type];
+		if (!events) return this;
+		args = Array.convert(args);
+		events.each(function(fn){
+			if (delay) fn.delay(delay, this, args);
+			else fn.apply(this, args);
+		}, this);
+		return this;
+	},
+
+	removeEvent: function(type, fn){
+		type = removeOn(type);
+		var events = this.$events[type];
+		if (events && !fn.internal){
+			var index = events.indexOf(fn);
+			if (index != -1) delete events[index];
+		}
+		return this;
+	},
+
+	removeEvents: function(events){
+		var type;
+		if (typeOf(events) == 'object'){
+			for (type in events) this.removeEvent(type, events[type]);
+			return this;
+		}
+		if (events) events = removeOn(events);
+		for (type in this.$events){
+			if (events && events != type) continue;
+			var fns = this.$events[type];
+			for (var i = fns.length; i--;) if (i in fns){
+				this.removeEvent(type, fns[i]);
+			}
+		}
+		return this;
+	}
+
+});
+
+this.Options = new Class({
+
+	setOptions: function(){
+		var options = this.options = Object.merge.apply(null, [{}, this.options].append(arguments));
+		if (this.addEvent) for (var option in options){
+			if (typeOf(options[option]) != 'function' || !(/^on[A-Z]/).test(option)) continue;
+			this.addEvent(option, options[option]);
+			delete options[option];
+		}
+		return this;
+	}
+
+});
+
+})();
+/*
+---
+
+name: Object
+
+description: Object generic methods
+
+license: MIT-style license.
+
+requires: Type
+
+provides: [Object, Hash]
+
+...
+*/
+
+(function(){
+
+Object.extend({
+
+	subset: function(object, keys){
+		var results = {};
+		for (var i = 0, l = keys.length; i < l; i++){
+			var k = keys[i];
+			if (k in object) results[k] = object[k];
+		}
+		return results;
+	},
+
+	map: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			results[key] = fn.call(bind, object[key], key, object);
+		}
+		return results;
+	},
+
+	filter: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i], value = object[key];
+			if (fn.call(bind, value, key, object)) results[key] = value;
+		}
+		return results;
+	},
+
+	every: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (!fn.call(bind, object[key], key)) return false;
+		}
+		return true;
+	},
+
+	some: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (fn.call(bind, object[key], key)) return true;
+		}
+		return false;
+	},
+
+	values: function(object){
+		var values = [];
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var k = keys[i];
+			values.push(object[k]);
+		}
+		return values;
+	},
+
+	getLength: function(object){
+		return Object.keys(object).length;
+	},
+
+	keyOf: function(object, value){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (object[key] === value) return key;
+		}
+		return null;
+	},
+
+	contains: function(object, value){
+		return Object.keyOf(object, value) != null;
+	},
+
+	toQueryString: function(object, base){
+		var queryString = [];
+
+		Object.each(object, function(value, key){
+			if (base) key = base + '[' + key + ']';
+			var result;
+			switch (typeOf(value)){
+				case 'object': result = Object.toQueryString(value, key); break;
+				case 'array':
+					var qs = {};
+					value.each(function(val, i){
+						qs[i] = val;
+					});
+					result = Object.toQueryString(qs, key);
+					break;
+				default: result = key + '=' + encodeURIComponent(value);
+			}
+			if (value != null) queryString.push(result);
 		});
+
+		return queryString.join('&');
+	}
+
+});
+
+})();
+
+
+/*
+---
+
+script: More.js
+
+name: More
+
+description: MooTools More
+
+license: MIT-style license
+
+authors:
+  - Guillermo Rauch
+  - Thomas Aylott
+  - Scott Kyle
+  - Arian Stolwijk
+  - Tim Wienk
+  - Christoph Pojer
+  - Aaron Newton
+  - Jacob Thornton
+
+requires:
+  - Core/MooTools
+
+provides: [MooTools.More]
+
+...
+*/
+
+MooTools.More = {
+	version: '1.6.1-dev',
+	build: '%build%'
+};
+/*
+---
+
+script: Object.Extras.js
+
+name: Object.Extras
+
+description: Extra Object generics, like getFromPath which allows a path notation to child elements.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+
+requires:
+  - Core/Object
+  - MooTools.More
+
+provides: [Object.Extras]
+
+...
+*/
+
+(function(){
+
+var defined = function(value){
+	return value != null;
+};
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+Object.extend({
+
+	getFromPath: function(source, parts){
+		if (typeof parts == 'string') parts = parts.split('.');
+		for (var i = 0, l = parts.length; i < l; i++){
+			if (hasOwnProperty.call(source, parts[i])) source = source[parts[i]];
+			else return null;
+		}
+		return source;
 	},
 
-	hyphenate: function(){
-		return String(this).replace(/[A-Z]/g, function(match){
-			return ('-' + match.charAt(0).toLowerCase());
-		});
+	cleanValues: function(object, method){
+		method = method || defined;
+		for (var key in object) if (!method(object[key])){
+			delete object[key];
+		}
+		return object;
 	},
 
-	capitalize: function(){
-		return String(this).replace(/\b[a-z]/g, function(match){
-			return match.toUpperCase();
-		});
+	erase: function(object, key){
+		if (hasOwnProperty.call(object, key)) delete object[key];
+		return object;
 	},
 
-	escapeRegExp: function(){
-		return String(this).replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+	run: function(object){
+		var args = Array.slice(arguments, 1);
+		for (var key in object) if (object[key].apply){
+			object[key].apply(object, args);
+		}
+		return object;
+	}
+
+});
+
+})();
+/*
+---
+
+script: Locale.js
+
+name: Locale
+
+description: Provides methods for localization.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+  - Arian Stolwijk
+
+requires:
+  - Core/Events
+  - Object.Extras
+  - MooTools.More
+
+provides: [Locale, Lang]
+
+...
+*/
+
+(function(){
+
+var current = null,
+	locales = {},
+	inherits = {};
+
+var getSet = function(set){
+	if (instanceOf(set, Locale.Set)) return set;
+	else return locales[set];
+};
+
+var Locale = this.Locale = {
+
+	define: function(locale, set, key, value){
+		var name;
+		if (instanceOf(locale, Locale.Set)){
+			name = locale.name;
+			if (name) locales[name] = locale;
+		} else {
+			name = locale;
+			if (!locales[name]) locales[name] = new Locale.Set(name);
+			locale = locales[name];
+		}
+
+		if (set) locale.define(set, key, value);
+
+		
+
+		if (!current) current = locale;
+
+		return locale;
 	},
 
-	toInt: function(base){
-		return parseInt(this, base || 10);
+	use: function(locale){
+		locale = getSet(locale);
+
+		if (locale){
+			current = locale;
+
+			this.fireEvent('change', locale);
+
+			
+		}
+
+		return this;
 	},
 
-	toFloat: function(){
-		return parseFloat(this);
+	getCurrent: function(){
+		return current;
 	},
 
-	hexToRgb: function(array){
-		var hex = String(this).match(/^#?(\w{1,2})(\w{1,2})(\w{1,2})$/);
-		return (hex) ? hex.slice(1).hexToRgb(array) : null;
+	get: function(key, args){
+		return (current) ? current.get(key, args) : '';
 	},
 
-	rgbToHex: function(array){
-		var rgb = String(this).match(/\d{1,3}/g);
-		return (rgb) ? rgb.rgbToHex(array) : null;
+	inherit: function(locale, inherits, set){
+		locale = getSet(locale);
+
+		if (locale) locale.inherit(inherits, set);
+		return this;
 	},
 
-	substitute: function(object, regexp){
-		return String(this).replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
-			if (match.charAt(0) == '\\') return match.slice(1);
-			return (object[name] != null) ? object[name] : '';
-		});
+	list: function(){
+		return Object.keys(locales);
+	}
+
+};
+
+Object.append(Locale, new Events);
+
+Locale.Set = new Class({
+
+	sets: {},
+
+	inherits: {
+		locales: [],
+		sets: {}
+	},
+
+	initialize: function(name){
+		this.name = name || '';
+	},
+
+	define: function(set, key, value){
+		var defineData = this.sets[set];
+		if (!defineData) defineData = {};
+
+		if (key){
+			if (typeOf(key) == 'object') defineData = Object.merge(defineData, key);
+			else defineData[key] = value;
+		}
+		this.sets[set] = defineData;
+
+		return this;
+	},
+
+	get: function(key, args, _base){
+		var value = Object.getFromPath(this.sets, key);
+		if (value != null){
+			var type = typeOf(value);
+			if (type == 'function') value = value.apply(null, Array.convert(args));
+			else if (type == 'object') value = Object.clone(value);
+			return value;
+		}
+
+		// get value of inherited locales
+		var index = key.indexOf('.'),
+			set = index < 0 ? key : key.substr(0, index),
+			names = (this.inherits.sets[set] || []).combine(this.inherits.locales).include('en-US');
+		if (!_base) _base = [];
+
+		for (var i = 0, l = names.length; i < l; i++){
+			if (_base.contains(names[i])) continue;
+			_base.include(names[i]);
+
+			var locale = locales[names[i]];
+			if (!locale) continue;
+
+			value = locale.get(key, args, _base);
+			if (value != null) return value;
+		}
+
+		return '';
+	},
+
+	inherit: function(names, set){
+		names = Array.convert(names);
+
+		if (set && !this.inherits.sets[set]) this.inherits.sets[set] = [];
+
+		var l = names.length;
+		while (l--) (set ? this.inherits.sets[set] : this.inherits.locales).unshift(names[l]);
+
+		return this;
 	}
 
 });
 
 
+
+})();
 /*
 ---
 
@@ -1025,128 +1647,6 @@ try {
 
 
 })();
-/*
----
-
-name: Object
-
-description: Object generic methods
-
-license: MIT-style license.
-
-requires: Type
-
-provides: [Object, Hash]
-
-...
-*/
-
-(function(){
-
-Object.extend({
-
-	subset: function(object, keys){
-		var results = {};
-		for (var i = 0, l = keys.length; i < l; i++){
-			var k = keys[i];
-			if (k in object) results[k] = object[k];
-		}
-		return results;
-	},
-
-	map: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			results[key] = fn.call(bind, object[key], key, object);
-		}
-		return results;
-	},
-
-	filter: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i], value = object[key];
-			if (fn.call(bind, value, key, object)) results[key] = value;
-		}
-		return results;
-	},
-
-	every: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (!fn.call(bind, object[key], key)) return false;
-		}
-		return true;
-	},
-
-	some: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (fn.call(bind, object[key], key)) return true;
-		}
-		return false;
-	},
-
-	values: function(object){
-		var values = [];
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var k = keys[i];
-			values.push(object[k]);
-		}
-		return values;
-	},
-
-	getLength: function(object){
-		return Object.keys(object).length;
-	},
-
-	keyOf: function(object, value){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (object[key] === value) return key;
-		}
-		return null;
-	},
-
-	contains: function(object, value){
-		return Object.keyOf(object, value) != null;
-	},
-
-	toQueryString: function(object, base){
-		var queryString = [];
-
-		Object.each(object, function(value, key){
-			if (base) key = base + '[' + key + ']';
-			var result;
-			switch (typeOf(value)){
-				case 'object': result = Object.toQueryString(value, key); break;
-				case 'array':
-					var qs = {};
-					value.each(function(val, i){
-						qs[i] = val;
-					});
-					result = Object.toQueryString(qs, key);
-					break;
-				default: result = key + '=' + encodeURIComponent(value);
-			}
-			if (value != null) queryString.push(result);
-		});
-
-		return queryString.join('&');
-	}
-
-});
-
-})();
-
-
 /*
 ---
 name: Slick.Parser
@@ -3899,241 +4399,6 @@ window.addEvent('load', function(){
 /*
 ---
 
-name: Class
-
-description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
-
-license: MIT-style license.
-
-requires: [Array, String, Function, Number]
-
-provides: Class
-
-...
-*/
-
-(function(){
-
-var Class = this.Class = new Type('Class', function(params){
-	if (instanceOf(params, Function)) params = {initialize: params};
-
-	var newClass = function(){
-		reset(this);
-		if (newClass.$prototyping) return this;
-		this.$caller = null;
-		this.$family = null;
-		var value = (this.initialize) ? this.initialize.apply(this, arguments) : this;
-		this.$caller = this.caller = null;
-		return value;
-	}.extend(this).implement(params);
-
-	newClass.$constructor = Class;
-	newClass.prototype.$constructor = newClass;
-	newClass.prototype.parent = parent;
-
-	return newClass;
-});
-
-var parent = function(){
-	if (!this.$caller) throw new Error('The method "parent" cannot be called.');
-	var name = this.$caller.$name,
-		parent = this.$caller.$owner.parent,
-		previous = (parent) ? parent.prototype[name] : null;
-	if (!previous) throw new Error('The method "' + name + '" has no parent.');
-	return previous.apply(this, arguments);
-};
-
-var reset = function(object){
-	for (var key in object){
-		var value = object[key];
-		switch (typeOf(value)){
-			case 'object':
-				var F = function(){};
-				F.prototype = value;
-				object[key] = reset(new F);
-				break;
-			case 'array': object[key] = value.clone(); break;
-		}
-	}
-	return object;
-};
-
-var wrap = function(self, key, method){
-	if (method.$origin) method = method.$origin;
-	var wrapper = function(){
-		if (method.$protected && this.$caller == null) throw new Error('The method "' + key + '" cannot be called.');
-		var caller = this.caller, current = this.$caller;
-		this.caller = current; this.$caller = wrapper;
-		var result = method.apply(this, arguments);
-		this.$caller = current; this.caller = caller;
-		return result;
-	}.extend({$owner: self, $origin: method, $name: key});
-	return wrapper;
-};
-
-var implement = function(key, value, retain){
-	if (Class.Mutators.hasOwnProperty(key)){
-		value = Class.Mutators[key].call(this, value);
-		if (value == null) return this;
-	}
-
-	if (typeOf(value) == 'function'){
-		if (value.$hidden) return this;
-		this.prototype[key] = (retain) ? value : wrap(this, key, value);
-	} else {
-		Object.merge(this.prototype, key, value);
-	}
-
-	return this;
-};
-
-var getInstance = function(klass){
-	klass.$prototyping = true;
-	var proto = new klass;
-	delete klass.$prototyping;
-	return proto;
-};
-
-Class.implement('implement', implement.overloadSetter());
-
-Class.Mutators = {
-
-	Extends: function(parent){
-		this.parent = parent;
-		this.prototype = getInstance(parent);
-	},
-
-	Implements: function(items){
-		Array.convert(items).each(function(item){
-			var instance = new item;
-			for (var key in instance) implement.call(this, key, instance[key], true);
-		}, this);
-	}
-};
-
-})();
-/*
----
-
-name: Class.Extras
-
-description: Contains Utility Classes that can be implemented into your own Classes to ease the execution of many common tasks.
-
-license: MIT-style license.
-
-requires: Class
-
-provides: [Class.Extras, Chain, Events, Options]
-
-...
-*/
-
-(function(){
-
-this.Chain = new Class({
-
-	$chain: [],
-
-	chain: function(){
-		this.$chain.append(Array.flatten(arguments));
-		return this;
-	},
-
-	callChain: function(){
-		return (this.$chain.length) ? this.$chain.shift().apply(this, arguments) : false;
-	},
-
-	clearChain: function(){
-		this.$chain.empty();
-		return this;
-	}
-
-});
-
-var removeOn = function(string){
-	return string.replace(/^on([A-Z])/, function(full, first){
-		return first.toLowerCase();
-	});
-};
-
-this.Events = new Class({
-
-	$events: {},
-
-	addEvent: function(type, fn, internal){
-		type = removeOn(type);
-
-		
-
-		this.$events[type] = (this.$events[type] || []).include(fn);
-		if (internal) fn.internal = true;
-		return this;
-	},
-
-	addEvents: function(events){
-		for (var type in events) this.addEvent(type, events[type]);
-		return this;
-	},
-
-	fireEvent: function(type, args, delay){
-		type = removeOn(type);
-		var events = this.$events[type];
-		if (!events) return this;
-		args = Array.convert(args);
-		events.each(function(fn){
-			if (delay) fn.delay(delay, this, args);
-			else fn.apply(this, args);
-		}, this);
-		return this;
-	},
-
-	removeEvent: function(type, fn){
-		type = removeOn(type);
-		var events = this.$events[type];
-		if (events && !fn.internal){
-			var index = events.indexOf(fn);
-			if (index != -1) delete events[index];
-		}
-		return this;
-	},
-
-	removeEvents: function(events){
-		var type;
-		if (typeOf(events) == 'object'){
-			for (type in events) this.removeEvent(type, events[type]);
-			return this;
-		}
-		if (events) events = removeOn(events);
-		for (type in this.$events){
-			if (events && events != type) continue;
-			var fns = this.$events[type];
-			for (var i = fns.length; i--;) if (i in fns){
-				this.removeEvent(type, fns[i]);
-			}
-		}
-		return this;
-	}
-
-});
-
-this.Options = new Class({
-
-	setOptions: function(){
-		var options = this.options = Object.merge.apply(null, [{}, this.options].append(arguments));
-		if (this.addEvent) for (var option in options){
-			if (typeOf(options[option]) != 'function' || !(/^on[A-Z]/).test(option)) continue;
-			this.addEvent(option, options[option]);
-			delete options[option];
-		}
-		return this;
-	}
-
-});
-
-})();
-/*
----
-
 name: Class.Thenable
 
 description: Contains a Utility Class that can be implemented into your own Classes to make them "thenable".
@@ -5684,39 +5949,6 @@ Request.JSON = new Class({
 	}
 
 });
-/*
----
-
-script: More.js
-
-name: More
-
-description: MooTools More
-
-license: MIT-style license
-
-authors:
-  - Guillermo Rauch
-  - Thomas Aylott
-  - Scott Kyle
-  - Arian Stolwijk
-  - Tim Wienk
-  - Christoph Pojer
-  - Aaron Newton
-  - Jacob Thornton
-
-requires:
-  - Core/MooTools
-
-provides: [MooTools.More]
-
-...
-*/
-
-MooTools.More = {
-	version: '1.6.1-dev',
-	build: '%build%'
-};
 /*
 ---
 
@@ -7913,238 +8145,6 @@ var Sortables = this.Sortables = new Class({
 	}
 
 });
-
-})();
-/*
----
-
-script: Object.Extras.js
-
-name: Object.Extras
-
-description: Extra Object generics, like getFromPath which allows a path notation to child elements.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-
-requires:
-  - Core/Object
-  - MooTools.More
-
-provides: [Object.Extras]
-
-...
-*/
-
-(function(){
-
-var defined = function(value){
-	return value != null;
-};
-
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-Object.extend({
-
-	getFromPath: function(source, parts){
-		if (typeof parts == 'string') parts = parts.split('.');
-		for (var i = 0, l = parts.length; i < l; i++){
-			if (hasOwnProperty.call(source, parts[i])) source = source[parts[i]];
-			else return null;
-		}
-		return source;
-	},
-
-	cleanValues: function(object, method){
-		method = method || defined;
-		for (var key in object) if (!method(object[key])){
-			delete object[key];
-		}
-		return object;
-	},
-
-	erase: function(object, key){
-		if (hasOwnProperty.call(object, key)) delete object[key];
-		return object;
-	},
-
-	run: function(object){
-		var args = Array.slice(arguments, 1);
-		for (var key in object) if (object[key].apply){
-			object[key].apply(object, args);
-		}
-		return object;
-	}
-
-});
-
-})();
-/*
----
-
-script: Locale.js
-
-name: Locale
-
-description: Provides methods for localization.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-  - Arian Stolwijk
-
-requires:
-  - Core/Events
-  - Object.Extras
-  - MooTools.More
-
-provides: [Locale, Lang]
-
-...
-*/
-
-(function(){
-
-var current = null,
-	locales = {},
-	inherits = {};
-
-var getSet = function(set){
-	if (instanceOf(set, Locale.Set)) return set;
-	else return locales[set];
-};
-
-var Locale = this.Locale = {
-
-	define: function(locale, set, key, value){
-		var name;
-		if (instanceOf(locale, Locale.Set)){
-			name = locale.name;
-			if (name) locales[name] = locale;
-		} else {
-			name = locale;
-			if (!locales[name]) locales[name] = new Locale.Set(name);
-			locale = locales[name];
-		}
-
-		if (set) locale.define(set, key, value);
-
-		
-
-		if (!current) current = locale;
-
-		return locale;
-	},
-
-	use: function(locale){
-		locale = getSet(locale);
-
-		if (locale){
-			current = locale;
-
-			this.fireEvent('change', locale);
-
-			
-		}
-
-		return this;
-	},
-
-	getCurrent: function(){
-		return current;
-	},
-
-	get: function(key, args){
-		return (current) ? current.get(key, args) : '';
-	},
-
-	inherit: function(locale, inherits, set){
-		locale = getSet(locale);
-
-		if (locale) locale.inherit(inherits, set);
-		return this;
-	},
-
-	list: function(){
-		return Object.keys(locales);
-	}
-
-};
-
-Object.append(Locale, new Events);
-
-Locale.Set = new Class({
-
-	sets: {},
-
-	inherits: {
-		locales: [],
-		sets: {}
-	},
-
-	initialize: function(name){
-		this.name = name || '';
-	},
-
-	define: function(set, key, value){
-		var defineData = this.sets[set];
-		if (!defineData) defineData = {};
-
-		if (key){
-			if (typeOf(key) == 'object') defineData = Object.merge(defineData, key);
-			else defineData[key] = value;
-		}
-		this.sets[set] = defineData;
-
-		return this;
-	},
-
-	get: function(key, args, _base){
-		var value = Object.getFromPath(this.sets, key);
-		if (value != null){
-			var type = typeOf(value);
-			if (type == 'function') value = value.apply(null, Array.convert(args));
-			else if (type == 'object') value = Object.clone(value);
-			return value;
-		}
-
-		// get value of inherited locales
-		var index = key.indexOf('.'),
-			set = index < 0 ? key : key.substr(0, index),
-			names = (this.inherits.sets[set] || []).combine(this.inherits.locales).include('en-US');
-		if (!_base) _base = [];
-
-		for (var i = 0, l = names.length; i < l; i++){
-			if (_base.contains(names[i])) continue;
-			_base.include(names[i]);
-
-			var locale = locales[names[i]];
-			if (!locale) continue;
-
-			value = locale.get(key, args, _base);
-			if (value != null) return value;
-		}
-
-		return '';
-	},
-
-	inherit: function(names, set){
-		names = Array.convert(names);
-
-		if (set && !this.inherits.sets[set]) this.inherits.sets[set] = [];
-
-		var l = names.length;
-		while (l--) (set ? this.inherits.sets[set] : this.inherits.locales).unshift(names[l]);
-
-		return this;
-	}
-
-});
-
-
 
 })();
 /*
@@ -17368,9 +17368,9 @@ Ngn.sd.LayersBar = new Class({
   },
   getTitle: function(item) {
     if (item.data.subType == 'image') {
-      return '<span class="ico">' + item.html + '</span>' + Ngn.String.ucfirst(item.data.type);
+      return '<span class="ico 1">' + item._data.html + '</span>' + Ngn.String.ucfirst(item.data.type);
     } else if (item.data.type == 'font') {
-      return '<span class="ico">' + '<img src="/sd/img/font.png"></span>' + //
+      return '<span class="ico 2">' + '<img src="/sd/img/font.png"></span>' + //
       '<span class="text">' + (item.html ? item.html : 'empty') + '</span>'
     } else {
       return '<span class="ico"></span>unsupported';
@@ -18000,748 +18000,4 @@ Ngn.sd.BcreatorLayersBar = new Class({
       return this.parent(item);
     }
   }
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
-Ngn.Form.El.Color = new Class({
-  Extends: Ngn.Form.El,
-
-  init: function() {
-    var el = this.eRow;
-    var eColor = el.getElement('div.color');
-    var eInput = el.getElement('input').addClass('hexInput');
-    eInput.addEvent('change', function() {
-      eColor.setStyle('background-color', eInput.value);
-    });
-    new Ngn.Rainbow(eInput, {
-      eParent: eInput.getParent(),
-      id: 'rainbow_' + eInput.get('name'),
-      //styles: { // и так работает
-      //  'z-index': this.options.dialog.dialog.getStyle('z-index').toInt() + 1
-      //},
-      imgPath: '/i/img/rainbow/small/',
-      wheel: true,
-      startColor: eInput.value ? new Color(eInput.value).rgb : [255, 255, 255],
-      onChange: function(color) {
-        eColor.setStyle('background-color', color.hex);
-        eInput.value = color.hex;
-        eInput.fireEvent('change', color);
-      },
-      onComplete: function(color) {
-        eColor.setStyle('background-color', color.hex);
-        eInput.value = color.hex;
-        eInput.fireEvent('change', color);
-      }
-    });
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Rainbow.js|--*/
-Ngn.Rainbows = [];
-
-Ngn.Rainbow = new Class({
-  options: {
-    id: 'rainbow',
-    styles: {},
-    prefix: 'moor-',
-    imgPath: 'images/',
-    startColor: [255, 0, 0],
-    wheel: false,
-    onComplete: Function.from(),
-    onChange: Function.from(),
-    eParent: null
-  },
-
-  initialize: function(el, options) {
-    this.element = $(el);
-    if (!this.element) return;
-    this.setOptions(options);
-    if (!this.options.eParent) this.options.eParent = document.body;
-    this.sliderPos = 0;
-    this.pickerPos = {x: 0, y: 0};
-    this.backupColor = this.options.startColor;
-    this.currentColor = this.options.startColor;
-    this.sets = {
-      rgb: [],
-      hsb: [],
-      hex: []
-    };
-    this.pickerClick = this.sliderClick = false;
-    if (!this.layout) this.doLayout();
-    this.OverlayEvents();
-    this.sliderEvents();
-    this.backupEvent();
-    if (this.options.wheel) this.wheelEvents();
-    this.element.addEvent('click', function(e) {
-      this.closeAll().toggle(e);
-    }.bind(this));
-
-    this.layout.overlay.setStyle('background-color', this.options.startColor.rgbToHex());
-    //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
-
-    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
-    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
-
-    this.manualSet(this.options.startColor);
-
-    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
-    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
-    this.sliderPos = this.snippet('arrPos') - this.snippet('arrSize', 'int');
-
-    if (window.khtml) this.hide();
-  },
-
-  toggle: function() {
-    this[this.visible ? 'hide' : 'show']();
-  },
-
-  show: function() {
-    this.rePosition();
-    (function() {
-      this.layout.setStyle('display', 'block');
-    }).delay(100, this);
-    this.visible = true;
-  },
-
-  hide: function() {
-    this.layout.setStyles({'display': 'none'});
-    this.visible = false;
-  },
-
-  closeAll: function() {
-    Ngn.Rainbows.each(function(obj) {
-      obj.hide();
-    });
-
-    return this;
-  },
-
-  manualSet: function(color, type) {
-    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
-    var rgb, hsb, hex;
-
-    if (type == 'rgb') {
-      rgb = color;
-      hsb = color.rgbToHsb();
-      hex = color.rgbToHex();
-    } else if (type == 'hsb') {
-      hsb = color;
-      rgb = color.hsbToRgb();
-      hex = rgb.rgbToHex();
-    } else {
-      hex = color;
-      rgb = color.hexToRgb(true);
-      hsb = rgb.rgbToHsb();
-    }
-
-    this.setRainbow(rgb);
-    this.autoSet(hsb);
-  },
-
-  autoSet: function(hsb) {
-    var curH = this.snippet('curSize', 'int').h;
-    var curW = this.snippet('curSize', 'int').w;
-    var oveH = this.layout.overlay.height;
-    var oveW = this.layout.overlay.width;
-    var sliH = this.layout.slider.height;
-    var arwH = this.snippet('arrSize', 'int');
-    var hue;
-
-    var posx = Math.round(((oveW * hsb[1]) / 100) - curW);
-    var posy = Math.round(-((oveH * hsb[2]) / 100) + oveH - curH);
-
-    var c = Math.round(((sliH * hsb[0]) / 360));
-    c = (c == 360) ? 0 : c;
-    var position = sliH - c + this.snippet('slider') - arwH;
-    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
-
-    this.layout.cursor.setStyles({'top': posy, 'left': posx});
-    this.layout.arrows.setStyle('top', position);
-    this.layout.overlay.setStyle('background-color', hue);
-    this.sliderPos = this.snippet('arrPos') - arwH;
-    this.pickerPos.x = this.snippet('curPos').l + curW;
-    this.pickerPos.y = this.snippet('curPos').t + curH;
-  },
-
-  setRainbow: function(color, type) {
-    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
-    var rgb, hsb, hex;
-
-    if (type == 'rgb') {
-      rgb = color;
-      hsb = color.rgbToHsb();
-      hex = color.rgbToHex();
-    } else if (type == 'hsb') {
-      hsb = color;
-      rgb = color.hsbToRgb();
-      hex = rgb.rgbToHex();
-    } else {
-      hex = color;
-      rgb = color.hexToRgb();
-      hsb = rgb.rgbToHsb();
-    }
-    this.sets = {
-      rgb: rgb,
-      hsb: hsb,
-      hex: hex
-    };
-    if (this.pickerPos.x == null) this.autoSet(hsb);
-    this.RedInput.value = rgb[0];
-    this.GreenInput.value = rgb[1];
-    this.BlueInput.value = rgb[2];
-    this.HueInput.value = hsb[0];
-    this.SatuInput.value = hsb[1];
-    this.BrighInput.value = hsb[2];
-    //this.hexInput.value = hex;
-    this.currentColor = rgb;
-    //this.chooseColor.setStyle('background-color', rgb.rgbToHex());
-  },
-
-  parseColors: function(x, y, z) {
-    var s = Math.round((x * 100) / this.layout.overlay.width);
-    var b = 100 - Math.round((y * 100) / this.layout.overlay.height);
-    var h = 360 - Math.round((z * 360) / this.layout.slider.height) + this.snippet('slider') - this.snippet('arrSize', 'int');
-    h -= this.snippet('arrSize', 'int');
-    h = (h >= 360) ? 0 : (h < 0) ? 0 : h;
-    s = (s > 100) ? 100 : (s < 0) ? 0 : s;
-    b = (b > 100) ? 100 : (b < 0) ? 0 : b;
-
-    return [h, s, b];
-  },
-
-  OverlayEvents: function() {
-    var lim, curH, curW, inputs;
-    curH = this.snippet('curSize', 'int').h;
-    curW = this.snippet('curSize', 'int').w;
-    //inputs = Array.from(this.arrRGB).concat(this.arrHSB, this.hexInput);
-    document.addEvent('click', function() {
-      this.hide(this.layout);
-    }.bind(this));
-    /*
-    inputs.each(function(el) {
-      el.addEvent('keydown', this.eventKeydown.bindWithEvent(this, el));
-      el.addEvent('keyup', this.eventKeyup.bindWithEvent(this, el));
-    }, this);
-    */
-    [this.element, this.layout].each(function(el) {
-      el.addEvents({
-        'click': function(e) {
-          e.preventDefault();
-        },
-        'keyup': function(e) {
-          if (e.key == 'esc' && this.visible) this.hide(this.layout);
-        }.bind(this)
-      }, this);
-    }, this);
-    lim = {
-      //x: [0 - curW, this.layout.overlay.width - curW],
-      //y: [0 - curH, this.layout.overlay.height - curH]
-      x: [0 - curW, 80 - curW],
-      y: [0 - curH, 80 - curH]
-    };
-    this.layout.addEvent('click', function(e) {
-      e.stop();
-    });
-    this.layout.drag = new Drag(this.layout.cursor, {
-      limit: lim,
-      onBeforeStart: this.overlayDrag.bind(this),
-      onStart: this.overlayDrag.bind(this),
-      onDrag: this.overlayDrag.bind(this),
-      snap: 0
-    });
-
-    this.layout.overlay2.addEvent('mousedown', function(e) {
-      this.layout.cursor.setStyles({
-        'top': e.page.y - this.layout.overlay.getTop() - curH,
-        'left': e.page.x - this.layout.overlay.getLeft() - curW
-      });
-      this.layout.drag.start(e);
-    }.bind(this));
-
-    /*
-     this.layout.overlay2.addEvent('dblclick', function(){
-     this.ok();
-     }.bind(this));
-     this.okButton.addEvent('click', function() {
-     this.ok();
-     }.bind(this));
-     */
-
-
-    this.transp.addEvent('click', function() {
-      this.hide();
-      this.fireEvent('onComplete', ['transparent', this]);
-    }.bind(this));
-  },
-
-  ok: function() {
-    if (this.currentColor == this.options.startColor) {
-      this.hide();
-      this.fireEvent('onComplete', [this.sets, this]);
-    } else {
-      this.backupColor = this.currentColor;
-      //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
-      this.hide();
-      this.fireEvent('onComplete', [this.sets, this]);
-    }
-  },
-
-  overlayDrag: function() {
-    var curH = this.snippet('curSize', 'int').h;
-    var curW = this.snippet('curSize', 'int').w;
-    this.pickerPos.x = this.snippet('curPos').l + curW;
-    this.pickerPos.y = this.snippet('curPos').t + curH;
-    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
-    this.fireEvent('onChange', [this.sets, this]);
-  },
-
-  sliderEvents: function() {
-    var arwH = this.snippet('arrSize', 'int'), lim;
-    lim = [0 + this.snippet('slider') - arwH, this.layout.slider.height - arwH + this.snippet('slider')];
-    this.layout.sliderDrag = new Drag(this.layout.arrows, {
-      limit: {y: lim},
-      modifiers: {x: false},
-      onBeforeStart: this.sliderDrag.bind(this),
-      onStart: this.sliderDrag.bind(this),
-      onDrag: this.sliderDrag.bind(this),
-      snap: 0
-    });
-
-    this.layout.slider.addEvent('mousedown', function(e) {
-      this.layout.arrows.setStyle('top', e.page.y - this.layout.slider.getTop() + this.snippet('slider') - arwH);
-      this.layout.sliderDrag.start(e);
-    }.bind(this));
-  },
-
-  sliderDrag: function() {
-    var arwH = this.snippet('arrSize', 'int'), hue;
-
-    this.sliderPos = this.snippet('arrPos') - arwH;
-    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
-    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
-    this.layout.overlay.setStyle('background-color', hue);
-    this.fireEvent('onChange', [this.sets, this]);
-  },
-
-  backupEvent: function() {
-    /*
-    this.layout.backup.addEvent('click', function() {
-      this.manualSet(this.backupColor);
-      this.fireEvent('onChange', [this.sets, this]);
-    }.bind(this));
-    */
-  },
-
-  wheelEvents: function() {
-    var arrColors = Object.append(Array.from(this.arrRGB), this.arrHSB);
-    arrColors.each(function(el) {
-      el.addEvents({
-        'mousewheel': function() {
-          this.eventKeys(el);
-        }.bind(this),
-        'keydown': function() {
-          this.eventKeys(el);
-        }.bind(this)
-      });
-    }, this);
-
-    [this.layout.arrows, this.layout.slider].each(function(el) {
-      el.addEvents({
-        'mousewheel': function() {
-          this.eventKeys([this.arrHSB[0], 'slider']);
-        }.bind(this),
-        'keydown': function() {
-          this.eventKeys([this.arrHSB[0], 'slider']);
-        }.bind(this)
-      });
-    }, this);
-  },
-
-  eventKeys: function(e, el, id) {
-    var wheel, type;
-    id = (!id) ? el.id : this.arrHSB[0];
-
-    if (e.type == 'keydown') {
-      if (e.key == 'up') wheel = 1; else if (e.key == 'down') wheel = -1; else return;
-    } else if (e.type == Element.Events.mousewheel.base) wheel = (e.wheel > 0) ? 1 : -1;
-
-    if (this.arrRGB.contains(el)) type = 'rgb'; else if (this.arrHSB.contains(el)) type = 'hsb'; else type = 'hsb';
-
-    if (type == 'rgb') {
-      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
-      var value = (el.value.toInt() || 0) + wheel;
-      value = (value > 255) ? 255 : (value < 0) ? 0 : value;
-
-      switch (el.className) {
-        case prefix + 'rInput':
-          pass = [value, rgb[1], rgb[2]];
-          break;
-        case prefix + 'gInput':
-          pass = [rgb[0], value, rgb[2]];
-          break;
-        case prefix + 'bInput':
-          pass = [rgb[0], rgb[1], value];
-          break;
-        default :
-          pass = rgb;
-      }
-      this.manualSet(pass);
-      this.fireEvent('onChange', [this.sets, this]);
-    } else {
-      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
-      var value = (el.value.toInt() || 0) + wheel;
-
-      if (el.className.test(/(HueInput)/)) value = (value > 359) ? 0 : (value < 0) ? 0 : value; else value = (value > 100) ? 100 : (value < 0) ? 0 : value;
-
-      switch (el.className) {
-        case prefix + 'HueInput':
-          pass = [value, hsb[1], hsb[2]];
-          break;
-        case prefix + 'SatuInput':
-          pass = [hsb[0], value, hsb[2]];
-          break;
-        case prefix + 'BrighInput':
-          pass = [hsb[0], hsb[1], value];
-          break;
-        default :
-          pass = hsb;
-      }
-
-      this.manualSet(pass, 'hsb');
-      this.fireEvent('onChange', [this.sets, this]);
-    }
-    e.stop();
-  },
-
-  eventKeydown: function(e, el) {
-    var n = e.code, k = e.key;
-    if ((!el.className.test(/hexInput/) && !(n >= 48 && n <= 57)) && (k != 'backspace' && k != 'tab' && k != 'delete' && k != 'left' && k != 'right'))
-      e.stop();
-  },
-
-  eventKeyup: function(e, el) {
-    var n = e.code, k = e.key, pass, prefix, chr = el.value.charAt(0);
-    if (el.value == null) return;
-    if (el.className.test(/hexInput/)) {
-      if (chr != "#" && el.value.length != 6) return;
-      if (chr == '#' && el.value.length != 7) return;
-    } else {
-      if (!(n >= 48 && n <= 57) && (!['backspace', 'tab', 'delete', 'left', 'right'].contains(k)) && el.value.length > 3) return;
-    }
-
-    prefix = this.options.prefix;
-
-    if (el.className.test(/(rInput|gInput|bInput)/)) {
-      if (el.value < 0 || el.value > 255) return;
-      switch (el.className) {
-        case prefix + 'rInput':
-          pass = [el.value, this.sets.rgb[1], this.sets.rgb[2]];
-          break;
-        case prefix + 'gInput':
-          pass = [this.sets.rgb[0], el.value, this.sets.rgb[2]];
-          break;
-        case prefix + 'bInput':
-          pass = [this.sets.rgb[0], this.sets.rgb[1], el.value];
-          break;
-        default :
-          pass = this.sets.rgb;
-      }
-      this.manualSet(pass);
-      this.fireEvent('onChange', [this.sets, this]);
-    } else if (!el.className.test(/hexInput/)) {
-      if (el.className.test(/HueInput/) && el.value < 0 || el.value > 360) return; else if (el.className.test(/HueInput/) && el.value == 360) el.value = 0; else if (el.className.test(/(SatuInput|BrighInput)/) && el.value < 0 || el.value > 100) return;
-      switch (el.className) {
-        case prefix + 'HueInput':
-          pass = [el.value, this.sets.hsb[1], this.sets.hsb[2]];
-          break;
-        case prefix + 'SatuInput':
-          pass = [this.sets.hsb[0], el.value, this.sets.hsb[2]];
-          break;
-        case prefix + 'BrighInput':
-          pass = [this.sets.hsb[0], this.sets.hsb[1], el.value];
-          break;
-        default :
-          pass = this.sets.hsb;
-      }
-      this.manualSet(pass, 'hsb');
-      this.fireEvent('onChange', [this.sets, this]);
-    } else {
-      pass = el.value.hexToRgb(true);
-      if (isNaN(pass[0]) || isNaN(pass[1]) || isNaN(pass[2])) return;
-      if (pass != null) {
-        this.manualSet(pass);
-        this.fireEvent('onChange', [this.sets, this]);
-      }
-    }
-  },
-
-  doLayout: function() {
-    var id = this.options.id, prefix = this.options.prefix;
-    var idPrefix = id + ' .' + prefix;
-
-    this.layout = new Element('div', {
-      'styles': Object.merge({ 'display': 'block', 'position': 'absolute', zIndex: 10}, this.options.styles),
-      'id': id
-    }).inject(this.options.eParent);
-
-    Ngn.Rainbows.push(this);
-
-    var box = new Element('div', {
-      'styles': {'position': 'relative'},
-      'class': prefix + 'box'
-    }).inject(this.layout);
-
-    var div = new Element('div', {
-      'styles': {'position': 'absolute', 'overflow': 'hidden'},
-      'class': prefix + 'overlayBox'
-    }).inject(box);
-
-    var ar = new Element('div', {
-      'styles': {
-        'position': 'absolute'
-        //,'zIndex': 1
-      },
-      'class': prefix + 'arrows'
-    }).inject(box);
-    ar.width = ar.getStyle('width').toInt();
-    ar.height = ar.getStyle('height').toInt();
-
-    var ov = new Element('img', {
-      'styles': {
-        'background-color': '#fff',
-        'position': 'relative'
-        //,'zIndex': 2
-      },
-      'src': this.options.imgPath + 'moor_woverlay.png',
-      'class': prefix + 'overlay'
-    }).inject(div);
-
-    var ov2 = new Element('img', {
-      'styles': {'position': 'absolute', 'top': 0, 'left': 0/*, 'zIndex': 2*/},
-      'src': this.options.imgPath + 'moor_boverlay.png',
-      'class': prefix + 'overlay'
-    }).inject(div);
-
-    if (window.ie6) {
-      div.setStyle('overflow', '');
-      var src = ov.src;
-      ov.src = this.options.imgPath + 'blank.gif';
-      ov.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
-      src = ov2.src;
-      ov2.src = this.options.imgPath + 'blank.gif';
-      ov2.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
-    }
-    ov.width = ov2.width = div.getStyle('width').toInt();
-    ov.height = ov2.height = div.getStyle('height').toInt();
-
-    var cr = new Element('div', {
-      'styles': {'overflow': 'hidden', 'position': 'absolute'/*, 'zIndex': 2*/},
-      'class': prefix + 'cursor'
-    }).inject(div);
-    cr.width = cr.getStyle('width').toInt();
-    cr.height = cr.getStyle('height').toInt();
-
-    var sl = new Element('img', {
-      'styles': {'position': 'absolute'/*, 'z-index': 2, marginLeft: '1px'*/},
-      'src': this.options.imgPath + 'moor_slider.png',
-      'class': prefix + 'slider'
-    }).inject(box);
-    this.layout.slider = document.getElement('#' + idPrefix + 'slider');
-    sl.width = sl.getStyle('width').toInt();
-    sl.height = sl.getStyle('height').toInt();
-
-    new Element('div', {
-      'styles': {'position': 'absolute'},
-      'class': prefix + 'colorBox'
-    }).inject(box);
-
-    /*
-     new Element('div', {
-      'styles': {
-      //'zIndex': 2,
-      'position': 'absolute'
-      },
-      'class': prefix + 'chooseColor'
-    }).inject(box);
-
-    this.layout.backup = new Element('div', {
-      'styles': {
-        //'zIndex': 2,
-        'position': 'absolute', 'cursor': 'pointer'},
-      'class': prefix + 'currentColor'
-    }).inject(box);
-    */
-
-    var R = new Element('label').inject(box).setStyle('position', 'absolute');
-    var G = R.clone().inject(box).addClass(prefix + 'gLabel').appendText('G: ');
-    var B = R.clone().inject(box).addClass(prefix + 'bLabel').appendText('B: ');
-    R.appendText('R: ').addClass(prefix + 'rLabel');
-
-    var inputR = new Element('input');
-    var inputG = inputR.clone().inject(G).addClass(prefix + 'gInput');
-    var inputB = inputR.clone().inject(B).addClass(prefix + 'bInput');
-    inputR.inject(R).addClass(prefix + 'rInput');
-
-    var HU = new Element('label').inject(box).setStyle('position', 'absolute');
-    var SA = HU.clone().inject(box).addClass(prefix + 'SatuLabel').appendText('S: ');
-    var BR = HU.clone().inject(box).addClass(prefix + 'BrighLabel').appendText('B: ');
-    HU.appendText('H: ').addClass(prefix + 'HueLabel');
-
-    var inputHU = new Element('input');
-    var inputSA = inputHU.clone().inject(SA).addClass(prefix + 'SatuInput');
-    var inputBR = inputHU.clone().inject(BR).addClass(prefix + 'BrighInput');
-    inputHU.inject(HU).addClass(prefix + 'HueInput');
-    SA.appendText(' %');
-    BR.appendText(' %');
-    new Element('span', {'styles': {'position': 'absolute'}, 'class': prefix + 'ballino'}).set('html', " &deg;").inject(HU, 'after');
-
-    //var hex = new Element('label').inject(box).setStyle('position', 'absolute').addClass(prefix + 'hexLabel').appendText('#hex: ').adopt(new Element('input').addClass(prefix + 'hexInput'));
-
-    /*
-    var ok = new Element('input', {
-      'styles': {'position': 'absolute'},
-      'type': 'button',
-      'value': 'OK',
-      'class': prefix + 'okButton'
-    }).inject(box);
-    */
-
-    var transp = new Element('a', {'style': {'position': 'absolute'}, 'href': '#', 'class': prefix + 'transp'}).inject(box);
-
-    this.rePosition();
-
-    var overlays = $$('#' + idPrefix + 'overlay');
-    this.layout.overlay = overlays[0];
-
-    this.layout.overlay2 = overlays[1];
-    this.layout.cursor = document.getElement('#' + idPrefix + 'cursor');
-    this.layout.arrows = document.getElement('#' + idPrefix + 'arrows');
-    this.chooseColor = document.getElement('#' + idPrefix + 'chooseColor');
-    //this.layout.backup = document.getElement('#' + idPrefix + 'currentColor');
-    this.RedInput = document.getElement('#' + idPrefix + 'rInput');
-    this.GreenInput = document.getElement('#' + idPrefix + 'gInput');
-    this.BlueInput = document.getElement('#' + idPrefix + 'bInput');
-    this.HueInput = document.getElement('#' + idPrefix + 'HueInput');
-    this.SatuInput = document.getElement('#' + idPrefix + 'SatuInput');
-    this.BrighInput = document.getElement('#' + idPrefix + 'BrighInput');
-    //this.hexInput = document.getElement('#' + idPrefix + 'hexInput');
-
-    this.arrRGB = [this.RedInput, this.GreenInput, this.BlueInput];
-    this.arrHSB = [this.HueInput, this.SatuInput, this.BrighInput];
-    //this.okButton = document.getElement('#' + idPrefix + 'okButton');
-    this.transp = box.getElement('.' + prefix + 'transp');
-
-    if (!window.khtml) this.hide();
-  },
-  rePosition: function() {
-    return;
-    var coords = this.element.getCoordinates();
-    this.layout.setStyles({
-      'left': coords.left,
-      'top': coords.top + coords.height + 1
-    });
-  },
-
-  snippet: function(mode, type) {
-    var size;
-    type = (type) ? type : 'none';
-    switch (mode) {
-      case 'arrPos':
-        var t = this.layout.arrows.getStyle('top').toInt();
-        size = t;
-        break;
-      case 'arrSize':
-        var h = this.layout.arrows.height;
-        h = (type == 'int') ? (h / 2).toInt() : h;
-        size = h;
-        break;
-      case 'curPos':
-        var l = this.layout.cursor.getStyle('left').toInt();
-        var t = this.layout.cursor.getStyle('top').toInt();
-        size = {'l': l, 't': t};
-        break;
-      case 'slider':
-        var t = this.layout.slider.getStyle('marginTop').toInt();
-        size = t;
-        break;
-      default :
-        var h = this.layout.cursor.height;
-        var w = this.layout.cursor.width;
-        h = (type == 'int') ? (h / 2).toInt() : h;
-        w = (type == 'int') ? (w / 2).toInt() : w;
-        size = {w: w, h: h};
-    }
-    ;
-    return size;
-  }
-});
-
-Ngn.Rainbow.implement(new Options);
-Ngn.Rainbow.implement(new Events);
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.Html.js|--*/
-Ngn.FieldSet.Html = new Class({
-  Extends: Ngn.FieldSet,
-
-  getContainer: function() {
-    return this.eContainerInit;
-  },
-
-  initialize: function(container, options) {
-    this.eContainerInit = $(container);
-    this.parent(this.eContainerInit.getParent(), options);
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.FieldSet.js|--*/
-Ngn.Frm.fieldSets = [];
-
-Ngn.Frm.FieldSet = new Class({
-  Extends: Ngn.FieldSet.Html,
-  form: null, // Ngn.Form
-
-  initialize: function(form, container, options) {
-    this.form = form;
-    Ngn.Frm.fieldSets.include(this);
-    this.parent(container, options);
-    this.initVirtualElement(this.eContainer);
-  },
-
-  initInput: function(eInput) {
-    this.form.initActiveEl(eInput);
-  },
-
-  afterAddRow: function(eNewRow) {
-    this.form.addElements(eNewRow);
-  }
-
-});
-
-Ngn.Frm.FieldSet.implement(Ngn.Frm.virtualElement);
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.Frm.FieldSetBcreatorImages.js|--*/
-Ngn.Frm.FieldSetBcreatorImages = new Class({
-  Extends: Ngn.Frm.FieldSet,
-
-  createDeleteButton: function(eRow, index) {
-    var fieldSet = this;
-    this.createRowButton(eRow, {
-      caption: this.options.deleteTitle,
-      cls: 'delete'
-    }, function() {
-      if (!confirm('Are you sure?')) return;
-      Ngn.Request.Iface.loading(true);
-      new Ngn.Request.JSON({
-        url: fieldSet.options.deleteImageUrl.replace('{n}', index),
-        onSuccess: function() {
-          Ngn.Request.Iface.loading(false);
-          eRow.dispose();
-          fieldSet.regenInputNames();
-          fieldSet.buttons.erase(this);
-          Ngn.sd.blocks[Ngn.sd.openedPropDialog.options.blockId].reload();
-        }
-      }).send();
-    });
-  }
-
 });
