@@ -1,4 +1,4 @@
-s:84462:"
+s:84880:"
 /*--|/home/user/ngn-env/ngn/i/css/common/screen.css|--*/
 /* -------------------------------------------------------------- 
   
@@ -819,7 +819,6 @@ cursor: default;
 font-size: 16px;
 margin: 5px 5px 0;
 padding: 4px 4px 0px 4px;
-font-family: Georgia;
 position: relative;
 border-top-left-radius: 4px;
 border-top-right-radius: 4px;
