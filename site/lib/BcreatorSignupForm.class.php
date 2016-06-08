@@ -31,7 +31,7 @@ class BcreatorSignupForm extends Form {
 //      ],
     ], [
       'placeholders' => true,
-      'submitTitle' => 'SUBMIT NOW'
+      'submitTitle' => 'Register'
     ]);
   }
 
@@ -49,12 +49,24 @@ class BcreatorSignupForm extends Form {
 
   protected function _update(array $data) {
     $pass = Misc::randString(8, true);
-    DbModelCore::create('users', [
+    $userId = DbModelCore::create('users', [
       'email' => $data['email'],
       'name' => $data['firstName'].' '.$data['lastName'],
       'pass' => $pass,
       'active' => true
     ]);
+    Auth::loginById($userId);
+    (new \Engine\IPN\Adapter\EngineMvc\InvoiceManager)->createInvoice( //
+      $userId, //
+      bin2hex(openssl_random_pseudo_bytes(8)), //
+      '0.0', //
+      new \DateTime(), //
+      new \DateInterval('P7D'), //
+      [
+        'module' => __CLASS__,
+        'action' => 'register',
+        'reason' => '7 days free trial'
+      ]);
     $host = SITE_DOMAIN;
     $title = SITE_TITLE;
     (new SendEmail)->send($data['email'], "Welcome to $title!", <<<HTML

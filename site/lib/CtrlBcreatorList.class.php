@@ -4,7 +4,7 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
 
   function action_default() {
     if (!Auth::get('id')) {
-      header('Location: /');
+      $this->redirect('/');
       return;
     }
     $this->d['banners'] = [];

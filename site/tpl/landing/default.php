@@ -8,24 +8,6 @@
       </div>
       <?= $d['signUpForm'] ?>
     </div>
-    <script>
-      new Ngn.Form(document.getElement('.apeform form'), {
-        ajaxSubmit: true,
-        ajaxSubmitUrl: '/?a=json_freeTrial',
-        onComplete: function(r) {
-          new Ngn.Dialog.Alert({
-            fixed: true,
-            message: r.msg
-          });
-        },
-        onFailed: function(r) {
-          new Ngn.Dialog.Alert({
-            fixed: true,
-            message: r.msg
-          });
-        }
-      });
-    </script>
     <div class="clearfix"></div>
   </div>
 </div>

@@ -62,7 +62,7 @@
         <? if (!Auth::get('id')) { ?>
           <div class="sign">
             <div class="item"><a href="/signin" class="link"><span class="fa fa-sign-in"></span>SIGN IN</a></div>
-            <div class="item"><a href="https://www.jvzoo.com/b/0/183117/1" class="link"><span
+            <div class="item"><a href="/register" class="link"><span
                   class="fa fa-unlock-alt"></span>REGISTER</a></div>
           </div>
         <? } else { ?>

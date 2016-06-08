@@ -15717,6 +15717,9 @@ Ngn.sd.BlockAbstract = new Class({
     this.initElement(el);
     this.addCont(this.el);
     this.event = event;
+    this.el.addEvent('click', function() {
+
+    });
     this.setOptions(options);
     this.ctrl = '/pageBlock/' + Ngn.sd.bannerId;
     this.init();
@@ -17305,7 +17308,7 @@ Ngn.sd.LayersBar = new Class({
         'data-type': item.data.type,
         events: {
           click: function() {
-            if (!this.canEdit(item)) return;
+            if (!Ngn.sd.blocks[item._data.id].canEdit()) return;
             Ngn.sd.blocks[item._data.id]._settingsAction(Ngn.sd.blocks[item._data.id]);
           }.bind(this)
         }
