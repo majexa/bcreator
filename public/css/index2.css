@@ -83,10 +83,10 @@ width: 337px;
 background: url(/public/images/images_new/icons/name.png) no-repeat 15px center;
 }
 .banner .form input[name='lastName'] {
-background: url(/public/images/images_new/icons/lastname.png) no-repeat 15px center;
+background: url(/public/images/images_new/icons/name.png) no-repeat 15px center;
 }
 .banner .form input[name='email'] {
-background: url(/public/images/images_new/icons/email.png) no-repeat 17px center;
+background: url(/public/images/images_new/icons/lastname.png) no-repeat 17px center;
 }
 .banner .form input[type='submit'], .banner .form input[type='button'] {
 border-style: solid;
