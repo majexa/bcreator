@@ -1,5 +1,6 @@
 <div class="banner full">
   <div class="block">
+    <? if (!Auth::get('id')) { ?>
     <div class="form apeform">
       <div class="logo"><img src="/public/images/images_new/logo_2.png" alt=""></div>
       <div class="title">
@@ -9,6 +10,7 @@
       <?= $d['signUpForm'] ?>
     </div>
     <div class="clearfix"></div>
+    <? } ?>
   </div>
 </div>
 
