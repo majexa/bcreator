@@ -5,10 +5,10 @@
 require dirname(NGN_PATH).'/bc/init.php';
 
 O::replaceInjection('DefaultRouter', 'BcreatorRouter');
-
-Lib::addPsr4Folder('/home/user/toaster/Library');
-Lib::addPsr4Folder('/home/user/toaster/Library/Engine/etc');
-Lib::addPsr2Folder('/home/user/toaster/Library');
+$root = dirname(dirname(dirname(__DIR__)));
+Lib::addPsr4Folder($root.'/Library');
+Lib::addPsr4Folder($root.'/Library/Engine/etc');
+Lib::addPsr2Folder($root.'/Library');
 Sql::setThrowErrors(true);
 Lib::required('Db'); // require to load DB_* constants
 Sql::connectDatabase([
