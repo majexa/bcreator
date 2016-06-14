@@ -6,3 +6,4 @@ landing-design
 cmd.php
 site/config/constants/more.php
 u/bcImagesCache/*
+u/banner/*

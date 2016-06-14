@@ -21,11 +21,17 @@ Ngn.sd.Slides = new Class({
       elements[currentIndex].setStyle('display', 'none');
       elements[nextIndex].setStyle('display', 'block');
       currentIndex = nextIndex;
-      if (typeof window.callPhantom === 'function') {
-        window.callPhantom({
-          action: 'frameChange'
-        });
+      var time = Math.round(new Date().getTime() / 100);
+      if (Ngn.sd.Slides.lastFrameChangeTime < time) {
+        Ngn.sd.Slides.lastFrameChangeTime = time;
+        if (typeof window.callPhantom === 'function') {
+          window.callPhantom({
+            action: 'frameChange'
+          });
+        }
       }
     }).periodical(this.options.duration);
   }
 });
+
+Ngn.sd.Slides.lastFrameChangeTime = 0;

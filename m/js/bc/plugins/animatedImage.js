@@ -15,7 +15,7 @@ Ngn.sd.BlockBAnimatedImage = new Class({
   },
   updateContent: function() {
     this.parent();
-    new Ngn.sd.Slides(this.el.getElements('.cont div'));
+    Ngn.sd.GlobalSlides.instance().add(this);
   }
 });
 

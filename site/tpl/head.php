@@ -14,6 +14,9 @@
   <script>
     Ngn.sd.barsClass = Ngn.sd.BcreatorBars;
     Locale.use('en-US');
+    window.addEvent('sdAfterInit', function(bannerId) {
+      
+    });
   </script>
 </head>
 

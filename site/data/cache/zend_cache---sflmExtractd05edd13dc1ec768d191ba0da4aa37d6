@@ -1,4 +1,4 @@
-
+s:24178:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
 Ngn.Form.El.Color = new Class({
   Extends: Ngn.Form.El,
@@ -715,4 +715,4 @@ Ngn.Frm.FieldSet = new Class({
 
 });
 
-Ngn.Frm.FieldSet.implement(Ngn.Frm.virtualElement);
+Ngn.Frm.FieldSet.implement(Ngn.Frm.virtualElement);";

@@ -13,7 +13,7 @@ Ngn.sd.BlockBAnimatedText = new Class({
   },
   updateContent: function() {
     this.parent();
-    new Ngn.sd.Slides(this.el.getElements('.cont div'));
+    Ngn.sd.GlobalSlides.instance().add(this);
   },
   hasAnimation: function() {
     return this.data.font.text.length > 1;
