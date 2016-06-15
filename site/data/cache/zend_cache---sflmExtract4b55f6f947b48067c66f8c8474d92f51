@@ -1,4 +1,4 @@
-s:266103:"
+s:266469:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -6847,17 +6847,28 @@ Ngn.sd.GlobalSlides = new Class({
   currentIndex: 0,
   nextIndex: 0,
   animationStarted: false,
+  maxSlidesBlockN: 0,
+
+  initMaxSlidesBlockN: function() {
+    for (var i = 0; i < this.slides.length; i++) {
+      if (this.slides[i].length > this.maxSlidesBlockN) {
+        this.maxSlidesBlockN = i;
+      }
+    }
+  },
 
   nextSlide: function() {
-    if (this.slides[0][this.currentIndex + 1]) {
+    if (this.slides[this.maxSlidesBlockN][this.currentIndex + 1]) {
       this.nextIndex = this.currentIndex + 1;
     } else {
       this.nextIndex = 0;
     }
     // hide current
     for (var i = 0; i < this.slides.length; i++) {
-      this.slides[i][this.currentIndex].setStyle('display', 'none');
-      this.slides[i][this.nextIndex].setStyle('display', 'block');
+      if (this.slides[i].length > 1) {
+        this.slides[i][this.currentIndex].setStyle('display', 'none');
+        this.slides[i][this.nextIndex].setStyle('display', 'block');
+      }
     }
     // show next
     this.currentIndex = this.nextIndex;
@@ -6869,6 +6880,8 @@ Ngn.sd.GlobalSlides = new Class({
     this.animationStarted = true;
     this.frameChange();
     this.cacheSlides();
+    this.initMaxSlidesBlockN();
+    //console.debug(this.maxSlidesBlockN);
     this.nextSlide.periodical(this.duration, this);
   },
 
