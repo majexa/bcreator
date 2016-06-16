@@ -10604,6 +10604,7 @@ Ngn.Form = new Class({
   },
 
   _submitAjax: function() {
+    console.trace('+++');
     new Ngn.Request.JSON({
       url: this.options.ajaxSubmitUrl || this.eForm.get('action'),
       onComplete: function(r) {

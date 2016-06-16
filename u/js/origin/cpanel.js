@@ -12504,6 +12504,7 @@ Ngn.Dialog.RequestFormBase = new Class({
   },
 
   submit: function() {
+    //console.debug('++++++++++');
     this._submit();
   },
 
@@ -12920,6 +12921,7 @@ Ngn.Form = new Class({
   },
 
   _submitAjax: function() {
+    console.trace('+++');
     new Ngn.Request.JSON({
       url: this.options.ajaxSubmitUrl || this.eForm.get('action'),
       onComplete: function(r) {
@@ -15213,19 +15215,14 @@ Ngn.FieldSet = new Class({
     var eLabel;
     var lastRowElements = eLastRow.getElements(Ngn.Frm.selector);
     eNewRow.getElements('.element').each(function(eElement, i) {
-      //c(eElement.get('class').replace('-' + curN + '-', '-' + nextN + '-'));
-      //c('(.*)-' + lastRowN + '-(.*)');
       eElement.set('class', eElement.get('class').replace(new RegExp('(.*)-0-(.*)'), '$1-' + nextRowN + '-$2'));
     });
     eNewRow.getElements(Ngn.Frm.selector).each(function(eInput, i) {
       Ngn.Frm.emptify(eInput);
       if (eInput.get('value')) eInput.set('value', '');
       if (eInput.get('checked')) eInput.set('checked', false);
-      //c(nextRowN);
       eInput.set('name', this.getInputName(eInput, nextRowN));
-      //eInput.set('id', lastRowElements[i].get('id').replace('-' + lastRowN + '-', '-' + nextRowN + '-'));
       eLabel = eInput.getNext('label');
-      //if (eLabel) eLabel.set('for', eInput.get('id'));
       this.initInput(eInput);
     }.bind(this));
     eNewRow.inject(eLastRow, 'after');
@@ -15281,7 +15278,6 @@ Ngn.FieldSet = new Class({
     ST.addEvent('complete', function(el, clone) {
       el.removeClass('move');
     }.bind(this));
-
     this.eContainer.getElements(this.options.dragBoxSelector).each(function(el) {
       el.addEvent('mouseover', function() {
         el.addClass('over');
@@ -17708,18 +17704,17 @@ Ngn.sd.BlockBButton = new Class({
   Extends: Ngn.sd.BlockBImage
 });
 
-Ngn.sd.ButtonInsertDialog = new Class({
-  Extends: Ngn.sd.ImageInsertDialog,
-  options: {
-    title: 'Insert button',
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect'
-  },
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?url=' + url
-  }
-});
-
 window.addEvent('sdPanelComplete', function() {
+  Ngn.sd.ButtonInsertDialog = new Class({
+    Extends: Ngn.sd.ImageInsertDialog,
+    options: {
+      title: 'Insert button',
+      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect'
+    },
+    createImageUrl: function(url) {
+      return '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?url=' + url
+    }
+  });
   new Ngn.Btn(Ngn.sd.fbtn('Add button', 'button'), function() {
     new Ngn.sd.ButtonInsertDialog();
   });
@@ -17746,23 +17741,26 @@ window.addEvent('sdPanelComplete', function() {
   });
 });
 /*--|/home/user/ngn-env/bc/sd/js/plugins/fromTemplate.js|--*/
-Ngn.sd.CreateFromTemplateDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'template',
-    title: 'Create from template',
-    okText: 'Create',
-    width: 400,
-    height: 300,
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect',
-    onRequest: function() {
-    },
-    ok: function() {
-    }.bind(this)
-  }
-});
-
 window.addEvent('sdPanelComplete', function() {
+  Ngn.sd.CreateFromTemplateDialog = new Class({
+    Extends: Ngn.sd.ImageInsertDialog,
+    options: {
+      id: 'template',
+      title: 'Create from template',
+      okText: 'Create',
+      width: 400,
+      height: 300,
+      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_templateSelect'
+    },
+    insertImage: function(url) {
+      new Ngn.Request.JSON({
+        url: '/createFromTemplate/' + url.replace(/.*\/(\d+)\..*/, '$1'),
+        onComplete: function(bannerId) {
+          window.location = '/cpanel/' + bannerId;
+        }
+      }).send();
+    }
+  });
   new Ngn.Btn(Ngn.sd.fbtn('Create from template', 'template'), function() {
     new Ngn.sd.CreateFromTemplateDialog();
   });

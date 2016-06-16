@@ -1,4 +1,4 @@
-s:126653:"
+s:126680:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -340,6 +340,7 @@ Ngn.Form = new Class({
   },
 
   _submitAjax: function() {
+    console.trace('+++');
     new Ngn.Request.JSON({
       url: this.options.ajaxSubmitUrl || this.eForm.get('action'),
       onComplete: function(r) {
