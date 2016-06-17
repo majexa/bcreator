@@ -5,5 +5,6 @@ sd
 landing-design
 cmd.php
 site/config/constants/more.php
+site/config/constants/database.php
 u/bcImagesCache/*
 u/banner/*
