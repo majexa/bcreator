@@ -1,4 +1,4 @@
-s:266486:"
+s:266475:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -1883,7 +1883,6 @@ Ngn.Dialog.RequestFormBase = new Class({
   },
 
   submit: function() {
-    //console.debug('++++++++++');
     this._submit();
   },
 
@@ -2161,6 +2160,7 @@ Ngn.Form = new Class({
   },
 
   initHtml5Upload: function() {
+    if (!this.hasFilesFields()) return;
     this.uploadType = 'html5';
     this.eForm.getElements('input[type=file]').each(function(eInput) {
       if (eInput.retrieve('uploadInitialized')) return;
@@ -2300,7 +2300,6 @@ Ngn.Form = new Class({
   },
 
   _submitAjax: function() {
-    console.trace('+++');
     new Ngn.Request.JSON({
       url: this.options.ajaxSubmitUrl || this.eForm.get('action'),
       onComplete: function(r) {
@@ -2316,7 +2315,6 @@ Ngn.Form = new Class({
   },
 
   _submit: function() {
-    //c('_submit');
     this.eForm.submit();
   }
 
@@ -6862,8 +6860,8 @@ Ngn.sd.GlobalSlides = new Class({
     // hide current
     for (var i = 0; i < this.slides.length; i++) {
       if (this.slides[i].length > 1) {
-        this.slides[i][this.currentIndex].setStyle('display', 'none');
-        this.slides[i][this.nextIndex].setStyle('display', 'block');
+        if (this.slides[i][this.currentIndex]) this.slides[i][this.currentIndex].setStyle('display', 'none');
+        if (this.slides[i][this.nextIndex]) this.slides[i][this.nextIndex].setStyle('display', 'block');
       }
     }
     // show next
@@ -6877,7 +6875,6 @@ Ngn.sd.GlobalSlides = new Class({
     this.frameChange();
     this.cacheSlides();
     this.initMaxSlidesBlockN();
-    //console.debug(this.maxSlidesBlockN);
     this.nextSlide.periodical(this.duration, this);
   },
 

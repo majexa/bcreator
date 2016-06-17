@@ -50,8 +50,8 @@ Ngn.sd.GlobalSlides = new Class({
     // hide current
     for (var i = 0; i < this.slides.length; i++) {
       if (this.slides[i].length > 1) {
-        this.slides[i][this.currentIndex].setStyle('display', 'none');
-        this.slides[i][this.nextIndex].setStyle('display', 'block');
+        if (this.slides[i][this.currentIndex]) this.slides[i][this.currentIndex].setStyle('display', 'none');
+        if (this.slides[i][this.nextIndex]) this.slides[i][this.nextIndex].setStyle('display', 'block');
       }
     }
     // show next
@@ -65,7 +65,6 @@ Ngn.sd.GlobalSlides = new Class({
     this.frameChange();
     this.cacheSlides();
     this.initMaxSlidesBlockN();
-    //console.debug(this.maxSlidesBlockN);
     this.nextSlide.periodical(this.duration, this);
   },
 
