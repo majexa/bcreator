@@ -10620,1965 +10620,6 @@ Swiff.remote = function(obj, fn){
 
 })();
 
-/*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
-/*
- * Copyright (c) 2009 Simo Kinnunen.
- * Licensed under the MIT license.
- *
- * @version 1.09i
- */
-var Cufon=(function(){var m=function(){return m.replace.apply(null,arguments)};var x=m.DOM={ready:(function(){var C=false,E={loaded:1,complete:1};var B=[],D=function(){if(C){return}C=true;for(var F;F=B.shift();F()){}};if(document.addEventListener){document.addEventListener("DOMContentLoaded",D,false);window.addEventListener("pageshow",D,false)}if(!window.opera&&document.readyState){(function(){E[document.readyState]?D():setTimeout(arguments.callee,10)})()}if(document.readyState&&document.createStyleSheet){(function(){try{document.body.doScroll("left");D()}catch(F){setTimeout(arguments.callee,1)}})()}q(window,"load",D);return function(F){if(!arguments.length){D()}else{C?F():B.push(F)}}})(),root:function(){return document.documentElement||document.body}};var n=m.CSS={Size:function(C,B){this.value=parseFloat(C);this.unit=String(C).match(/[a-z%]*$/)[0]||"px";this.convert=function(D){return D/B*this.value};this.convertFrom=function(D){return D/this.value*B};this.toString=function(){return this.value+this.unit}},addClass:function(C,B){var D=C.className;C.className=D+(D&&" ")+B;return C},color:j(function(C){var B={};B.color=C.replace(/^rgba\((.*?),\s*([\d.]+)\)/,function(E,D,F){B.opacity=parseFloat(F);return"rgb("+D+")"});return B}),fontStretch:j(function(B){if(typeof B=="number"){return B}if(/%$/.test(B)){return parseFloat(B)/100}return{"ultra-condensed":0.5,"extra-condensed":0.625,condensed:0.75,"semi-condensed":0.875,"semi-expanded":1.125,expanded:1.25,"extra-expanded":1.5,"ultra-expanded":2}[B]||1}),getStyle:function(C){var B=document.defaultView;if(B&&B.getComputedStyle){return new a(B.getComputedStyle(C,null))}if(C.currentStyle){return new a(C.currentStyle)}return new a(C.style)},gradient:j(function(F){var G={id:F,type:F.match(/^-([a-z]+)-gradient\(/)[1],stops:[]},C=F.substr(F.indexOf("(")).match(/([\d.]+=)?(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)/ig);for(var E=0,B=C.length,D;E<B;++E){D=C[E].split("=",2).reverse();G.stops.push([D[1]||E/(B-1),D[0]])}return G}),quotedList:j(function(E){var D=[],C=/\s*((["'])([\s\S]*?[^\\])\2|[^,]+)\s*/g,B;while(B=C.exec(E)){D.push(B[3]||B[1])}return D}),recognizesMedia:j(function(G){var E=document.createElement("style"),D,C,B;E.type="text/css";E.media=G;try{E.appendChild(document.createTextNode("/**/"))}catch(F){}C=g("head")[0];C.insertBefore(E,C.firstChild);D=(E.sheet||E.styleSheet);B=D&&!D.disabled;C.removeChild(E);return B}),removeClass:function(D,C){var B=RegExp("(?:^|\\s+)"+C+"(?=\\s|$)","g");D.className=D.className.replace(B,"");return D},supports:function(D,C){var B=document.createElement("span").style;if(B[D]===undefined){return false}B[D]=C;return B[D]===C},textAlign:function(E,D,B,C){if(D.get("textAlign")=="right"){if(B>0){E=" "+E}}else{if(B<C-1){E+=" "}}return E},textShadow:j(function(F){if(F=="none"){return null}var E=[],G={},B,C=0;var D=/(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)|(-?[\d.]+[a-z%]*)|,/ig;while(B=D.exec(F)){if(B[0]==","){E.push(G);G={};C=0}else{if(B[1]){G.color=B[1]}else{G[["offX","offY","blur"][C++]]=B[2]}}}E.push(G);return E}),textTransform:(function(){var B={uppercase:function(C){return C.toUpperCase()},lowercase:function(C){return C.toLowerCase()},capitalize:function(C){return C.replace(/\b./g,function(D){return D.toUpperCase()})}};return function(E,D){var C=B[D.get("textTransform")];return C?C(E):E}})(),whiteSpace:(function(){var D={inline:1,"inline-block":1,"run-in":1};var C=/^\s+/,B=/\s+$/;return function(H,F,G,E){if(E){if(E.nodeName.toLowerCase()=="br"){H=H.replace(C,"")}}if(D[F.get("display")]){return H}if(!G.previousSibling){H=H.replace(C,"")}if(!G.nextSibling){H=H.replace(B,"")}return H}})()};n.ready=(function(){var B=!n.recognizesMedia("all"),E=false;var D=[],H=function(){B=true;for(var K;K=D.shift();K()){}};var I=g("link"),J=g("style");function C(K){return K.disabled||G(K.sheet,K.media||"screen")}function G(M,P){if(!n.recognizesMedia(P||"all")){return true}if(!M||M.disabled){return false}try{var Q=M.cssRules,O;if(Q){search:for(var L=0,K=Q.length;O=Q[L],L<K;++L){switch(O.type){case 2:break;case 3:if(!G(O.styleSheet,O.media.mediaText)){return false}break;default:break search}}}}catch(N){}return true}function F(){if(document.createStyleSheet){return true}var L,K;for(K=0;L=I[K];++K){if(L.rel.toLowerCase()=="stylesheet"&&!C(L)){return false}}for(K=0;L=J[K];++K){if(!C(L)){return false}}return true}x.ready(function(){if(!E){E=n.getStyle(document.body).isUsable()}if(B||(E&&F())){H()}else{setTimeout(arguments.callee,10)}});return function(K){if(B){K()}else{D.push(K)}}})();function s(D){var C=this.face=D.face,B={"\u0020":1,"\u00a0":1,"\u3000":1};this.glyphs=D.glyphs;this.w=D.w;this.baseSize=parseInt(C["units-per-em"],10);this.family=C["font-family"].toLowerCase();this.weight=C["font-weight"];this.style=C["font-style"]||"normal";this.viewBox=(function(){var F=C.bbox.split(/\s+/);var E={minX:parseInt(F[0],10),minY:parseInt(F[1],10),maxX:parseInt(F[2],10),maxY:parseInt(F[3],10)};E.width=E.maxX-E.minX;E.height=E.maxY-E.minY;E.toString=function(){return[this.minX,this.minY,this.width,this.height].join(" ")};return E})();this.ascent=-parseInt(C.ascent,10);this.descent=-parseInt(C.descent,10);this.height=-this.ascent+this.descent;this.spacing=function(L,N,E){var O=this.glyphs,M,K,G,P=[],F=0,J=-1,I=-1,H;while(H=L[++J]){M=O[H]||this.missingGlyph;if(!M){continue}if(K){F-=G=K[H]||0;P[I]-=G}F+=P[++I]=~~(M.w||this.w)+N+(B[H]?E:0);K=M.k}P.total=F;return P}}function f(){var C={},B={oblique:"italic",italic:"oblique"};this.add=function(D){(C[D.style]||(C[D.style]={}))[D.weight]=D};this.get=function(H,I){var G=C[H]||C[B[H]]||C.normal||C.italic||C.oblique;if(!G){return null}I={normal:400,bold:700}[I]||parseInt(I,10);if(G[I]){return G[I]}var E={1:1,99:0}[I%100],K=[],F,D;if(E===undefined){E=I>400}if(I==500){I=400}for(var J in G){if(!k(G,J)){continue}J=parseInt(J,10);if(!F||J<F){F=J}if(!D||J>D){D=J}K.push(J)}if(I<F){I=F}if(I>D){I=D}K.sort(function(M,L){return(E?(M>=I&&L>=I)?M<L:M>L:(M<=I&&L<=I)?M>L:M<L)?-1:1});return G[K[0]]}}function r(){function D(F,G){if(F.contains){return F.contains(G)}return F.compareDocumentPosition(G)&16}function B(G){var F=G.relatedTarget;if(!F||D(this,F)){return}C(this,G.type=="mouseover")}function E(F){C(this,F.type=="mouseenter")}function C(F,G){setTimeout(function(){var H=d.get(F).options;m.replace(F,G?h(H,H.hover):H,true)},10)}this.attach=function(F){if(F.onmouseenter===undefined){q(F,"mouseover",B);q(F,"mouseout",B)}else{q(F,"mouseenter",E);q(F,"mouseleave",E)}}}function u(){var C=[],D={};function B(H){var E=[],G;for(var F=0;G=H[F];++F){E[F]=C[D[G]]}return E}this.add=function(F,E){D[F]=C.push(E)-1};this.repeat=function(){var E=arguments.length?B(arguments):C,F;for(var G=0;F=E[G++];){m.replace(F[0],F[1],true)}}}function A(){var D={},B=0;function C(E){return E.cufid||(E.cufid=++B)}this.get=function(E){var F=C(E);return D[F]||(D[F]={})}}function a(B){var D={},C={};this.extend=function(E){for(var F in E){if(k(E,F)){D[F]=E[F]}}return this};this.get=function(E){return D[E]!=undefined?D[E]:B[E]};this.getSize=function(F,E){return C[F]||(C[F]=new n.Size(this.get(F),E))};this.isUsable=function(){return !!B}}function q(C,B,D){if(C.addEventListener){C.addEventListener(B,D,false)}else{if(C.attachEvent){C.attachEvent("on"+B,function(){return D.call(C,window.event)})}}}function v(C,B){var D=d.get(C);if(D.options){return C}if(B.hover&&B.hoverables[C.nodeName.toLowerCase()]){b.attach(C)}D.options=B;return C}function j(B){var C={};return function(D){if(!k(C,D)){C[D]=B.apply(null,arguments)}return C[D]}}function c(F,E){var B=n.quotedList(E.get("fontFamily").toLowerCase()),D;for(var C=0;D=B[C];++C){if(i[D]){return i[D].get(E.get("fontStyle"),E.get("fontWeight"))}}return null}function g(B){return document.getElementsByTagName(B)}function k(C,B){return C.hasOwnProperty(B)}function h(){var C={},B,F;for(var E=0,D=arguments.length;B=arguments[E],E<D;++E){for(F in B){if(k(B,F)){C[F]=B[F]}}}return C}function o(E,M,C,N,F,D){var K=document.createDocumentFragment(),H;if(M===""){return K}var L=N.separate;var I=M.split(p[L]),B=(L=="words");if(B&&t){if(/^\s/.test(M)){I.unshift("")}if(/\s$/.test(M)){I.push("")}}for(var J=0,G=I.length;J<G;++J){H=z[N.engine](E,B?n.textAlign(I[J],C,J,G):I[J],C,N,F,D,J<G-1);if(H){K.appendChild(H)}}return K}function l(D,M){var C=D.nodeName.toLowerCase();if(M.ignore[C]){return}var E=!M.textless[C];var B=n.getStyle(v(D,M)).extend(M);var F=c(D,B),G,K,I,H,L,J;if(!F){return}for(G=D.firstChild;G;G=I){K=G.nodeType;I=G.nextSibling;if(E&&K==3){if(H){H.appendData(G.data);D.removeChild(G)}else{H=G}if(I){continue}}if(H){D.replaceChild(o(F,n.whiteSpace(H.data,B,H,J),B,M,G,D),H);H=null}if(K==1){if(G.firstChild){if(G.nodeName.toLowerCase()=="cufon"){z[M.engine](F,null,B,M,G,D)}else{arguments.callee(G,M)}}J=G}}}var t=" ".split(/\s+/).length==0;var d=new A();var b=new r();var y=new u();var e=false;var z={},i={},w={autoDetect:false,engine:null,forceHitArea:false,hover:false,hoverables:{a:true},ignore:{applet:1,canvas:1,col:1,colgroup:1,head:1,iframe:1,map:1,optgroup:1,option:1,script:1,select:1,style:1,textarea:1,title:1,pre:1},printable:true,selector:(window.Sizzle||(window.jQuery&&function(B){return jQuery(B)})||(window.dojo&&dojo.query)||(window.Ext&&Ext.query)||(window.YAHOO&&YAHOO.util&&YAHOO.util.Selector&&YAHOO.util.Selector.query)||(window.$$&&function(B){return $$(B)})||(window.$&&function(B){return $(B)})||(document.querySelectorAll&&function(B){return document.querySelectorAll(B)})||g),separate:"words",textless:{dl:1,html:1,ol:1,table:1,tbody:1,thead:1,tfoot:1,tr:1,ul:1},textShadow:"none"};var p={words:/\s/.test("\u00a0")?/[^\S\u00a0]+/:/\s+/,characters:"",none:/^/};m.now=function(){x.ready();return m};m.refresh=function(){y.repeat.apply(y,arguments);return m};m.registerEngine=function(C,B){if(!B){return m}z[C]=B;return m.set("engine",C)};m.registerFont=function(D){if(!D){return m}var B=new s(D),C=B.family;if(!i[C]){i[C]=new f()}i[C].add(B);return m.set("fontFamily",'"'+C+'"')};m.replace=function(D,C,B){C=h(w,C);if(!C.engine){return m}if(!e){n.addClass(x.root(),"cufon-active cufon-loading");n.ready(function(){n.addClass(n.removeClass(x.root(),"cufon-loading"),"cufon-ready")});e=true}if(C.hover){C.forceHitArea=true}if(C.autoDetect){delete C.fontFamily}if(typeof C.textShadow=="string"){C.textShadow=n.textShadow(C.textShadow)}if(typeof C.color=="string"&&/^-/.test(C.color)){C.textGradient=n.gradient(C.color)}else{delete C.textGradient}if(!B){y.add(D,arguments)}if(D.nodeType||typeof D=="string"){D=[D]}n.ready(function(){for(var F=0,E=D.length;F<E;++F){var G=D[F];if(typeof G=="string"){m.replace(C.selector(G),C,true)}else{l(G,C)}}});return m};m.set=function(B,C){w[B]=C;return m};return m})();Cufon.registerEngine("vml",(function(){var e=document.namespaces;if(!e){return}e.add("cvml","urn:schemas-microsoft-com:vml");e=null;var b=document.createElement("cvml:shape");b.style.behavior="url(#default#VML)";if(!b.coordsize){return}b=null;var h=(document.documentMode||0)<8;document.write(('<style type="text/css">cufoncanvas{text-indent:0;}@media screen{cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}cufoncanvas{position:absolute;text-align:left;}cufon{display:inline-block;position:relative;vertical-align:'+(h?"middle":"text-bottom")+";}cufon cufontext{position:absolute;left:-10000in;font-size:1px;}a cufon{cursor:pointer}}@media print{cufon cufoncanvas{display:none;}}</style>").replace(/;/g,"!important;"));function c(i,j){return a(i,/(?:em|ex|%)$|^[a-z-]+$/i.test(j)?"1em":j)}function a(l,m){if(m==="0"){return 0}if(/px$/i.test(m)){return parseFloat(m)}var k=l.style.left,j=l.runtimeStyle.left;l.runtimeStyle.left=l.currentStyle.left;l.style.left=m.replace("%","em");var i=l.style.pixelLeft;l.style.left=k;l.runtimeStyle.left=j;return i}function f(l,k,j,n){var i="computed"+n,m=k[i];if(isNaN(m)){m=k.get(n);k[i]=m=(m=="normal")?0:~~j.convertFrom(a(l,m))}return m}var g={};function d(p){var q=p.id;if(!g[q]){var n=p.stops,o=document.createElement("cvml:fill"),i=[];o.type="gradient";o.angle=180;o.focus="0";o.method="sigma";o.color=n[0][1];for(var m=1,l=n.length-1;m<l;++m){i.push(n[m][0]*100+"% "+n[m][1])}o.colors=i.join(",");o.color2=n[l][1];g[q]=o}return g[q]}return function(ac,G,Y,C,K,ad,W){var n=(G===null);if(n){G=K.alt}var I=ac.viewBox;var p=Y.computedFontSize||(Y.computedFontSize=new Cufon.CSS.Size(c(ad,Y.get("fontSize"))+"px",ac.baseSize));var y,q;if(n){y=K;q=K.firstChild}else{y=document.createElement("cufon");y.className="cufon cufon-vml";y.alt=G;q=document.createElement("cufoncanvas");y.appendChild(q);if(C.printable){var Z=document.createElement("cufontext");Z.appendChild(document.createTextNode(G));y.appendChild(Z)}if(!W){y.appendChild(document.createElement("cvml:shape"))}}var ai=y.style;var R=q.style;var l=p.convert(I.height),af=Math.ceil(l);var V=af/l;var P=V*Cufon.CSS.fontStretch(Y.get("fontStretch"));var U=I.minX,T=I.minY;R.height=af;R.top=Math.round(p.convert(T-ac.ascent));R.left=Math.round(p.convert(U));ai.height=p.convert(ac.height)+"px";var F=Y.get("color");var ag=Cufon.CSS.textTransform(G,Y).split("");var L=ac.spacing(ag,f(ad,Y,p,"letterSpacing"),f(ad,Y,p,"wordSpacing"));if(!L.length){return null}var k=L.total;var x=-U+k+(I.width-L[L.length-1]);var ah=p.convert(x*P),X=Math.round(ah);var O=x+","+I.height,m;var J="r"+O+"ns";var u=C.textGradient&&d(C.textGradient);var o=ac.glyphs,S=0;var H=C.textShadow;var ab=-1,aa=0,w;while(w=ag[++ab]){var D=o[ag[ab]]||ac.missingGlyph,v;if(!D){continue}if(n){v=q.childNodes[aa];while(v.firstChild){v.removeChild(v.firstChild)}}else{v=document.createElement("cvml:shape");q.appendChild(v)}v.stroked="f";v.coordsize=O;v.coordorigin=m=(U-S)+","+T;v.path=(D.d?"m"+D.d+"xe":"")+"m"+m+J;v.fillcolor=F;if(u){v.appendChild(u.cloneNode(false))}var ae=v.style;ae.width=X;ae.height=af;if(H){var s=H[0],r=H[1];var B=Cufon.CSS.color(s.color),z;var N=document.createElement("cvml:shadow");N.on="t";N.color=B.color;N.offset=s.offX+","+s.offY;if(r){z=Cufon.CSS.color(r.color);N.type="double";N.color2=z.color;N.offset2=r.offX+","+r.offY}N.opacity=B.opacity||(z&&z.opacity)||1;v.appendChild(N)}S+=L[aa++]}var M=v.nextSibling,t,A;if(C.forceHitArea){if(!M){M=document.createElement("cvml:rect");M.stroked="f";M.className="cufon-vml-cover";t=document.createElement("cvml:fill");t.opacity=0;M.appendChild(t);q.appendChild(M)}A=M.style;A.width=X;A.height=af}else{if(M){q.removeChild(M)}}ai.width=Math.max(Math.ceil(p.convert(k*P)),0);if(h){var Q=Y.computedYAdjust;if(Q===undefined){var E=Y.get("lineHeight");if(E=="normal"){E="1em"}else{if(!isNaN(E)){E+="em"}}Y.computedYAdjust=Q=0.5*(a(ad,E)-parseFloat(ai.height))}if(Q){ai.marginTop=Math.ceil(Q)+"px";ai.marginBottom=Q+"px"}}return y}})());Cufon.registerEngine("canvas",(function(){var b=document.createElement("canvas");if(!b||!b.getContext||!b.getContext.apply){return}b=null;var a=Cufon.CSS.supports("display","inline-block");var e=!a&&(document.compatMode=="BackCompat"||/frameset|transitional/i.test(document.doctype.publicId));var f=document.createElement("style");f.type="text/css";f.appendChild(document.createTextNode(("cufon{text-indent:0;}@media screen,projection{cufon{display:inline;display:inline-block;position:relative;vertical-align:middle;"+(e?"":"font-size:1px;line-height:1px;")+"}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}"+(a?"cufon canvas{position:relative;}":"cufon canvas{position:absolute;}")+"}@media print{cufon{padding:0;}cufon canvas{display:none;}}").replace(/;/g,"!important;")));document.getElementsByTagName("head")[0].appendChild(f);function d(p,h){var n=0,m=0;var g=[],o=/([mrvxe])([^a-z]*)/g,k;generate:for(var j=0;k=o.exec(p);++j){var l=k[2].split(",");switch(k[1]){case"v":g[j]={m:"bezierCurveTo",a:[n+~~l[0],m+~~l[1],n+~~l[2],m+~~l[3],n+=~~l[4],m+=~~l[5]]};break;case"r":g[j]={m:"lineTo",a:[n+=~~l[0],m+=~~l[1]]};break;case"m":g[j]={m:"moveTo",a:[n=~~l[0],m=~~l[1]]};break;case"x":g[j]={m:"closePath"};break;case"e":break generate}h[g[j].m].apply(h,g[j].a)}return g}function c(m,k){for(var j=0,h=m.length;j<h;++j){var g=m[j];k[g.m].apply(k,g.a)}}return function(V,w,P,t,C,W){var k=(w===null);if(k){w=C.getAttribute("alt")}var A=V.viewBox;var m=P.getSize("fontSize",V.baseSize);var B=0,O=0,N=0,u=0;var z=t.textShadow,L=[];if(z){for(var U=z.length;U--;){var F=z[U];var K=m.convertFrom(parseFloat(F.offX));var I=m.convertFrom(parseFloat(F.offY));L[U]=[K,I];if(I<B){B=I}if(K>O){O=K}if(I>N){N=I}if(K<u){u=K}}}var Z=Cufon.CSS.textTransform(w,P).split("");var E=V.spacing(Z,~~m.convertFrom(parseFloat(P.get("letterSpacing"))||0),~~m.convertFrom(parseFloat(P.get("wordSpacing"))||0));if(!E.length){return null}var h=E.total;O+=A.width-E[E.length-1];u+=A.minX;var s,n;if(k){s=C;n=C.firstChild}else{s=document.createElement("cufon");s.className="cufon cufon-canvas";s.setAttribute("alt",w);n=document.createElement("canvas");s.appendChild(n);if(t.printable){var S=document.createElement("cufontext");S.appendChild(document.createTextNode(w));s.appendChild(S)}}var aa=s.style;var H=n.style;var j=m.convert(A.height);var Y=Math.ceil(j);var M=Y/j;var G=M*Cufon.CSS.fontStretch(P.get("fontStretch"));var J=h*G;var Q=Math.ceil(m.convert(J+O-u));var o=Math.ceil(m.convert(A.height-B+N));n.width=Q;n.height=o;H.width=Q+"px";H.height=o+"px";B+=A.minY;H.top=Math.round(m.convert(B-V.ascent))+"px";H.left=Math.round(m.convert(u))+"px";var r=Math.max(Math.ceil(m.convert(J)),0)+"px";if(a){aa.width=r;aa.height=m.convert(V.height)+"px"}else{aa.paddingLeft=r;aa.paddingBottom=(m.convert(V.height)-1)+"px"}var X=n.getContext("2d"),D=j/A.height;X.scale(D,D*M);X.translate(-u,-B);X.save();function T(){var x=V.glyphs,ab,l=-1,g=-1,y;X.scale(G,1);while(y=Z[++l]){var ab=x[Z[l]]||V.missingGlyph;if(!ab){continue}if(ab.d){X.beginPath();if(ab.code){c(ab.code,X)}else{ab.code=d("m"+ab.d,X)}X.fill()}X.translate(E[++g],0)}X.restore()}if(z){for(var U=z.length;U--;){var F=z[U];X.save();X.fillStyle=F.color;X.translate.apply(X,L[U]);T()}}var q=t.textGradient;if(q){var v=q.stops,p=X.createLinearGradient(0,A.minY,0,A.maxY);for(var U=0,R=v.length;U<R;++U){p.addColorStop.apply(p,v[U])}X.fillStyle=p}else{X.fillStyle=P.get("color")}T();return s}})());
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.js|--*/
-Ngn.toObj = function(s, value) {
-  var a = s.split('.');
-  for (var i = 0; i < a.length; i++) {
-    var ss = a.slice(0, i + 1).join('.');
-    eval('var def = ' + ss + ' === undefined');
-    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
-  }
-  if (value) eval(s + ' = value');
-};
-
-if (!Ngn.tpls) Ngn.tpls = {};
-
-/*--|/home/user/ngn-env/bc/scripts/js/base.php|--*/
-Ngn.toObj('Ngn.sd.baseUrl', 'http://bcreator.majexa.ru');
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.RequiredOptions.js|--*/
-Ngn.RequiredOptions = new Class({
-  Extends: Options,
-
-  requiredOptions: [],
-
-  setOptions: function(options) {
-    this.parent(options);
-    for (var i = 0; i++; i < this.requiredOptions.length) {
-      if (!this.options[this.requiredOptions[i]])
-        throw new Error('Required option ' + this.requiredOptions[i] + ' not defined');
-    }
-    return this;
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.js|--*/
-Ngn.Dialog = new Class({
-  Implements: [Ngn.RequiredOptions, Events],
-  options: {
-    id: 'dlg', // Уникальный идентификатор диалога. Если не задан, то формируется, как "dlg + random string"
-    autoShow: true, // Показывать диалог при создании класса. Иначе используется _Ngn.Dialog.show_
-    buttons: null, // Набор дополнительные кнопок в подвале. Формат объекта: {name: 'Name', text: 'Button text', class_name: 'CSS class', action: function() {}, tabindex: 1}
-    cancel: null,
-    cancelClass: 'cancel',
-    cancelText: 'Cancel',
-    cancelDestroy: true,
-    callback: null,
-    center: true,
-    dialogClass: 'dialog',
-    draggable: true,
-    fxOptions: {},
-    footer: null,
-    footerClass: 'dialog-footer iconsSet',
-    force: true,
-    height: 'auto',
-    message: null,
-    messageAreaClass: 'dialog-message',
-    messageBoxClass: 'mid-float-box',
-    noTitleClass: 'mav-no-title',
-    noFooterClass: 'mav-no-footer',
-    ok: null,
-    okClass: 'ok',
-    okText: 'OK',
-    okDestroy: true,
-    parent: null,
-    shadeClass: 'dialog-shade',
-    styles: {},
-    title: '',
-    titleBarClass: 'dialog-title',
-    titleClose: true,
-    titleCloseClass: 'icon-button md-closer',
-    titleCloseTitle: 'Close',
-    titleTextClass: 'md-title-text move',
-    url: null,
-    useFx: !Browser.ie,
-    //'useFx: false,
-    width: 550,
-    top: 30,
-    bindBuildMessageFunction: false,
-    noPadding: true,
-    setMessageDelay: null,
-    forceShadeClose: false,
-    jsonRequest: false,
-    reduceHeight: false,
-    baseZIndex: 300,
-    savePosition: false,
-    vResize: false,
-    fixed: false,
-    //maxHeight: null,
-    onComplete: Function.from(),
-    onClose: Function.from(),
-    onOkClose: Function.from(),
-    onCancelClose: Function.from(),
-    onHide: Function.from(),
-    onRequest: Function.from(),
-    onShow: Function.from()
-  },
-
-  delayedShow: false,
-  closed: false,
-  dialog: null,
-  drag: null,
-  footer: null,
-  fx: null,
-  grabbed: null,
-  message: null,
-  parent: null,
-  request: null,
-  titlebar: null,
-  isOkClose: false,
-  btns: {},
-  status: null,
-
-  initialize: function(options) {
-    this.setOptions(options);
-    // new Image().src = '/i/img/dialog/cross-pushed.png'; // preloading of hover cross
-    if (this.options.id == 'dlg') {
-      this.options.id = 'dlg' + Ngn.String.rand(5);
-      if (this.options.savePosition) throw new Error('Can not save position on random ID');
-      if (this.options.vResize) throw new Error('Can not save size on random ID');
-    }
-    if (this.options.vResize && typeof(this.options.vResize) != 'function') {
-      this.options.vResize = Ngn.Dialog.VResize;
-    }
-    if (this.options.noPadding) this.options.messageAreaClass += ' dialog-nopadding';
-    if (this.options.reduceHeight) this.options.messageAreaClass += ' dialog-scroll';
-    if ($(this.options.id + '_dialog')) {
-      console.debug('Dialog with id=' + this.options.id + ' already opened. Aborted');
-      return null;
-    }
-    if (this.options.bindBuildMessageFunction) this.options.message = this.buildMessage.bind(this, this.options.message);
-    this.request = new (this.options.jsonRequest ? Ngn.Request.JSON : Ngn.Request)({
-      evalScripts: true,
-      onSuccess: this.urlResponse.bind(this),
-      onFailure: this.errorMessage.bind(this)
-    });
-    this.dialogId = this.options.id + '_dialog';
-    this.dialogN = Ngn.Dialog.dialogs.getLength() + 1;
-    Ngn.Dialog.dialogs[this.dialogId] = this;
-    this.parentElement = $((this.options.parent || document.body));
-    var dialog_styles = Object.merge({
-      'display': 'none',
-      'width': this.options.width.toInt() + 'px',
-      'z-index': this.options.baseZIndex + (this.dialogN * 2)
-    }, this.options.styles);
-    this.dialog = new Element('div', {
-      'id': this.dialogId,
-      'class': this.options.dialogClass,
-      //'opacity': (this.options.useFx ? 0 : 1),
-      'styles': dialog_styles
-    }).inject(this.parentElement);
-    if (this.options.fixed) this.dialog.setStyle('position', 'fixed');
-    this.fx = this.options.useFx ? new Fx.Tween(this.dialog, Object.merge({
-      duration: 300
-    }, this.options.fxOptions)) : null;
-    if (this.fx) this.fx.set('opacity', 0);
-
-    //dialog-message
-    //if (this.options.maxHeight)
-    //this.message.setStyle('max-height', this.options.maxHeight+'px');
-    //this.options.maxHeight;
-
-    // dialog box sections and borders
-    this.eMessage = new Element('div', {
-      'class': this.options.messageBoxClass
-    }).inject(this.dialog);
-
-    // dialog box title
-    if (this.options.title !== false) {
-      this.titlebar = new Element('div', {
-        'id': this.options.id + '_title',
-        'class': this.options.titleBarClass
-      }).inject(this.eMessage);
-
-      this.titleText = new Element('span', {'class': this.options.titleTextClass, 'html': this.options.title}).inject(this.titlebar);
-
-      if (this.options.titleClose != false) {
-        this.btnClose = Ngn.Btn.opacity(new Element('span', {
-          'id': this.options.id + '_closer',
-          'class': this.options.titleCloseClass
-          //'title': this.options.titleCloseTitle
-        }).inject(this.titlebar).addEvent('click', this.close.bind(this)));
-      }
-    }
-
-    // dialog box message
-    this.message = new Element('div', {
-      'id': this.options.id + '_message',
-      'class': this.options.messageAreaClass + (this.options.title === false ? ' ' + this.options.noTitleClass : '') + (this.options.footer === false ? ' ' + this.options.noFooterClass : '')
-    }).inject(this.eMessage);
-    if (this.options.height != 'auto') this.message.setStyle('max-height', this.options.height.toInt() + 'px');
-    if (this.options.height != 'auto') this.message.setStyle('overflow-y', 'auto');
-    this.beforeInitRequest();
-    if (this.options.url != undefined) {
-      this.dotter = new Ngn.Dotter(this.message);
-      this.dotter.start();
-      this.request.options.url = this.options.url;
-      this.startupLoading(true);
-      (function() {
-        this.request.send()
-      }).delay(100, this);
-      if (this.options.autoShow) this.delayedShow = true;
-    } else if (this.options.message != undefined) {
-      if (this.options.setMessageDelay) {
-        (function() {
-          this.setMessage(this.options.message);
-        }).delay(this.options.setMessageDelay, this);
-      } else {
-        this.setMessage(this.options.message);
-      }
-    }
-
-    // dialog footer
-    if (this.options.footer !== false) {
-      this.footer = new Element('div', {
-        'id': this.options.id + '_footer',
-        'class': this.options.footerClass
-      }).inject(this.eMessage);
-      new Element('div', {'class': 'foot-wrap'}).inject(this.footer);
-      if (this.options.ok !== false) {
-        this.createButton('ok', this.options.id, this.options.okText, this.options.okClass, this.options.ok, !this.options.okDestroy, undefined, true).inject(this.footer.firstChild, 'top');
-      }
-      if (this.options.cancel !== false) {
-        this.createButton('cancel', this.options.id, this.options.cancelText, this.options.cancelClass, this.options.cancel, !this.options.cancelDestroy).inject(this.footer.firstChild, 'top');
-      }
-      this.status = new Element('div', {'class': 'foot-status'}).inject(this.footer.firstChild, 'top');
-      if (typeOf(this.options.buttons) == 'object') {
-        for (var btn in this.options.buttons) {
-          btn = this.options.buttons[btn];
-          this.createButton(btn.name, this.options.id, btn.text, btn.class_name, btn.action, !(btn.auto_close), ((btn.tabindex != undefined) ? btn.tabindex : null)).inject(this.footer.firstChild, 'top');
-        }
-      }
-    }
-
-    // set dialog to draggable
-    if (this.options.draggable && this.titlebar) {
-      this.drag = new Drag.Move(this.dialog, {
-        handle: this.titlebar,
-        onComplete: function() {
-          if (this.options.savePosition) Ngn.Storage.json.set('dialogPos' + this.options.id, this.dialog.getPosition());
-          window.fireEvent('dialogMove', this);
-        }.bind(this)
-      });
-    }
-
-    this.fireEvent('complete');
-    this.init();
-
-    if (this.options.vResize) {
-      if (this.options.url) {
-        this.addEvent('request', function() {
-          new this.options.vResize(this);
-        }.bind(this));
-      } else {
-        new this.options.vResize(this);
-      }
-    }
-
-    // close on escape
-    this.dialog.addEvent('keydown', function(e) {
-      if (e.key == 'esc') this.close();
-    }.bind(this));
-    // execute onComplete function, if present.
-    if (this.options.autoShow && !this.request.running) {
-      this.show();
-    }
-    window.document.currentDialog = this;
-  },
-
-  initSavedPosition: function() {
-    if (this.options.id == 'dlg') throw new Error('Can not use default id for such dialog');
-    var pos = Ngn.Storage.json.get('dialogPos' + this.options.id);
-    if (pos) this.dialog.setPosition(pos); else this.initCenterPosition();
-  },
-
-  beforeInitRequest: function() {
-  },
-
-  init: function() {
-  },
-
-  initReduceHeight: function(force) {
-    if (force || !this.options.reduceHeight) return;
-    //if (this.initHeight) return;
-    //this.initHeight = this.message.getSize().y;
-    //if (!this.initHeight) throw new Error('Cannot be null');
-    window.addEvent('resize', this.reduceHeight.bind(this));
-    this.reduceHeight();
-  },
-
-  reduceHeight: function() {
-    var maxH = window.getSize().y - 150;
-    this.message.setStyle('max-height', maxH + 'px');
-    return;
-    if (this.initHeight < maxH)
-      this.message.setStyle('height', this.initHeight + 'px'); else
-      this.message.setStyle('height', maxH + 'px');
-  },
-
-  setTitle: function(title) {
-    if (this.options.title === false) return;
-    this.prevTitle = this.options.title;
-    this.title = title;
-    this.titleText.set('html', title);
-  },
-
-  restorePrevTitle: function() {
-    if (this.options.title === false) return;
-    this.titleText.set('html', this.prevTitle);
-  },
-
-  setMessage: function(_message, delayedShow) {
-    var message = (typeOf(_message) == 'function' ? _message() : _message);
-    if (this.dotter) this.dotter.stop();
-    if (typeOf(message) == 'element') {
-      this.grabbed = message.getParent();
-      if (this.grabbed != null) {
-        message.removeClass('none');
-        this.message.grab(message);
-      } else {
-        message.inject(this.message);
-      }
-    } else {
-      this.message.set('html', message);
-    }
-    if (delayedShow == undefined) delayedShow = this.delayedShow;
-    if (this.delayedShow && delayedShow) {
-      this.delayedShow = false;
-      this.show();
-    }
-
-    /*
-     if (this.titlebar && this.btnClose) {
-     this.titleText.setStyle('width',
-     (this.titlebar.getSizeWithoutPadding().x
-     - this.btnClose.getSizeWithMargin().x
-     - 10) + 'px');
-     }
-     */
-
-    this.initReduceHeight();
-    this.initPosition();
-  },
-
-  initPosition: function() {
-    this.options.savePosition ? this.initSavedPosition() : this.initCenterPosition();
-  },
-
-  setOkText: function(text) {
-    if (!this.btns.ok) return;
-    this.btns.ok.getElement('a').set('html', this.getButtonInnerHtml(text));
-  },
-
-  setWidth: function(width) {
-    this.options.width = width;
-    this.dialog.setStyle('width', width.toInt() + 'px');
-    this.initPosition();
-  },
-
-  enlargeWidth: function(width) {
-    if (width > this.options.width) this.setWidth(width);
-  },
-
-  toggle: function(name, flag) {
-    if (!this.btns[name]) return;
-    this.btns[name].setStyle('display', flag ? 'block' : 'none');
-  },
-
-  errorMessage: function(xhr) {
-  },
-
-  urlResponse: function(_response) {
-    if (this.closed) return;
-    this.startupLoading(false);
-    this.dotter.stop();
-    if (!this.options.jsonRequest) {
-      this.setMessage(_response, false);
-    } else {
-      if (_response.title) this.setTitle(_response.title);
-      this.setMessage('', false);
-    }
-    this.fireEvent('request', _response);
-  },
-
-  getButtonInnerHtml: function(text) {
-    return '<span><i></i>' + text + '</span>';
-  },
-
-  createButton: function(name, id, text, cls, action, unforceClose, tabindex, okClose) {
-    var self = this;
-    var eButton = new Element('div', { 'class': 'goright image-button ' + cls });
-    var eLink = new Element('a', {
-      id: id + '_' + name,
-      href: 'javascript:void(0)',
-      'class': 'btn',
-      tabindex: (tabindex != undefined ? tabindex : (++this.tab_index)),
-      html: this.getButtonInnerHtml(text)
-    }).inject(eButton);
-    if (action && action instanceof Function) {
-      eLink.addEvent('click', action);
-    }
-    if (!unforceClose) eLink.addEvent('click', okClose ? this.okClose.bind(this) : this.close.bind(this));
-    /*
-     if (!unforceClose) eLink.addEvent('click', function(e) {
-     e.preventDefault();
-     okClose ? this.okClose.bind(this) : this.close.bind(this);
-     }.bind(this));
-     */
-    this.btns[name] = eButton;
-    return eButton;
-  },
-
-  openShade: function() {
-    if (this.eShade != undefined) return;
-    this.eShade = new Element('div', {
-      'class': this.options.shadeClass,
-      'styles': {
-        'z-index': this.options.baseZIndex + (this.dialogN * 2) - 1
-      }
-    }).inject(document.body);
-    return this;
-  },
-
-  closeShade: function() {
-    this.eShade.dispose();
-  },
-
-  show: function() {
-    if (this.options.force) this.openShade();
-    this.dialog.setStyle('display', '');
-    this.initPosition();
-    this.fireEvent('show');
-    if (this.options.useFx) {
-      this.fx.start('opacity', 0, 1);
-    }
-  },
-
-  hide: function() {
-    this.dialog.setStyle('display', 'none');
-    this.fireEvent('hide');
-  },
-
-  okClose: function() {
-    this.isOkClose = true;
-    this.close();
-  },
-
-  close: function() {
-    if (this.options.useFx) {
-      this.fx.start('opacity', 1, 0).chain(this.finishClose.bind(this));
-    } else {
-      this.finishClose();
-    }
-  },
-
-  finishClose: function() {
-    document.getElement('body').removeClass('noscroll');
-    if ($(this.dialog)) {
-      this.closed = true;
-      if (this.grabbed != undefined) {
-        this.grabbed.grab(this.message.firstChild);
-      }
-      this.fireEvent('beforeClose');
-      this.dialog.empty().dispose();
-      Ngn.Dialog.dialogs.erase(this.dialogId);
-      if (this.options.force) this.closeShade();
-      this.fireEvent('close');
-      this.isOkClose ? this.fireEvent('okClose') : this.fireEvent('cancelClose');
-    }
-  },
-
-  initCenterPosition: function(fx) {
-    if (!this.options.center) return;
-    var parXY = this.parentElement.getCoordinates();
-    var parScroll = this.parentElement.getScroll();
-    var elmXY = this.dialog.getCoordinates();
-    var elmWH = this.dialog.getSize();
-    var dialogH = Math.round((parXY.height - elmWH.y) / 5);
-    if (dialogH < 20) dialogH = 20;
-    if (this.options.center !== 'y') {
-      if (fx) new Fx.Tween(this.dialog, { duration: 'short' }).start('left', ((parXY.width - elmWH.x) / 2) + 'px'); else this.dialog.setStyle('left', ((parXY.width - elmWH.x) / 2) + 'px');
-    }
-    if (this.options.center !== 'x') {
-      if (fx) new Fx.Tween(this.dialog, { duration: 'short' }).start('top', (dialogH + parScroll.y) + 'px');
-      //else this.dialog.setStyle('top', (dialogH + parScroll.y) + 'px');
-      else this.dialog.setStyle('top', this.options.top + 'px');
-    }
-  },
-
-  startupLoading: function(flag) {
-    flag ? this.message.addClass('dialog-loading') : this.message.removeClass('dialog-loading');
-    this.loading(flag);
-  },
-
-  loading: function(flag) {
-    this.toggle('ok', !flag);
-    this.toggle('cancel', !flag);
-    if (this.footer) {
-      this.message.removeClass('loading');
-      flag ? this.footer.addClass('loading') : this.footer.removeClass('loading');
-    } else {
-      flag ? this.message.addClass('loading') : this.message.removeClass('loading');
-    }
-  }
-
-});
-
-Ngn.Dialog.openWhenClosed = function(closingDialogObject, openDialogClass, options) {
-  var id = function() {
-    if (!closingDialogObject.closed) return;
-    clearInterval(id);
-    new openDialogClass(options);
-  }.periodical(500);
-};
-
-Ngn.Dialog.dialogs = new Hash({});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.String.js|--*/
-Ngn.String = {};
-Ngn.String.rand = function(len) {
-  var allchars = 'abcdefghijknmpqrstuvwxyzABCDEFGHIJKLNMPQRSTUVWXYZ'.split('');
-  var string = '';
-  for (var i = 0; i < len; i++) {
-    string += allchars[Ngn.Number.randomInt(0, allchars.length - 1)];
-  }
-  return string;
-};
-
-Ngn.String.ucfirst = function(str) {
-  var f = str.charAt(0).toUpperCase();
-  return f + str.substr(1, str.length - 1);
-};
-
-Ngn.String.hashCode = function(str) {
-  var hash = 0, i, chr, len;
-  if (str.length == 0) return hash;
-  for (i = 0, len = str.length; i < len; i++) {
-    chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-
-Ngn.String.trim = function(s) {
-  return s.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-};
-
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Number.js|--*/
-Ngn.Number = {};
-Ngn.Number.randomInt = function(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.VResize.js|--*/
-Ngn.Dialog.VResize = new Class({
-
-  initialize: function(dialog) {
-    this.dialog = dialog;
-    Ngn.Element._whenElPresents(this.getResizebleEl.bind(this), this.init.bind(this));
-  },
-
-  init: function() {
-    var eResizeble = this.getResizebleEl();
-    this.eHandler = new Element('div', {'class': 'vResizeHandler'}).inject(this.dialog.eMessage);
-    this.dialog.dialog.addClass('vResize');
-    var storeK = this.dialog.options.id + '_height';
-    var h = Ngn.Storage.get(storeK);
-    if (h) eResizeble.setStyle('height', h + 'px');
-    new Drag(eResizeble, {
-      preventDefault: true,
-      stopPropagation: true,
-      snap: 0,
-      handle: this.eHandler,
-      modifiers: {y: 'height', x: null},
-      onComplete: function() {
-        Ngn.Storage.set(storeK, eResizeble.getSize().y);
-      }
-    });
-    this.eHandler.inject(this.dialog.eMessage);
-  },
-
-  getResizebleEl: function() {
-    return this.dialog.eMessage;
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Element.js|--*/
-Ngn.Element = {};
-
-Ngn.Element._whenElPresents = function(elGetter, action, maxAttempts) {
-  var el;
-  el = elGetter();
-  find = function() {
-    return el = elGetter();
-  };
-  if (find()) {
-    action(el);
-    return;
-  }
-  maxAttempts = maxAttempts || 10;
-  var n = 1;
-  var id = function() {
-    n++;
-    if (find()) {
-      clearTimeout(id);
-      action(el);
-      return;
-    }
-    if (n == maxAttempts) {
-      clearTimeout(id);
-      throw new Error('Element not presents after ' + maxAttempts + ' attempts');
-    }
-  }.periodical(200);
-};
-
-Ngn.Element.whenElPresents = function(eParent, selector, action) {
-  return Ngn.Element._whenElPresents(function() {
-    return eParent.getElement(selector);
-  }, action);
-};
-
-Ngn.Element.bindSizes = function(eFrom, eTo) {
-  eFrom.addEvent('resize', function() {
-    eTo.setSize(eFrom.getSize());
-  });
-};
-
-Ngn.Element.initTips = function(els) {
-  if (!Ngn.tips) Ngn.Element.tips = new Tips(els);
-};
-
-Ngn.Element.setTip = function(el, title) {
-  if (!Ngn.Element.tips) Ngn.Element.initTips(el);
-  if (el.retrieve('tip:native')) {
-    Ngn.Element.tips.hide(el);
-    el.store('tip:title', title);
-  } else {
-    Ngn.Element.tips.attach(el);
-  }
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Storage.js|--*/
-Ngn.Storage = {
-  get: function(key) {
-    if (localStorage) {
-      var v = localStorage.getItem(key);
-    } else {
-      var v = Cookie.read(key);
-    }
-    if (v == 'false') return false; else if (v == 'true') return true; else return v;
-  },
-  set: function(key, value) {
-    if (localStorage) {
-      localStorage.setItem(key, value)
-    } else {
-      Cookie.write(key, value);
-    }
-  },
-  remove: function(key) {
-    localStorage.removeItem(key);
-  },
-  bget: function(key, value) {
-    return !!this.get(key);
-  }
-};
-
-Ngn.Storage.int = {
-
-  get: function(key) {
-    return parseInt(Ngn.Storage.get(key));
-  }
-
-};
-
-Ngn.Storage.json = {
-  get: function(key) {
-    try {
-      if (localStorage) {
-        var r = Ngn.LocalStorage.json.get(key);
-      } else {
-        var r = JSON.decode(Cookie.read(key));
-      }
-    } catch (e) {
-      var r = {};
-    }
-    return r;
-  },
-  set: function(key, data) {
-    if (localStorage)
-      Ngn.LocalStorage.json.set(key, data); else
-      Cookie.write(key, JSON.encode(data));
-  }
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.LocalStorage.js|--*/
-Ngn.LocalStorage = {
-
-  clean: function() {
-    if (!localStorage) return;
-    try {
-      for (var k in localStorage) {
-        localStorage.removeItem(k);
-      }
-    } catch (e) {
-      for (var i = 0; i < localStorage.length; i++)
-        localStorage.removeItem(localStorage[i]);
-    }
-  },
-
-  remove: function(key) {
-    if (!localStorage) return false;
-    localStorage.removeItem(key);
-  }
-
-};
-
-Ngn.LocalStorage.json = {
-
-  get: function(key) {
-    if (!localStorage) return false;
-    return JSON.decode(localStorage.getItem(key));
-  },
-
-  set: function(key, data) {
-    localStorage.setItem(key, JSON.encode(data));
-  }
-
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Request.js|--*/
-Ngn.Request = new Class({
-  Extends: Request,
-
-  id: null,
-
-  initialize: function(options) {
-    this.id = Ngn.String.rand(20);
-    this.parent(options);
-  },
-
-  success: function(text, xml) {
-    Ngn.Arr.drop(Ngn.Request.inProgress, this.id);
-    if (text.contains('Error: ')) {
-      return;
-    }
-    this.parent(text, xml);
-  },
-
-  send: function(options) {
-    Ngn.Request.inProgress.push(this.id);
-    this.parent(options);
-  }
-
-});
-
-Ngn.Request.inProgress = [];
-
-Ngn.Request.Loading = new Class({
-  Extends: Ngn.Request,
-
-  success: function(text, xml) {
-    Ngn.loading(false);
-    this.parent(text, xml);
-  },
-
-  send: function(options) {
-    Ngn.loading(true);
-    this.parent(options);
-  }
-
-});
-
-Ngn.json = {};
-Ngn.json.decode = function(text, secure) {
-  return Ngn.json.process(JSON.decode(text, secure));
-};
-
-Ngn.json.process = function(json) {
-  if (!json) return json;
-  for (var i in json) {
-    if (typeof(json[i]) == 'object' || typeof(json[i]) == 'array') {
-      json[i] = Ngn.json.process(json[i]);
-    } else if (typeOf(json[i]) == 'string') {
-      if (json[i].test(/^func: .*/)) {
-        json[i] = json[i].replace(/^func: (.*)/, '$1');
-        json[i] = eval('(function() {' + json[i] + '})');
-      }
-    }
-  }
-  return json;
-};
-
-Ngn.Request.JSON = new Class({
-  Extends: Request.JSON,
-
-  initialize: function(options) {
-    this.id = Ngn.String.rand(20);
-    this.parent(options);
-  },
-
-  success: function(text) {
-    Ngn.Arr.drop(Ngn.Request.inProgress, this.id);
-    try {
-      this.response.json = Ngn.json.decode(text, this.options.secure);
-    } catch (e) {
-      throw new Error('non-json result by url ' + this.options.url + '. result:\n' + text);
-    }
-    if (this.response.json === null) {
-      this.onSuccess({});
-      return;
-    }
-    if (this.response.json.actionDisabled) {
-      window.location.reload(true);
-      return;
-    }
-    if (this.response.json.error) {
-      Ngn.Request.JSON.throwServerError(this.response.json);
-      return;
-    }
-    // sflm
-    if (this.response.json.sflJsDeltaUrl) {
-      Asset.javascript(this.response.json.sflJsDeltaUrl, {
-        onLoad: function() {
-          this.onSuccess(this.response.json, text);
-        }.bind(this)
-      });
-    } else {
-      this.onSuccess(this.response.json, text);
-    }
-    if (this.response.json.sflCssDeltaUrl) Asset.css(this.response.json.sflCssDeltaUrl);
-  },
-
-  send: function(options) {
-    Ngn.Request.inProgress.push(this.id);
-    this.parent(options);
-  }
-
-});
-
-Ngn.Request.JSON.throwServerError = function(r) {
-  throw new Error(r.error.message + "\n----------\n" + r.error.trace)
-};
-
-Ngn.Request.sflJsDeltaUrlOnLoad = false;
-
-Ngn.Request.Iface = {};
-
-Ngn.Request.Iface.loading = function(state) {
-  var el = $('globalLoader');
-  if (!el) {
-    var el = Elements.from('<div id="globalLoader" class="globalLoader"></div>')[0].inject(document.getElement('body'), 'top');
-    el.setStyle('top', window.getScroll().y);
-    window.addEvent('scroll', function() {
-      el.setStyle('top', window.getScroll().y);
-    });
-  }
-  el.setStyle('visibility', state ? 'visible' : 'hidden');
-};
-
-Ngn.Request.settings = function(name, callback) {
-  Asset.javascript('/c2/jsSettings/' + name, {
-    onLoad: function() {
-      callback(eval('Ngn.settings.' + name.replace(/\//g, '.')));
-    }
-  });
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Arr.js|--*/
-Ngn.Arr = {};
-Ngn.Arr.inn = function(needle, haystack, strict) {  // Checks if a value exists in an array
-  var found = false, key, strict = !!strict;
-  for (key in haystack) {
-    if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
-      found = true;
-      break;
-    }
-  }
-  return found;
-};
-
-Ngn.Arr.drop = function(array, value) {
-  return array.splice(array.indexOf(value), 1);
-};
-
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Btn.js|--*/
-// @requires Ngn.Frm
-
-Ngn.Btn = new Class({
-  Implements: [Options],
-
-  options: {
-    usePushed: false,
-    request: false,
-    fileUpload: false
-  },
-
-  pushed: false,
-
-  initialize: function(el, action, options) {
-    //if (options.request) this.request = options.request;
-    this.setOptions(options);
-    this.setAction(action);
-    this.el = el;
-    this.toggleDisabled(true);
-    var up = function() {
-      if (!this.enable) return;
-      if (!this.options.usePushed) this.el.removeClass('pushed');
-    }.bind(this);
-    var down = function() {
-      if (!this.enable) return;
-      if (!this.options.usePushed) this.el.addClass('pushed');
-    }.bind(this);
-    this.el.addEvent('mousedown', down);
-    this.el.addEvent('tap', down);
-    this.el.addEvent('mouseup', up);
-    this.el.addEvent('mouseout', up);
-    this.el.addEvent('click', function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      if (!this.enable) return;
-      //if (this.request) this.toggleDisabled(false);
-      this.runAction();
-    }.bind(this));
-    //if (this.request) {
-    //  this.request.addEvent('complete', function() {
-    //    this.toggleDisabled(true);
-    //  }.bind(this));
-    //}
-    if (this.options.fileUpload) {
-      new Ngn.Btn.FileUpload(this, this.options.fileUpload);
-    }
-    this.init();
-  },
-
-  setAction: function(action) {
-    if (!action) action = function() {
-    };
-    if (typeof(action) == 'function') this.action = { action: action.bind(this) };
-    else {
-      if (action.classAction) {
-        // do nothing. action is class
-      } else {
-        if (action.args) {
-          action.action = action.action.pass(action.args, this);
-        } else {
-          action.action = action.action.bind(this);
-        }
-      }
-      this.action = action;
-    }
-  },
-
-  runAction: function() {
-    if (!this.pushed && this.action.confirm) {
-      var opt = {
-        id: this.action.id,
-        onOkClose: function() {
-          this._action();
-        }.bind(this)
-      };
-      if (typeof(this.action.confirm) == 'string') opt.message = this.action.confirm;
-      new Ngn.Dialog.Confirm.Mem(opt);
-    } else {
-      this._action();
-    }
-  },
-
-  _action: function() {
-    this.action.action();
-    if (this.options.usePushed) this.togglePushed(!this.pushed);
-    if (this.request) this.request.send();
-  },
-
-  init: function() {
-  },
-
-  togglePushed: function(pushed) {
-    this.pushed = pushed;
-    this.pushed ? this.el.addClass('pushed') : this.el.removeClass('pushed');
-  },
-
-  toggleDisabled: function(enable) {
-    this.enable = enable;
-    enable ? this.el.removeClass('nonActive') : this.el.addClass('nonActive');
-  }
-
-});
-
-/**
- * Создаёт и возвращает html-элемент кнопки
- *
- * @param opt
- * @param opt.cls CSS-класс
- * @param opt.title Заголовок кнопки
- * @param opt.caption Значение тега "title"
- * @returns {HTMLElement}
- */
-Ngn.Btn.btn = function(opt) {
-  if (!opt) opt = {};
-  if (!opt.cls) opt.cls = '';
-  if (!opt.title && !opt.cls.contains('btn')) opt.cls = 'bordered ' + opt.cls;
-  var a = new Element('a', Object.merge({
-    'class': (opt.cls.contains('icon') ? '' : 'smIcons ') + opt.cls,
-    html: opt.title || ''
-  }, opt.prop || {}));
-  if (opt.caption) {
-    a.set('title', opt.caption);
-    //Ngn.Element.setTip(a, opt.caption);
-  }
-  new Element('i').inject(a, 'top');
-  return a;
-};
-
-/**
- * Кнопка с заголовком
- */
-Ngn.Btn.btn1 = function(title, cls, prop) {
-  return Ngn.Btn.btn({
-    title: title,
-    cls: cls,
-    prop: prop
-  });
-};
-
-/**
- * Кнопка с всплывающей подсказкой
- */
-Ngn.Btn.btn2 = function(caption, cls, prop) {
-  return Ngn.Btn.btn({
-    caption: caption,
-    cls: cls,
-    prop: prop
-  });
-};
-
-Ngn.Btn.flag1 = function(defaultFirstState, state1, state2) {
-  return Ngn.Btn.__flag(Ngn.Btn.tn1, defaultFirstState, state1, state2);
-};
-
-Ngn.Btn.flag2 = function(defaultFirstState, state1, state2) {
-  return Ngn.Btn.__flag(Ngn.Btn.btn2, defaultFirstState, state1, state2);
-};
-
-Ngn.Btn.__flag = function(btn, defaultFirstState, state1, state2) {
-  var deflt = defaultFirstState ? state1 : state2;
-  return Ngn.Btn._flag(Ngn.Btn.btn2(deflt.title, deflt.cls), state1, state2);
-};
-
-Ngn.Btn._flag = function(eA, state1, state2) {
-  return eA.addEvent('click', function(e) {
-    e.preventDefault();
-    var flag = eA.hasClass(state1.cls);
-    var newState = flag ? state2 : state1;
-    var curState = flag ? state1 : state2;
-    if (curState.confirm !== undefined) if (!confirm(curState.confirm)) return;
-    new Ngn.Request({
-      url: curState.url,
-      onComplete: function() {
-        eA.removeClass(curState.cls);
-        eA.addClass(newState.cls);
-        eA.set('title', newState.title);
-        //Ngn.addTips(eA);
-      }
-    }).send();
-  });
-};
-
-Ngn.Btn.Action = new Class({
-  action: function() {}
-});
-
-Ngn.Btn.FileUpload = new Class({
-  Implements: [Options],
-
-  options: {
-    // url: '',
-    mime: '',
-    onRequest: function() {
-    },
-    onComplete: function() {
-    }
-  },
-
-  initialize: function(btn, options) {
-    this.btn = btn;
-    this.setOptions(options);
-    var eUploadWrapper = new Element('div', {styles: {
-      position: 'relative',
-      display: 'inline-block',
-      overflow: 'hidden'
-    }}).wraps(this.btn.el);
-    var eEile = new Element('input', {type: 'file', accept: this.options.mime, events: {
-      mouseover: function() {
-        this.getParent().getElement('a').addClass('over');
-      },
-      mouseout: function() {
-        this.getParent().getElement('a').removeClass('over');
-      }
-    }, styles: {
-      position: 'absolute',
-      cursor: 'pointer',
-      width: this.btn.el.getSize().x + 'px',
-      height: this.btn.el.getSize().y + 'px',
-      top: '0px',
-      left: '0px',
-      'z-index': 2,
-      'opacity': 0
-    }}).inject(eUploadWrapper, 'bottom');
-    eEile.addEvent('change', function() {
-      req.append('file', this.files[0]);
-      req.send();
-    });
-    this.options.onRequest = this.options.onRequest.bind(this);
-    this.options.onComplete = this.options.onComplete.bind(this);
-    var req = new Ngn.Request.File({
-      url: this.options.url,
-      formData: {
-        name: 'bg'
-      },
-      onRequest: function() {
-        this.btn.toggleDisabled(false);
-        this.options.onRequest();
-      }.bind(this),
-      onProgress: function(event) {
-        var loaded = event.loaded, total = event.total;
-        var proc = parseInt(loaded / total * 100, 10).limit(0, 100);
-        //c ('Загружено ' + proc + '%');
-        //if (proc == 100) console.debug('Загрузка завершена');
-      }.bind(this),
-      onComplete: function(r) {
-        this.btn.toggleDisabled(true);
-        this.options.onComplete(r);
-        eEile.set('value', '');
-        req.clear();
-      }.bind(this)
-    });
-
-  }
-
-});
-
-Ngn.Btn.addAction = function(selector, action, parent) {
-  var esBtn = (parent ? parent : document).getElements(selector);
-  if (!esBtn) return;
-  esBtn.each(function(eBtn) {
-    action = action.pass(eBtn);
-    eBtn.addEvent('click', function(e) {
-      e.preventDefault();
-      action(e);
-    });
-  });
-};
-
-Ngn.Btn.opacity = function(eBtn, outOp, overOp) {
-  var fx = new Fx.Morph(eBtn, { duration: 'short', link: 'cancel' });
-  if (!outOp != undefined) outOp = 0.4;
-  if (!overOp != undefined) overOp = 1;
-  eBtn.setStyle('opacity', outOp);
-  eBtn.addEvent('mouseover', function() {
-    fx.start({'opacity': [outOp, overOp]});
-  });
-  eBtn.addEvent('mouseout', function() {
-    fx.start({'opacity': [overOp, outOp]});
-  });
-  return eBtn;
-};
-
-Ngn.Btn.addAjaxAction = function(eBtn, action, onComplete) {
-  if (!eBtn) return;
-  onComplete = onComplete ? onComplete : Function.from();
-  eBtn.addEvent('click', function(e) {
-    e.preventDefault();
-    if (eBtn.hasClass('confirm') && !Ngn.confirm()) return;
-    if (eBtn.hasClass('loading')) return;
-    if (eBtn.retrieve('disabled')) return;
-    eBtn.addClass('loading');
-    new Ngn.Request({
-      url: eBtn.get('href').replace(action, 'ajax_' + action),
-      onComplete: function() {
-        onComplete();
-        eBtn.removeClass('loading');
-      }
-    }).send();
-  });
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Msg.js|--*/
-Ngn.Dialog.Msg = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    noPadding: false,
-    messageAreaClass: 'dialog-message large',
-    title: false
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
-Ngn.Dialog.Confirm = new Class({
-  Extends: Ngn.Dialog.Msg,
-
-  options: {
-    width: 300,
-    message: 'Вы уверены?'
-  },
-
-  initialize: function(_opts) {
-    var opts = Object.merge(_opts, {
-      cancel: false,
-      titleClose: false,
-      ok: this.closeAction.bind(this, true),
-      cancel: this.closeAction.bind(this, false)
-    });
-    this.parent(opts);
-  },
-
-  closeAction: function(_confirmed) {
-    _confirmed ? this.okClose() : this.close();
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.Mem.js|--*/
-Ngn.Dialog.Confirm.Mem = new Class({
-  Extends: Ngn.Dialog.Confirm,
-
-  options: {
-    width: 250,
-    okText: 'Удалить',
-    bindBuildMessageFunction: true,
-    notAskSomeTime: false
-  },
-
-  timeoutId: null,
-
-  initialize: function(_opts) {
-    this.setOptions(_opts);
-    this.options.dialogClass += ' dialog-confirm';
-    if (this.options.notAskSomeTime) {
-      if (this.timeoutId) clearTimeout(this.timeoutId);
-      this.timeoutId = (function() {
-        Ngn.Storage.remove(this.options.id + 'confirmMem');
-      }).delay(120000, this);
-    }
-    if (Ngn.Storage.get(this.options.id + 'confirmMem')) {
-      this.fireEvent('okClose');
-      return;
-    }
-    this.parent(_opts);
-  },
-
-  buildMessage: function(_msg) {
-    var eMessageCont = new Element('div');
-    if (this.options.notAskSomeTime) {
-      var checkboxCaption = 'Неспрашивать меня об этом какое-то время';
-    } else {
-      var checkboxCaption = 'Больше не спрашивать по этому поводу';
-    }
-    new Element('div', {'html': '<h3 style="margin-top:0px">' + _msg + '</h3>'}).inject(eMessageCont);
-    Elements.from('<span class="checkbox"><input type="checkbox" id="confirmMem' + this.options.id + '" class="confirmMem" /><label for="confirmMem' + this.options.id + '">' + checkboxCaption + '</label></span>')[0].inject(eMessageCont);
-    this.eMemCheckbox = eMessageCont.getElement('.confirmMem');
-    return eMessageCont;
-  },
-
-  finishClose: function() {
-    if (this.isOkClose) {
-      console.debug([this.options.id + 'confirmMem', this.eMemCheckbox.get('checked')]);
-      Ngn.Storage.set(this.options.id + 'confirmMem', this.eMemCheckbox.get('checked'));
-    }
-    this.parent();
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Request.File.js|--*/
-Ngn.progressSupport = ('onprogress' in new Browser.Request);
-
-// Обёртка для Request с поддержкой FormData
-Ngn.Request.File = new Class({
-  Extends: Ngn.Request.JSON,
-
-  options: {
-    emulation: false, urlEncoded: false, allowDublicates: false, formData: null
-  },
-
-  initialize: function(options) {
-    this.id = Ngn.String.rand(20);
-    this.xhr = new Browser.Request();
-    this.setOptions(options);
-    this.clear();
-    this.headers = this.options.headers;
-    if (this.options.formData) for (var i in this.options.formData) this.append(i, this.options.formData[i]);
-  },
-
-  clear: function() {
-    this.formData = new FormData();
-    this._formData = {};
-    return this;
-  },
-
-  bracketCount: {},
-
-  append: function(key, value) {
-    var hasStr = function(haystack, needle) {
-      var pos = haystack.indexOf(needle);
-      if (pos == -1) {
-        return false;
-      } else {
-        return true;
-      }
-    };
-    var baseKey;
-    var multi = hasStr(key, '[]');
-    if (!multi && !this.options.allowDublicates && this._formData[key]) return;
-    if (multi) {
-      baseKey = key.replace('[]', '');
-      if (!this.bracketCount[baseKey]) this.bracketCount[baseKey] = 0;
-      key = baseKey + '[' + this.bracketCount[baseKey] + ']';
-      this.bracketCount[baseKey]++;
-    }
-    this.formData.append(key, value);
-    this._formData[key] = value;
-    return this.formData;
-  },
-
-  send: function(options) {
-    if (!this.check(options)) return this;
-    Ngn.Request.inProgress.push(this.id);
-    this.options.isSuccess = this.options.isSuccess || this.isSuccess;
-    this.running = true;
-    var xhr = this.xhr;
-    if (Ngn.progressSupport) {
-      xhr.onloadstart = this.loadstart.bind(this);
-      xhr.onprogress = this.progress.bind(this);
-      xhr.upload.onprogress = this.progress.bind(this);
-    }
-    xhr.open('POST', this.options.url, true);
-    xhr.onreadystatechange = this.onStateChange.bind(this);
-    Object.each(this.headers, function(value, key) {
-      try {
-        xhr.setRequestHeader(key, value);
-      } catch (e) {
-        this.fireEvent('exception', [key, value]);
-      }
-    }, this);
-    this.fireEvent('request');
-    xhr.send(this.formData);
-    if (!this.options.async) this.onStateChange();
-    if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
-    return this;
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.elementExtras.js|--*/
-Element.implement({
-  values: function() {
-    var r = {};
-    this.getElements('input').each(function(el) {
-      if (el.get('type') == 'radio') {
-        if (el.get('checked')) {
-          r = el.get('value');
-        }
-      } else if (el.get('type') == 'checkbox') {
-        if (el.get('checked')) {
-          r[el.get('name')] = el.get('value');
-        }
-      } else {
-        r[el.get('name')] = el.get('value');
-      }
-    });
-    return r;
-  },
-  getSizeWithMarginBorder: function() {
-    var s = this.getSize();
-    return {
-      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + parseInt(this.getStyle('border-left-width')) + parseInt(this.getStyle('border-right-width')) + s.x,
-      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + parseInt(this.getStyle('border-top-width')) + parseInt(this.getStyle('border-bottom-width')) + s.y
-    };
-  },
-  getSizeWithMargin: function() {
-    var s = this.getSize();
-    return {
-      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + s.x,
-      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + s.y
-    };
-  },
-  getSizeWithoutBorders: function() {
-    var s = this.getSize();
-    return {
-      x: s.x - parseInt(this.getStyle('border-left-width')) - parseInt(this.getStyle('border-right-width')),
-      y: s.y - parseInt(this.getStyle('border-top-width')) - parseInt(this.getStyle('border-bottom-width'))
-    };
-  },
-  getSizeWithoutPadding: function() {
-    var s = this.getSize();
-    return {
-      x: s.x - parseInt(this.getStyle('padding-left')) - parseInt(this.getStyle('padding-right')),
-      y: s.y - parseInt(this.getStyle('padding-top')) - parseInt(this.getStyle('padding-bottom'))
-    };
-  },
-  setSize: function(s) {
-    if (!s.x && !s.y) throw new Error('No sizes defined');
-    if (s.x) this.setStyle('width', s.x + 'px');
-    if (s.y) this.setStyle('height', s.y + 'px');
-    this.fireEvent('resize');
-  },
-  setValue: function(v) {
-    this.set('value', v);
-    this.fireEvent('change');
-  },
-  getPadding: function() {
-    return {
-      x: parseInt(this.getStyle('padding-left')) + parseInt(this.getStyle('padding-right')),
-      y: parseInt(this.getStyle('padding-top')) + parseInt(this.getStyle('padding-bottom'))
-    };
-  },
-  storeAppend: function(k, v) {
-    var r = this.retrieve(k);
-    this.store(k, r ? r.append(v) : r = [v]);
-  },
-  setTip: function(title) {
-    if (!Ngn.tips) Ngn.initTips(this);
-    if (this.retrieve('tip:native')) {
-      Ngn.tips.hide(this);
-      this.store('tip:title', title);
-    } else {
-      Ngn.tips.attach(this);
-    }
-  }
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.js|--*/
-Ngn.Frm = {};
-Ngn.Frm.init = {}; // объект для хранения динамических функций иниыиализации
-Ngn.Frm.html = {};
-Ngn.Frm.selector = 'input,select,textarea';
-Ngn.Frm.textSelector = 'input[type=text],input[type=password],textarea';
-
-Ngn.Frm.getValueByName = function(name, parent) {
-  return Ngn.Frm.getValue(Ngn.Frm.getElements(name, parent));
-};
-
-Ngn.Frm.emptify = function(eInput) {
-  if (eInput.get('type') == 'checkbox') eInput.set('checked', false); else eInput.get('value', '');
-};
-
-/**
- * @param Element|array of Element
- * @returns {*}
- */
-Ngn.Frm.getValue = function(el) {
-  if (el.length === undefined) {
-    var elements = el.getElements(Ngn.Frm.selector);
-  } else {
-    var elements = el;
-  }
-  var r = null;
-  var res = [];
-  var i = 0;
-  elements.each(function(el) {
-    var type = el.get('type');
-    if (type == 'checkbox') {
-      if (el.get('checked')) res[i] = el.get('value');
-      i++;
-    } else if (type == 'radio') {
-      if (el.get('checked'))
-        r = el.get('value');
-    } else {
-      r = el.get('value');
-    }
-  });
-  if (res.length != 0) r = res;
-  return r;
-};
-
-Ngn.Frm.getValues = function(el) {
-  if (el.length === undefined) {
-    var elements = el.getElements(Ngn.Frm.selector);
-  } else {
-    var elements = el;
-  }
-  var r = [];
-  elements.each(function(el) {
-    var type = el.get('type');
-    if (type == 'radio' || type == 'checkbox') {
-      if (el.get('checked'))
-        r.push(el.get('value'));
-    } else {
-      r = [el.get('value')];
-    }
-  });
-  return r;
-};
-
-Ngn.Frm.getElements = function(name, parent) {
-  var elements = [];
-  var n = 0;
-  var _name;
-  parent = parent || document;
-  parent.getElements(Ngn.Frm.selector).each(function(el) {
-    _name = el.get('name');
-    if (!_name) return;
-    if (_name.replace('[]', '') != name) return;
-    elements[n] = el;
-    n++;
-  });
-  return elements;
-};
-
-Ngn.Frm.virtualElements = [];
-Ngn.Frm.disable = function(eForm, flag) {
-  eForm.getElements(Ngn.Frm.selector).each(function(el) {
-    el.set('disabled', flag);
-  });
-  // console.debug(Ngn.Frm.virtualElements);
-  for (var i = 0; i < Ngn.Frm.virtualElements.length; i++) {
-    // var o = Ngn.Frm.virtualElements[i];
-    // console.debug([o, o.getForm()]);
-    // if (o.getForm() && o.getForm().get('id') != eForm.get('id')) return;
-    // o.toggleDisabled(!flag);
-  }
-};
-
-// формат callback ф-ии должен быть следующим:
-// function (fieldValue, args) {}
-Ngn.Frm.addEvent = function(event, name, callback, args) {
-  var elements = Ngn.Frm.getElements(name);
-  elements.each(function(el) {
-    el.addEvent(event, function(e) {
-      callback.run([Ngn.Frm.getValue(elements), args], el);
-    });
-  });
-}
-
-Ngn.enumm = function(arr, tpl, glue) {
-  if (glue == undefined) glue = '';
-  for (var i = 0; i < arr.length; i++)
-    arr[i] = tpl.replace('{v}', arr[i]);
-  return arr.join(glue);
-};
-
-Ngn.Frm.getPureName = function($bracketName) {
-  return $bracketName.replace(/(\w)\[.*/, '$1');
-};
-
-Ngn.Frm.getBracketNameKeys = function(name) {
-  var m;
-  m = name.match(/([^[]*)\[/);
-  if (!m) return [name];
-  var keys = [];
-  keys.append([m[1]]);
-  var re = /\[([^\]]*)\]/g;
-  while (m = re.exec(name)) {
-    keys.append([m[1]]);
-  }
-  return keys;
-};
-
-Ngn.Frm.fillEmptyObject = function(object, keys) {
-  for (var i = 0; i < keys.length - 1; i++) {
-    var p = 'object' + (Ngn.enumm(keys.slice(0, i + 1), "['{v}']"));
-    eval('if (' + p + ' == undefined) ' + p + ' = {}');
-  }
-};
-
-Ngn.Frm.setValueByBracketName = function(o, name, value) {
-  var _name = name.replace('[]', '');
-  if (!(o instanceof Object)) throw new Error('o is not object');
-  var keys = Ngn.Frm.getBracketNameKeys(_name);
-  Ngn.Frm.fillEmptyObject(o, keys);
-  var p = 'o';
-  for (var i = 0; i < keys.length; i++) p += "['" + keys[i] + "']";
-  if (name.contains('[]')) {
-    eval(p + ' = (' + p + ' != undefined) ? ' + p + '.concat(value) : [value]');
-  } else {
-    //eval(p+' = $defined('+p+') ? [].concat('+p+', value) : value');
-    eval(p + ' = value');
-  }
-  return o;
-};
-
-Ngn.Frm.objTo = function(eContainer, obj) {
-  for (var i in obj) {
-    eContainer.getElement('input[name=' + i + ']').set('value', obj[i]);
-  }
-};
-
-Ngn.Frm.toObj = function(eContainer, except) {
-  var rv = {};
-  except = except || [];
-  eContainer = $(eContainer);
-  var typeMatch = 'text' + (!except.contains('hidden') ? '|hidden' : '') + (!except.contains('password') ? '|password' : '');
-  var elements = eContainer.getElements(Ngn.Frm.selector);
-  for (var i = 0; i < elements.length; i++) {
-    var el = elements[i];
-    if (!el.name) continue;
-    var pushValue = undefined;
-    if (el.get('tag') == 'textarea' && el.get('aria-hidden')) {
-      // Значит из этой texarea был сделан tinyMce
-      pushValue = tinyMCE.get(el.get('id')).getContent();
-      //} else if ((el.get('tag') == 'input' && el.type.match(new RegExp('^' + typeMatch + '$', 'i'))) || el.get('tag') == 'textarea' || (el.get('type').match(/^checkbox|radio$/i) && el.get('checked'))) {
-    } else if ((el.get('tag') == 'input' && el.type.match(new RegExp('^' + typeMatch + '$', 'i'))) || el.get('tag') == 'textarea' || (el.get('type').match(/^radio$/i) && el.get('checked'))) {
-      pushValue = el.value;
-    } else if ((el.get('type').match(/^checkbox$/i) && el.get('checked'))) {
-      var pushValue = [];
-      eContainer.getElement('.name_'+el.name).getElements('input').each(function(checkbox){
-        if(checkbox.get('checked'))  pushValue.push(checkbox.value);
-      });
-    } else if (el.get('tag') == 'select') {
-      if (el.multiple) {
-        var pushValue = [];
-        for (var j = 0; j < el.options.length; j++)
-          if (el.options[j].selected)
-            pushValue.push(el.options[j].value);
-        if (pushValue.length == 0) pushValue = undefined;
-      } else {
-        pushValue = el.options[el.selectedIndex].value;
-      }
-    }
-    if (pushValue != undefined) {
-      Ngn.Frm.setValueByBracketName(rv, el.name, pushValue);
-    }
-  }
-  return rv;
-};
-
-Ngn.Frm.initTranslateField = function(eMasterField, eTranslatedField) {
-  var eMasterField = $(eMasterField);
-  var eTranslatedField = $(eTranslatedField);
-  //if (!eMasterField || !eTranslatedField) return;
-  var translatedValueExists = eTranslatedField.get('value') ? true : false;
-  var translatedFieldEdited = false;
-  var translateField = function() {
-    if (translatedValueExists || translatedFieldEdited) return;
-    eTranslatedField.set('value', translate(trim(eMasterField.get('value'))));
-  };
-  eMasterField.addEvent('keyup', translateField);
-  eMasterField.addEvent('blur', translateField);
-  eMasterField.addEvent('click', translateField);
-  eTranslatedField.addEvent('keyup', function(e) {
-    translatedFieldEdited = true;
-  });
-};
-
-Ngn.Frm.initCopySelectValue = function(eSelectField, eSlaveField, param) {
-  if (param == undefined) param = 'value';
-  var eSelectField = $(eSelectField);
-  var eSlaveField = $(eSlaveField);
-  eSlaveField.addEvent('keyup', function() {
-    eSlaveField.store('edited', true);
-  });
-  eSelectField.addEvent('change', function() {
-    if (eSlaveField.retrieve('edited')) return;
-    eSlaveField.set('value', eSelectField.options[eSelectField.selectedIndex].get(param));
-    eSlaveField.fireEvent('blur');
-  });
-};
-
-Ngn.Frm.initCopySelectTitle = function(eSelectField, eSlaveField) {
-  Ngn.Frm.initCopySelectValue(eSelectField, eSlaveField, 'text');
-};
-
-Ngn.Frm.storable = function(eInput) {
-  if (!eInput.get('id')) throw new Error('ID param mast be defined');
-  var store = function() {
-    Ngn.Storage.set(eInput.get('id'), eInput.get('value'));
-  };
-  var restore = function() {
-    eInput.set('value', Ngn.Storage.get(eInput.get('id')));
-  };
-  restore();
-  eInput.addEvent('keypress', function() {
-    (function() {
-      store();
-    }).delay(100);
-  });
-  eInput.addEvent('blur', function() {
-    store();
-  });
-}
-
-// @requiresBefore i/js/ngn/core/Ngn.elementExtras.js
-Ngn.Frm.virtualElement = {
-  // abstract toggleDisabled: function(flag) {},
-  parentForm: null,
-  initVirtualElement: function(el) {
-    var eForm = el.getParent('form');
-    if (!eForm) return;
-    eForm.storeAppend('virtualElements', this);
-  },
-  getForm: function() {
-  }
-};
-
-Ngn.Frm.maxLength = function(eForm, defaultMaxLength) {
-  eForm.getElements('textarea').each(function(eInput){
-    var eLabel = eInput.getParent('.element').getElement('.label');
-    var maxlength = eInput.get('maxlength');
-    if (!eLabel || !maxlength) return;
-    var init = function() {
-      eRemained.set('html',
-        ' (осталось ' + (maxlength-eInput.get('value').length) + ' знаков из ' + maxlength + ')'
-      );
-    };
-    if (maxlength >= defaultMaxLength) return;
-    var eRemained = new Element('small', {
-      'class': 'remained gray'
-    }).inject(eLabel, 'bottom');
-    eInput.addEvent('keyup', init);
-    init();
-  });
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Dotter.js|--*/
-Ngn.Dotter = new Class({
-  Implements: [Options,Events],
-
-  options: {
-    delay: 500,
-    dot: '.',
-    message: 'Loading',
-    numDots: 10,
-    property: 'text',
-    reset: false/*,
-    onDot: Function.from(),
-    onStart: Function.from(),
-    onStop: Function.from()
-    */
-  },
-
-  initialize: function(container, options) {
-    this.setOptions(options);
-    this.container = document.id(container);
-    this.dots = 0;
-    this.running = false;
-  },
-
-  dot: function() {
-    if(this.running) {
-      var text = this.container.get(this.options.property);
-      this.dots++;
-      this.container.set(this.options.property,(this.dots % this.options.numDots != 0 ? text : this.options.message) + '' + this.options.dot);
-    }
-    return this;
-  },
-
-  load: function() {
-    this.loaded = true;
-    this.dots = 0;
-    this.dotter = function(){ this.dot(); this.fireEvent('dot'); }.bind(this);
-    this.periodical = this.dotter.periodical(this.options.delay);
-    this.container.set(this.options.property,this.options.message + '' + this.options.dot);
-    return this;
-  },
-
-  start: function() {
-    if(!this.loaded || this.options.reset) this.load();
-    this.running = true;
-    this.fireEvent('start');
-    return this;
-  },
-
-  stop: function() {
-    this.running = this.loaded = false;
-    clearTimeout(this.periodical);
-    this.fireEvent('stop');
-    return this;
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
-Ngn.Dialog.RequestFormBase = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    okDestroy: false,
-    jsonRequest: true,
-    autoSave: false,
-    getFormData: function() {
-      return Ngn.Frm.toObj(this.form.eForm);
-    },
-    onFormResponse: Function.from(),
-    onFormRequest: Function.from(),
-    onSubmitSuccess: Function.from()
-  },
-
-  initialize: function(options) {
-    options = options || {};
-    options.ok = this.submit.bind(this);
-    if (options.submitUrl == undefined) {
-      if (options.jsonSubmit == undefined) options.jsonSubmit = false;
-      options.submitUrl = options.url;
-    }
-    this.parent(options);
-    this.toggle('ok', false);
-    this.iframeUpload = true;
-    window.addEvent('keypress', function(e) {
-      if (e.key != 'enter' || e.target.get('tag') == 'textarea') return;
-      e.preventDefault();
-      this.submit();
-    }.bind(this));
-  },
-
-  form: null,
-  response: null,
-
-  urlResponse: function(r) {
-    this.parent(r);
-    this.response = r;
-    if (r.submitTitle) this.setOkText(r.submitTitle);
-    if (r.jsOptions) {
-      if (r.jsOptions.onOkClose)
-        this.addEvent('okClose', r.jsOptions.onOkClose);
-    }
-    this.setMessage(r.form, false);
-    this.form = Ngn.Form.factory(this.message.getElement('form'), {
-      ajaxSubmit: true,
-      ajaxSubmitUrl: this.options.submitUrl,
-      disableInit: true
-    });
-    this.form.options.dialog = this; // Важно передавать объект Диалога в объект
-    // Формы после выполнения конструктура, иначе объект
-    // Даилога не будет содержать созданого объекта Формы
-    this.form.init();
-    this.fireEvent('formResponse');
-    this.form.addEvent('submit', function(r) {
-      this.fireEvent('formRequest');
-      this.loading(true);
-    }.bind(this));
-    this.form.addEvent('failed', function(r) {
-      this.urlResponse(r);
-      this.loading(false);
-    }.bind(this));
-    this.form.addEvent('complete', function(r) {
-      this.response = r;
-      this.okClose();
-      this.fireEvent('submitSuccess', r);
-    }.bind(this));
-    this.resizeByCols();
-    if (this.options.autoSave) {
-      new Ngn.Frm.Saver(this.form.eForm, {
-        url: this.options.submitUrl,
-        jsonRequest: true
-      });
-    }
-    this.initEvents();
-    this.formInit();
-    this.initPosition();
-  },
-
-  // abstract
-  initEvents: function() {
-  },
-
-  resizeByCols: function() {
-    var cols = this.form.eForm.getElements('.type_col');
-    if (!cols.length) return;
-    //var maxY = 0;
-    var ys = [];
-    var x = 0;
-    for (var i = 0; i < cols.length; i++) {
-      ys[i] = cols[i].getSize().y;
-      x += cols[i].getSize().x;
-    }
-    //for (var i=0; i<cols.length; i++) cols[i].setStyle('height', ys.max() + 'px');
-    this.dialog.setStyle('width', (x + 12) + 'px');
-  },
-
-  formInit: function() {
-  },
-
-  submit: function() {
-    this._submit();
-  },
-
-  finishClose: function() {
-    this.parent();
-    // если в последнем респонзе есть ссылка не следующую форму
-    if (this.isOkClose && this.response.nextFormUrl) {
-      var opt = {};
-      if (this.response.nextFormOptions) opt = Object.merge(opt, this.response.nextFormOptions);
-      opt.url = this.response.nextFormUrl;
-      new Ngn.Dialog.RequestForm(opt);
-    }
-  }
-
-  // abstract
-  //_submit: {}
-
-});
-
-Ngn.Dialog.Form = new Class({
-  Extends: Ngn.Dialog.RequestFormBase,
-
-  options: {
-    onSubmit: Function.from()
-  },
-
-  _submit: function() {
-    this.fireEvent('submit', this.options.getFormData.bind(this)());
-    this.okClose();
-  }
-
-});
-
-Ngn.Dialog.RequestForm = new Class({
-  Extends: Ngn.Dialog.RequestFormBase,
-
-  options: {
-    autoSave: false,
-    formEvents: false
-    //cacheRequest: false
-  },
-
-  _submit: function() {
-    this.form.submit();
-  },
-
-  initEvents: function() {
-    if (!this.options.formEvents) return;
-    var obj = this;
-    for (var i = 0; i < this.options.formEvents.length; i++) {
-      var evnt = this.options.formEvents[i];
-      this.message.getElement('[name=' + evnt.fieldName + ']').addEvent(evnt.fieldEvent, function() {
-        obj.fireEvent(evnt.formEvent, this.get('value'));
-      });
-    }
-  }
-
-});
-
-Ngn.Dialog.RequestForm.Static = new Class({
-  Extends: Ngn.Dialog.RequestForm,
-
-  // options: {
-  //   staticResponse: {
-  //     title: text
-  //     submitTitle: text
-  //     form: html
-  //   }
-  // }
-
-  initFormResponse: function() {
-    this.urlResponse(Ngn.json.process(this.options.staticResponse));
-  }
-
-});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -13261,6 +11302,454 @@ Form.Validator.addAllThese([
     }
   }]
 ]);
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.elementExtras.js|--*/
+Element.implement({
+  values: function() {
+    var r = {};
+    this.getElements('input').each(function(el) {
+      if (el.get('type') == 'radio') {
+        if (el.get('checked')) {
+          r = el.get('value');
+        }
+      } else if (el.get('type') == 'checkbox') {
+        if (el.get('checked')) {
+          r[el.get('name')] = el.get('value');
+        }
+      } else {
+        r[el.get('name')] = el.get('value');
+      }
+    });
+    return r;
+  },
+  getSizeWithMarginBorder: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + parseInt(this.getStyle('border-left-width')) + parseInt(this.getStyle('border-right-width')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + parseInt(this.getStyle('border-top-width')) + parseInt(this.getStyle('border-bottom-width')) + s.y
+    };
+  },
+  getSizeWithMargin: function() {
+    var s = this.getSize();
+    return {
+      x: parseInt(this.getStyle('margin-left')) + parseInt(this.getStyle('margin-right')) + s.x,
+      y: parseInt(this.getStyle('margin-top')) + parseInt(this.getStyle('margin-bottom')) + s.y
+    };
+  },
+  getSizeWithoutBorders: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('border-left-width')) - parseInt(this.getStyle('border-right-width')),
+      y: s.y - parseInt(this.getStyle('border-top-width')) - parseInt(this.getStyle('border-bottom-width'))
+    };
+  },
+  getSizeWithoutPadding: function() {
+    var s = this.getSize();
+    return {
+      x: s.x - parseInt(this.getStyle('padding-left')) - parseInt(this.getStyle('padding-right')),
+      y: s.y - parseInt(this.getStyle('padding-top')) - parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  setSize: function(s) {
+    if (!s.x && !s.y) throw new Error('No sizes defined');
+    if (s.x) this.setStyle('width', s.x + 'px');
+    if (s.y) this.setStyle('height', s.y + 'px');
+    this.fireEvent('resize');
+  },
+  setValue: function(v) {
+    this.set('value', v);
+    this.fireEvent('change');
+  },
+  getPadding: function() {
+    return {
+      x: parseInt(this.getStyle('padding-left')) + parseInt(this.getStyle('padding-right')),
+      y: parseInt(this.getStyle('padding-top')) + parseInt(this.getStyle('padding-bottom'))
+    };
+  },
+  storeAppend: function(k, v) {
+    var r = this.retrieve(k);
+    this.store(k, r ? r.append(v) : r = [v]);
+  },
+  setTip: function(title) {
+    if (!Ngn.tips) Ngn.initTips(this);
+    if (this.retrieve('tip:native')) {
+      Ngn.tips.hide(this);
+      this.store('tip:title', title);
+    } else {
+      Ngn.tips.attach(this);
+    }
+  }
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.js|--*/
+Ngn.Frm = {};
+Ngn.Frm.init = {}; // объект для хранения динамических функций иниыиализации
+Ngn.Frm.html = {};
+Ngn.Frm.selector = 'input,select,textarea';
+Ngn.Frm.textSelector = 'input[type=text],input[type=password],textarea';
+
+Ngn.Frm.getValueByName = function(name, parent) {
+  return Ngn.Frm.getValue(Ngn.Frm.getElements(name, parent));
+};
+
+Ngn.Frm.emptify = function(eInput) {
+  if (eInput.get('type') == 'checkbox') eInput.set('checked', false); else eInput.get('value', '');
+};
+
+/**
+ * @param Element|array of Element
+ * @returns {*}
+ */
+Ngn.Frm.getValue = function(el) {
+  if (el.length === undefined) {
+    var elements = el.getElements(Ngn.Frm.selector);
+  } else {
+    var elements = el;
+  }
+  var r = null;
+  var res = [];
+  var i = 0;
+  elements.each(function(el) {
+    var type = el.get('type');
+    if (type == 'checkbox') {
+      if (el.get('checked')) res[i] = el.get('value');
+      i++;
+    } else if (type == 'radio') {
+      if (el.get('checked'))
+        r = el.get('value');
+    } else {
+      r = el.get('value');
+    }
+  });
+  if (res.length != 0) r = res;
+  return r;
+};
+
+Ngn.Frm.getValues = function(el) {
+  if (el.length === undefined) {
+    var elements = el.getElements(Ngn.Frm.selector);
+  } else {
+    var elements = el;
+  }
+  var r = [];
+  elements.each(function(el) {
+    var type = el.get('type');
+    if (type == 'radio' || type == 'checkbox') {
+      if (el.get('checked'))
+        r.push(el.get('value'));
+    } else {
+      r = [el.get('value')];
+    }
+  });
+  return r;
+};
+
+Ngn.Frm.getElements = function(name, parent) {
+  var elements = [];
+  var n = 0;
+  var _name;
+  parent = parent || document;
+  parent.getElements(Ngn.Frm.selector).each(function(el) {
+    _name = el.get('name');
+    if (!_name) return;
+    if (_name.replace('[]', '') != name) return;
+    elements[n] = el;
+    n++;
+  });
+  return elements;
+};
+
+Ngn.Frm.virtualElements = [];
+Ngn.Frm.disable = function(eForm, flag) {
+  eForm.getElements(Ngn.Frm.selector).each(function(el) {
+    el.set('disabled', flag);
+  });
+  // console.debug(Ngn.Frm.virtualElements);
+  for (var i = 0; i < Ngn.Frm.virtualElements.length; i++) {
+    // var o = Ngn.Frm.virtualElements[i];
+    // console.debug([o, o.getForm()]);
+    // if (o.getForm() && o.getForm().get('id') != eForm.get('id')) return;
+    // o.toggleDisabled(!flag);
+  }
+};
+
+// формат callback ф-ии должен быть следующим:
+// function (fieldValue, args) {}
+Ngn.Frm.addEvent = function(event, name, callback, args) {
+  var elements = Ngn.Frm.getElements(name);
+  elements.each(function(el) {
+    el.addEvent(event, function(e) {
+      callback.run([Ngn.Frm.getValue(elements), args], el);
+    });
+  });
+}
+
+Ngn.enumm = function(arr, tpl, glue) {
+  if (glue == undefined) glue = '';
+  for (var i = 0; i < arr.length; i++)
+    arr[i] = tpl.replace('{v}', arr[i]);
+  return arr.join(glue);
+};
+
+Ngn.Frm.getPureName = function($bracketName) {
+  return $bracketName.replace(/(\w)\[.*/, '$1');
+};
+
+Ngn.Frm.getBracketNameKeys = function(name) {
+  var m;
+  m = name.match(/([^[]*)\[/);
+  if (!m) return [name];
+  var keys = [];
+  keys.append([m[1]]);
+  var re = /\[([^\]]*)\]/g;
+  while (m = re.exec(name)) {
+    keys.append([m[1]]);
+  }
+  return keys;
+};
+
+Ngn.Frm.fillEmptyObject = function(object, keys) {
+  for (var i = 0; i < keys.length - 1; i++) {
+    var p = 'object' + (Ngn.enumm(keys.slice(0, i + 1), "['{v}']"));
+    eval('if (' + p + ' == undefined) ' + p + ' = {}');
+  }
+};
+
+Ngn.Frm.setValueByBracketName = function(o, name, value) {
+  var _name = name.replace('[]', '');
+  if (!(o instanceof Object)) throw new Error('o is not object');
+  var keys = Ngn.Frm.getBracketNameKeys(_name);
+  Ngn.Frm.fillEmptyObject(o, keys);
+  var p = 'o';
+  for (var i = 0; i < keys.length; i++) p += "['" + keys[i] + "']";
+  if (name.contains('[]')) {
+    eval(p + ' = (' + p + ' != undefined) ? ' + p + '.concat(value) : [value]');
+  } else {
+    //eval(p+' = $defined('+p+') ? [].concat('+p+', value) : value');
+    eval(p + ' = value');
+  }
+  return o;
+};
+
+Ngn.Frm.objTo = function(eContainer, obj) {
+  for (var i in obj) {
+    eContainer.getElement('input[name=' + i + ']').set('value', obj[i]);
+  }
+};
+
+Ngn.Frm.toObj = function(eContainer, except) {
+  var rv = {};
+  except = except || [];
+  eContainer = $(eContainer);
+  var typeMatch = 'text' + (!except.contains('hidden') ? '|hidden' : '') + (!except.contains('password') ? '|password' : '');
+  var elements = eContainer.getElements(Ngn.Frm.selector);
+  for (var i = 0; i < elements.length; i++) {
+    var el = elements[i];
+    if (!el.name) continue;
+    var pushValue = undefined;
+    if (el.get('tag') == 'textarea' && el.get('aria-hidden')) {
+      // Значит из этой texarea был сделан tinyMce
+      pushValue = tinyMCE.get(el.get('id')).getContent();
+      //} else if ((el.get('tag') == 'input' && el.type.match(new RegExp('^' + typeMatch + '$', 'i'))) || el.get('tag') == 'textarea' || (el.get('type').match(/^checkbox|radio$/i) && el.get('checked'))) {
+    } else if ((el.get('tag') == 'input' && el.type.match(new RegExp('^' + typeMatch + '$', 'i'))) || el.get('tag') == 'textarea' || (el.get('type').match(/^radio$/i) && el.get('checked'))) {
+      pushValue = el.value;
+    } else if ((el.get('type').match(/^checkbox$/i) && el.get('checked'))) {
+      var pushValue = [];
+      eContainer.getElement('.name_'+el.name).getElements('input').each(function(checkbox){
+        if(checkbox.get('checked'))  pushValue.push(checkbox.value);
+      });
+    } else if (el.get('tag') == 'select') {
+      if (el.multiple) {
+        var pushValue = [];
+        for (var j = 0; j < el.options.length; j++)
+          if (el.options[j].selected)
+            pushValue.push(el.options[j].value);
+        if (pushValue.length == 0) pushValue = undefined;
+      } else {
+        pushValue = el.options[el.selectedIndex].value;
+      }
+    }
+    if (pushValue != undefined) {
+      Ngn.Frm.setValueByBracketName(rv, el.name, pushValue);
+    }
+  }
+  return rv;
+};
+
+Ngn.Frm.initTranslateField = function(eMasterField, eTranslatedField) {
+  var eMasterField = $(eMasterField);
+  var eTranslatedField = $(eTranslatedField);
+  //if (!eMasterField || !eTranslatedField) return;
+  var translatedValueExists = eTranslatedField.get('value') ? true : false;
+  var translatedFieldEdited = false;
+  var translateField = function() {
+    if (translatedValueExists || translatedFieldEdited) return;
+    eTranslatedField.set('value', translate(trim(eMasterField.get('value'))));
+  };
+  eMasterField.addEvent('keyup', translateField);
+  eMasterField.addEvent('blur', translateField);
+  eMasterField.addEvent('click', translateField);
+  eTranslatedField.addEvent('keyup', function(e) {
+    translatedFieldEdited = true;
+  });
+};
+
+Ngn.Frm.initCopySelectValue = function(eSelectField, eSlaveField, param) {
+  if (param == undefined) param = 'value';
+  var eSelectField = $(eSelectField);
+  var eSlaveField = $(eSlaveField);
+  eSlaveField.addEvent('keyup', function() {
+    eSlaveField.store('edited', true);
+  });
+  eSelectField.addEvent('change', function() {
+    if (eSlaveField.retrieve('edited')) return;
+    eSlaveField.set('value', eSelectField.options[eSelectField.selectedIndex].get(param));
+    eSlaveField.fireEvent('blur');
+  });
+};
+
+Ngn.Frm.initCopySelectTitle = function(eSelectField, eSlaveField) {
+  Ngn.Frm.initCopySelectValue(eSelectField, eSlaveField, 'text');
+};
+
+Ngn.Frm.storable = function(eInput) {
+  if (!eInput.get('id')) throw new Error('ID param mast be defined');
+  var store = function() {
+    Ngn.Storage.set(eInput.get('id'), eInput.get('value'));
+  };
+  var restore = function() {
+    eInput.set('value', Ngn.Storage.get(eInput.get('id')));
+  };
+  restore();
+  eInput.addEvent('keypress', function() {
+    (function() {
+      store();
+    }).delay(100);
+  });
+  eInput.addEvent('blur', function() {
+    store();
+  });
+}
+
+// @requiresBefore i/js/ngn/core/Ngn.elementExtras.js
+Ngn.Frm.virtualElement = {
+  // abstract toggleDisabled: function(flag) {},
+  parentForm: null,
+  initVirtualElement: function(el) {
+    var eForm = el.getParent('form');
+    if (!eForm) return;
+    eForm.storeAppend('virtualElements', this);
+  },
+  getForm: function() {
+  }
+};
+
+Ngn.Frm.maxLength = function(eForm, defaultMaxLength) {
+  eForm.getElements('textarea').each(function(eInput){
+    var eLabel = eInput.getParent('.element').getElement('.label');
+    var maxlength = eInput.get('maxlength');
+    if (!eLabel || !maxlength) return;
+    var init = function() {
+      eRemained.set('html',
+        ' (осталось ' + (maxlength-eInput.get('value').length) + ' знаков из ' + maxlength + ')'
+      );
+    };
+    if (maxlength >= defaultMaxLength) return;
+    var eRemained = new Element('small', {
+      'class': 'remained gray'
+    }).inject(eLabel, 'bottom');
+    eInput.addEvent('keyup', init);
+    init();
+  });
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Storage.js|--*/
+Ngn.Storage = {
+  get: function(key) {
+    if (localStorage) {
+      var v = localStorage.getItem(key);
+    } else {
+      var v = Cookie.read(key);
+    }
+    if (v == 'false') return false; else if (v == 'true') return true; else return v;
+  },
+  set: function(key, value) {
+    if (localStorage) {
+      localStorage.setItem(key, value)
+    } else {
+      Cookie.write(key, value);
+    }
+  },
+  remove: function(key) {
+    localStorage.removeItem(key);
+  },
+  bget: function(key, value) {
+    return !!this.get(key);
+  }
+};
+
+Ngn.Storage.int = {
+
+  get: function(key) {
+    return parseInt(Ngn.Storage.get(key));
+  }
+
+};
+
+Ngn.Storage.json = {
+  get: function(key) {
+    try {
+      if (localStorage) {
+        var r = Ngn.LocalStorage.json.get(key);
+      } else {
+        var r = JSON.decode(Cookie.read(key));
+      }
+    } catch (e) {
+      var r = {};
+    }
+    return r;
+  },
+  set: function(key, data) {
+    if (localStorage)
+      Ngn.LocalStorage.json.set(key, data); else
+      Cookie.write(key, JSON.encode(data));
+  }
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.LocalStorage.js|--*/
+Ngn.LocalStorage = {
+
+  clean: function() {
+    if (!localStorage) return;
+    try {
+      for (var k in localStorage) {
+        localStorage.removeItem(k);
+      }
+    } catch (e) {
+      for (var i = 0; i < localStorage.length; i++)
+        localStorage.removeItem(localStorage[i]);
+    }
+  },
+
+  remove: function(key) {
+    if (!localStorage) return false;
+    localStorage.removeItem(key);
+  }
+
+};
+
+Ngn.LocalStorage.json = {
+
+  get: function(key) {
+    if (!localStorage) return false;
+    return JSON.decode(localStorage.getItem(key));
+  },
+
+  set: function(key, data) {
+    localStorage.setItem(key, JSON.encode(data));
+  }
+
+};
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.PlaceholderSupport.js|--*/
 Ngn.PlaceholderSupport = new Class({
@@ -14630,6 +13119,280 @@ Ngn.Form.Upload.Multi = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Request.js|--*/
+Ngn.Request = new Class({
+  Extends: Request,
+
+  id: null,
+
+  initialize: function(options) {
+    this.id = Ngn.String.rand(20);
+    this.parent(options);
+  },
+
+  success: function(text, xml) {
+    Ngn.Arr.drop(Ngn.Request.inProgress, this.id);
+    if (text.contains('Error: ')) {
+      return;
+    }
+    this.parent(text, xml);
+  },
+
+  send: function(options) {
+    Ngn.Request.inProgress.push(this.id);
+    this.parent(options);
+  }
+
+});
+
+Ngn.Request.inProgress = [];
+
+Ngn.Request.Loading = new Class({
+  Extends: Ngn.Request,
+
+  success: function(text, xml) {
+    Ngn.loading(false);
+    this.parent(text, xml);
+  },
+
+  send: function(options) {
+    Ngn.loading(true);
+    this.parent(options);
+  }
+
+});
+
+Ngn.json = {};
+Ngn.json.decode = function(text, secure) {
+  return Ngn.json.process(JSON.decode(text, secure));
+};
+
+Ngn.json.process = function(json) {
+  if (!json) return json;
+  for (var i in json) {
+    if (typeof(json[i]) == 'object' || typeof(json[i]) == 'array') {
+      json[i] = Ngn.json.process(json[i]);
+    } else if (typeOf(json[i]) == 'string') {
+      if (json[i].test(/^func: .*/)) {
+        json[i] = json[i].replace(/^func: (.*)/, '$1');
+        json[i] = eval('(function() {' + json[i] + '})');
+      }
+    }
+  }
+  return json;
+};
+
+Ngn.Request.JSON = new Class({
+  Extends: Request.JSON,
+
+  initialize: function(options) {
+    this.id = Ngn.String.rand(20);
+    this.parent(options);
+  },
+
+  success: function(text) {
+    Ngn.Arr.drop(Ngn.Request.inProgress, this.id);
+    try {
+      this.response.json = Ngn.json.decode(text, this.options.secure);
+    } catch (e) {
+      throw new Error('non-json result by url ' + this.options.url + '. result:\n' + text);
+    }
+    if (this.response.json === null) {
+      this.onSuccess({});
+      return;
+    }
+    if (this.response.json.actionDisabled) {
+      window.location.reload(true);
+      return;
+    }
+    if (this.response.json.error) {
+      Ngn.Request.JSON.throwServerError(this.response.json);
+      return;
+    }
+    // sflm
+    if (this.response.json.sflJsDeltaUrl) {
+      Asset.javascript(this.response.json.sflJsDeltaUrl, {
+        onLoad: function() {
+          this.onSuccess(this.response.json, text);
+        }.bind(this)
+      });
+    } else {
+      this.onSuccess(this.response.json, text);
+    }
+    if (this.response.json.sflCssDeltaUrl) Asset.css(this.response.json.sflCssDeltaUrl);
+  },
+
+  send: function(options) {
+    Ngn.Request.inProgress.push(this.id);
+    this.parent(options);
+  }
+
+});
+
+Ngn.Request.JSON.throwServerError = function(r) {
+  throw new Error(r.error.message + "\n----------\n" + r.error.trace)
+};
+
+Ngn.Request.sflJsDeltaUrlOnLoad = false;
+
+Ngn.Request.Iface = {};
+
+Ngn.Request.Iface.loading = function(state) {
+  var el = $('globalLoader');
+  if (!el) {
+    var el = Elements.from('<div id="globalLoader" class="globalLoader"></div>')[0].inject(document.getElement('body'), 'top');
+    el.setStyle('top', window.getScroll().y);
+    window.addEvent('scroll', function() {
+      el.setStyle('top', window.getScroll().y);
+    });
+  }
+  el.setStyle('visibility', state ? 'visible' : 'hidden');
+};
+
+Ngn.Request.settings = function(name, callback) {
+  Asset.javascript('/c2/jsSettings/' + name, {
+    onLoad: function() {
+      callback(eval('Ngn.settings.' + name.replace(/\//g, '.')));
+    }
+  });
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.String.js|--*/
+Ngn.String = {};
+Ngn.String.rand = function(len) {
+  var allchars = 'abcdefghijknmpqrstuvwxyzABCDEFGHIJKLNMPQRSTUVWXYZ'.split('');
+  var string = '';
+  for (var i = 0; i < len; i++) {
+    string += allchars[Ngn.Number.randomInt(0, allchars.length - 1)];
+  }
+  return string;
+};
+
+Ngn.String.ucfirst = function(str) {
+  var f = str.charAt(0).toUpperCase();
+  return f + str.substr(1, str.length - 1);
+};
+
+Ngn.String.hashCode = function(str) {
+  var hash = 0, i, chr, len;
+  if (str.length == 0) return hash;
+  for (i = 0, len = str.length; i < len; i++) {
+    chr = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+Ngn.String.trim = function(s) {
+  return s.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+};
+
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Number.js|--*/
+Ngn.Number = {};
+Ngn.Number.randomInt = function(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Arr.js|--*/
+Ngn.Arr = {};
+Ngn.Arr.inn = function(needle, haystack, strict) {  // Checks if a value exists in an array
+  var found = false, key, strict = !!strict;
+  for (key in haystack) {
+    if ((strict && haystack[key] === needle) || (!strict && haystack[key] == needle)) {
+      found = true;
+      break;
+    }
+  }
+  return found;
+};
+
+Ngn.Arr.drop = function(array, value) {
+  return array.splice(array.indexOf(value), 1);
+};
+
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Request.File.js|--*/
+Ngn.progressSupport = ('onprogress' in new Browser.Request);
+
+// Обёртка для Request с поддержкой FormData
+Ngn.Request.File = new Class({
+  Extends: Ngn.Request.JSON,
+
+  options: {
+    emulation: false, urlEncoded: false, allowDublicates: false, formData: null
+  },
+
+  initialize: function(options) {
+    this.id = Ngn.String.rand(20);
+    this.xhr = new Browser.Request();
+    this.setOptions(options);
+    this.clear();
+    this.headers = this.options.headers;
+    if (this.options.formData) for (var i in this.options.formData) this.append(i, this.options.formData[i]);
+  },
+
+  clear: function() {
+    this.formData = new FormData();
+    this._formData = {};
+    return this;
+  },
+
+  bracketCount: {},
+
+  append: function(key, value) {
+    var hasStr = function(haystack, needle) {
+      var pos = haystack.indexOf(needle);
+      if (pos == -1) {
+        return false;
+      } else {
+        return true;
+      }
+    };
+    var baseKey;
+    var multi = hasStr(key, '[]');
+    if (!multi && !this.options.allowDublicates && this._formData[key]) return;
+    if (multi) {
+      baseKey = key.replace('[]', '');
+      if (!this.bracketCount[baseKey]) this.bracketCount[baseKey] = 0;
+      key = baseKey + '[' + this.bracketCount[baseKey] + ']';
+      this.bracketCount[baseKey]++;
+    }
+    this.formData.append(key, value);
+    this._formData[key] = value;
+    return this.formData;
+  },
+
+  send: function(options) {
+    if (!this.check(options)) return this;
+    Ngn.Request.inProgress.push(this.id);
+    this.options.isSuccess = this.options.isSuccess || this.isSuccess;
+    this.running = true;
+    var xhr = this.xhr;
+    if (Ngn.progressSupport) {
+      xhr.onloadstart = this.loadstart.bind(this);
+      xhr.onprogress = this.progress.bind(this);
+      xhr.upload.onprogress = this.progress.bind(this);
+    }
+    xhr.open('POST', this.options.url, true);
+    xhr.onreadystatechange = this.onStateChange.bind(this);
+    Object.each(this.headers, function(value, key) {
+      try {
+        xhr.setRequestHeader(key, value);
+      } catch (e) {
+        this.fireEvent('exception', [key, value]);
+      }
+    }, this);
+    this.fireEvent('request');
+    xhr.send(this.formData);
+    if (!this.options.async) this.onStateChange();
+    if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
+    return this;
+  }
+
+});
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.MultipleFileInput.js|--*/
 Object.append(Element.NativeEvents, {
   dragenter: 2, dragleave: 2, dragover: 2, dragend: 2, drop: 2
@@ -14891,6 +13654,1042 @@ Ngn.IframeFormRequest.JSON = new Class({
   }
   
 });
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.RequiredOptions.js|--*/
+Ngn.RequiredOptions = new Class({
+  Extends: Options,
+
+  requiredOptions: [],
+
+  setOptions: function(options) {
+    this.parent(options);
+    for (var i = 0; i++; i < this.requiredOptions.length) {
+      if (!this.options[this.requiredOptions[i]])
+        throw new Error('Required option ' + this.requiredOptions[i] + ' not defined');
+    }
+    return this;
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.js|--*/
+Ngn.Dialog = new Class({
+  Implements: [Ngn.RequiredOptions, Events],
+  options: {
+    id: 'dlg', // Уникальный идентификатор диалога. Если не задан, то формируется, как "dlg + random string"
+    autoShow: true, // Показывать диалог при создании класса. Иначе используется _Ngn.Dialog.show_
+    buttons: null, // Набор дополнительные кнопок в подвале. Формат объекта: {name: 'Name', text: 'Button text', class_name: 'CSS class', action: function() {}, tabindex: 1}
+    cancel: null,
+    cancelClass: 'cancel',
+    cancelText: 'Cancel',
+    cancelDestroy: true,
+    callback: null,
+    center: true,
+    dialogClass: 'dialog',
+    draggable: true,
+    fxOptions: {},
+    footer: null,
+    footerClass: 'dialog-footer iconsSet',
+    force: true,
+    height: 'auto',
+    message: null,
+    messageAreaClass: 'dialog-message',
+    messageBoxClass: 'mid-float-box',
+    noTitleClass: 'mav-no-title',
+    noFooterClass: 'mav-no-footer',
+    ok: null,
+    okClass: 'ok',
+    okText: 'OK',
+    okDestroy: true,
+    parent: null,
+    shadeClass: 'dialog-shade',
+    styles: {},
+    title: '',
+    titleBarClass: 'dialog-title',
+    titleClose: true,
+    titleCloseClass: 'icon-button md-closer',
+    titleCloseTitle: 'Close',
+    titleTextClass: 'md-title-text move',
+    url: null,
+    useFx: !Browser.ie,
+    //'useFx: false,
+    width: 550,
+    top: 30,
+    bindBuildMessageFunction: false,
+    noPadding: true,
+    setMessageDelay: null,
+    forceShadeClose: false,
+    jsonRequest: false,
+    reduceHeight: false,
+    baseZIndex: 300,
+    savePosition: false,
+    vResize: false,
+    fixed: false,
+    //maxHeight: null,
+    onComplete: Function.from(),
+    onClose: Function.from(),
+    onOkClose: Function.from(),
+    onCancelClose: Function.from(),
+    onHide: Function.from(),
+    onRequest: Function.from(),
+    onShow: Function.from()
+  },
+
+  delayedShow: false,
+  closed: false,
+  dialog: null,
+  drag: null,
+  footer: null,
+  fx: null,
+  grabbed: null,
+  message: null,
+  parent: null,
+  request: null,
+  titlebar: null,
+  isOkClose: false,
+  btns: {},
+  status: null,
+
+  initialize: function(options) {
+    this.setOptions(options);
+    // new Image().src = '/i/img/dialog/cross-pushed.png'; // preloading of hover cross
+    if (this.options.id == 'dlg') {
+      this.options.id = 'dlg' + Ngn.String.rand(5);
+      if (this.options.savePosition) throw new Error('Can not save position on random ID');
+      if (this.options.vResize) throw new Error('Can not save size on random ID');
+    }
+    if (this.options.vResize && typeof(this.options.vResize) != 'function') {
+      this.options.vResize = Ngn.Dialog.VResize;
+    }
+    if (this.options.noPadding) this.options.messageAreaClass += ' dialog-nopadding';
+    if (this.options.reduceHeight) this.options.messageAreaClass += ' dialog-scroll';
+    if ($(this.options.id + '_dialog')) {
+      console.debug('Dialog with id=' + this.options.id + ' already opened. Aborted');
+      return null;
+    }
+    if (this.options.bindBuildMessageFunction) this.options.message = this.buildMessage.bind(this, this.options.message);
+    this.request = new (this.options.jsonRequest ? Ngn.Request.JSON : Ngn.Request)({
+      evalScripts: true,
+      onSuccess: this.urlResponse.bind(this),
+      onFailure: this.errorMessage.bind(this)
+    });
+    this.dialogId = this.options.id + '_dialog';
+    this.dialogN = Ngn.Dialog.dialogs.getLength() + 1;
+    Ngn.Dialog.dialogs[this.dialogId] = this;
+    this.parentElement = $((this.options.parent || document.body));
+    var dialog_styles = Object.merge({
+      'display': 'none',
+      'width': this.options.width.toInt() + 'px',
+      'z-index': this.options.baseZIndex + (this.dialogN * 2)
+    }, this.options.styles);
+    this.dialog = new Element('div', {
+      'id': this.dialogId,
+      'class': this.options.dialogClass,
+      //'opacity': (this.options.useFx ? 0 : 1),
+      'styles': dialog_styles
+    }).inject(this.parentElement);
+    if (this.options.fixed) this.dialog.setStyle('position', 'fixed');
+    this.fx = this.options.useFx ? new Fx.Tween(this.dialog, Object.merge({
+      duration: 300
+    }, this.options.fxOptions)) : null;
+    if (this.fx) this.fx.set('opacity', 0);
+
+    //dialog-message
+    //if (this.options.maxHeight)
+    //this.message.setStyle('max-height', this.options.maxHeight+'px');
+    //this.options.maxHeight;
+
+    // dialog box sections and borders
+    this.eMessage = new Element('div', {
+      'class': this.options.messageBoxClass
+    }).inject(this.dialog);
+
+    // dialog box title
+    if (this.options.title !== false) {
+      this.titlebar = new Element('div', {
+        'id': this.options.id + '_title',
+        'class': this.options.titleBarClass
+      }).inject(this.eMessage);
+
+      this.titleText = new Element('span', {'class': this.options.titleTextClass, 'html': this.options.title}).inject(this.titlebar);
+
+      if (this.options.titleClose != false) {
+        this.btnClose = Ngn.Btn.opacity(new Element('span', {
+          'id': this.options.id + '_closer',
+          'class': this.options.titleCloseClass
+          //'title': this.options.titleCloseTitle
+        }).inject(this.titlebar).addEvent('click', this.close.bind(this)));
+      }
+    }
+
+    // dialog box message
+    this.message = new Element('div', {
+      'id': this.options.id + '_message',
+      'class': this.options.messageAreaClass + (this.options.title === false ? ' ' + this.options.noTitleClass : '') + (this.options.footer === false ? ' ' + this.options.noFooterClass : '')
+    }).inject(this.eMessage);
+    if (this.options.height != 'auto') this.message.setStyle('max-height', this.options.height.toInt() + 'px');
+    if (this.options.height != 'auto') this.message.setStyle('overflow-y', 'auto');
+    this.beforeInitRequest();
+    if (this.options.url != undefined) {
+      this.dotter = new Ngn.Dotter(this.message);
+      this.dotter.start();
+      this.request.options.url = this.options.url;
+      this.startupLoading(true);
+      (function() {
+        this.request.send()
+      }).delay(100, this);
+      if (this.options.autoShow) this.delayedShow = true;
+    } else if (this.options.message != undefined) {
+      if (this.options.setMessageDelay) {
+        (function() {
+          this.setMessage(this.options.message);
+        }).delay(this.options.setMessageDelay, this);
+      } else {
+        this.setMessage(this.options.message);
+      }
+    }
+
+    // dialog footer
+    if (this.options.footer !== false) {
+      this.footer = new Element('div', {
+        'id': this.options.id + '_footer',
+        'class': this.options.footerClass
+      }).inject(this.eMessage);
+      new Element('div', {'class': 'foot-wrap'}).inject(this.footer);
+      if (this.options.ok !== false) {
+        this.createButton('ok', this.options.id, this.options.okText, this.options.okClass, this.options.ok, !this.options.okDestroy, undefined, true).inject(this.footer.firstChild, 'top');
+      }
+      if (this.options.cancel !== false) {
+        this.createButton('cancel', this.options.id, this.options.cancelText, this.options.cancelClass, this.options.cancel, !this.options.cancelDestroy).inject(this.footer.firstChild, 'top');
+      }
+      this.status = new Element('div', {'class': 'foot-status'}).inject(this.footer.firstChild, 'top');
+      if (typeOf(this.options.buttons) == 'object') {
+        for (var btn in this.options.buttons) {
+          btn = this.options.buttons[btn];
+          this.createButton(btn.name, this.options.id, btn.text, btn.class_name, btn.action, !(btn.auto_close), ((btn.tabindex != undefined) ? btn.tabindex : null)).inject(this.footer.firstChild, 'top');
+        }
+      }
+    }
+
+    // set dialog to draggable
+    if (this.options.draggable && this.titlebar) {
+      this.drag = new Drag.Move(this.dialog, {
+        handle: this.titlebar,
+        onComplete: function() {
+          if (this.options.savePosition) Ngn.Storage.json.set('dialogPos' + this.options.id, this.dialog.getPosition());
+          window.fireEvent('dialogMove', this);
+        }.bind(this)
+      });
+    }
+
+    this.fireEvent('complete');
+    this.init();
+
+    if (this.options.vResize) {
+      if (this.options.url) {
+        this.addEvent('request', function() {
+          new this.options.vResize(this);
+        }.bind(this));
+      } else {
+        new this.options.vResize(this);
+      }
+    }
+
+    // close on escape
+    this.dialog.addEvent('keydown', function(e) {
+      if (e.key == 'esc') this.close();
+    }.bind(this));
+    // execute onComplete function, if present.
+    if (this.options.autoShow && !this.request.running) {
+      this.show();
+    }
+    window.document.currentDialog = this;
+  },
+
+  initSavedPosition: function() {
+    if (this.options.id == 'dlg') throw new Error('Can not use default id for such dialog');
+    var pos = Ngn.Storage.json.get('dialogPos' + this.options.id);
+    if (pos) this.dialog.setPosition(pos); else this.initCenterPosition();
+  },
+
+  beforeInitRequest: function() {
+  },
+
+  init: function() {
+  },
+
+  initReduceHeight: function(force) {
+    if (force || !this.options.reduceHeight) return;
+    //if (this.initHeight) return;
+    //this.initHeight = this.message.getSize().y;
+    //if (!this.initHeight) throw new Error('Cannot be null');
+    window.addEvent('resize', this.reduceHeight.bind(this));
+    this.reduceHeight();
+  },
+
+  reduceHeight: function() {
+    var maxH = window.getSize().y - 150;
+    this.message.setStyle('max-height', maxH + 'px');
+    return;
+    if (this.initHeight < maxH)
+      this.message.setStyle('height', this.initHeight + 'px'); else
+      this.message.setStyle('height', maxH + 'px');
+  },
+
+  setTitle: function(title) {
+    if (this.options.title === false) return;
+    this.prevTitle = this.options.title;
+    this.title = title;
+    this.titleText.set('html', title);
+  },
+
+  restorePrevTitle: function() {
+    if (this.options.title === false) return;
+    this.titleText.set('html', this.prevTitle);
+  },
+
+  setMessage: function(_message, delayedShow) {
+    var message = (typeOf(_message) == 'function' ? _message() : _message);
+    if (this.dotter) this.dotter.stop();
+    if (typeOf(message) == 'element') {
+      this.grabbed = message.getParent();
+      if (this.grabbed != null) {
+        message.removeClass('none');
+        this.message.grab(message);
+      } else {
+        message.inject(this.message);
+      }
+    } else {
+      this.message.set('html', message);
+    }
+    if (delayedShow == undefined) delayedShow = this.delayedShow;
+    if (this.delayedShow && delayedShow) {
+      this.delayedShow = false;
+      this.show();
+    }
+
+    /*
+     if (this.titlebar && this.btnClose) {
+     this.titleText.setStyle('width',
+     (this.titlebar.getSizeWithoutPadding().x
+     - this.btnClose.getSizeWithMargin().x
+     - 10) + 'px');
+     }
+     */
+
+    this.initReduceHeight();
+    this.initPosition();
+  },
+
+  initPosition: function() {
+    this.options.savePosition ? this.initSavedPosition() : this.initCenterPosition();
+  },
+
+  setOkText: function(text) {
+    if (!this.btns.ok) return;
+    this.btns.ok.getElement('a').set('html', this.getButtonInnerHtml(text));
+  },
+
+  setWidth: function(width) {
+    this.options.width = width;
+    this.dialog.setStyle('width', width.toInt() + 'px');
+    this.initPosition();
+  },
+
+  enlargeWidth: function(width) {
+    if (width > this.options.width) this.setWidth(width);
+  },
+
+  toggle: function(name, flag) {
+    if (!this.btns[name]) return;
+    this.btns[name].setStyle('display', flag ? 'block' : 'none');
+  },
+
+  errorMessage: function(xhr) {
+  },
+
+  urlResponse: function(_response) {
+    if (this.closed) return;
+    this.startupLoading(false);
+    this.dotter.stop();
+    if (!this.options.jsonRequest) {
+      this.setMessage(_response, false);
+    } else {
+      if (_response.title) this.setTitle(_response.title);
+      this.setMessage('', false);
+    }
+    this.fireEvent('request', _response);
+  },
+
+  getButtonInnerHtml: function(text) {
+    return '<span><i></i>' + text + '</span>';
+  },
+
+  createButton: function(name, id, text, cls, action, unforceClose, tabindex, okClose) {
+    var self = this;
+    var eButton = new Element('div', { 'class': 'goright image-button ' + cls });
+    var eLink = new Element('a', {
+      id: id + '_' + name,
+      href: 'javascript:void(0)',
+      'class': 'btn',
+      tabindex: (tabindex != undefined ? tabindex : (++this.tab_index)),
+      html: this.getButtonInnerHtml(text)
+    }).inject(eButton);
+    if (action && action instanceof Function) {
+      eLink.addEvent('click', action);
+    }
+    if (!unforceClose) eLink.addEvent('click', okClose ? this.okClose.bind(this) : this.close.bind(this));
+    /*
+     if (!unforceClose) eLink.addEvent('click', function(e) {
+     e.preventDefault();
+     okClose ? this.okClose.bind(this) : this.close.bind(this);
+     }.bind(this));
+     */
+    this.btns[name] = eButton;
+    return eButton;
+  },
+
+  openShade: function() {
+    if (this.eShade != undefined) return;
+    this.eShade = new Element('div', {
+      'class': this.options.shadeClass,
+      'styles': {
+        'z-index': this.options.baseZIndex + (this.dialogN * 2) - 1
+      }
+    }).inject(document.body);
+    return this;
+  },
+
+  closeShade: function() {
+    this.eShade.dispose();
+  },
+
+  show: function() {
+    if (this.options.force) this.openShade();
+    this.dialog.setStyle('display', '');
+    this.initPosition();
+    this.fireEvent('show');
+    if (this.options.useFx) {
+      this.fx.start('opacity', 0, 1);
+    }
+  },
+
+  hide: function() {
+    this.dialog.setStyle('display', 'none');
+    this.fireEvent('hide');
+  },
+
+  okClose: function() {
+    this.isOkClose = true;
+    this.close();
+  },
+
+  close: function() {
+    if (this.options.useFx) {
+      this.fx.start('opacity', 1, 0).chain(this.finishClose.bind(this));
+    } else {
+      this.finishClose();
+    }
+  },
+
+  finishClose: function() {
+    document.getElement('body').removeClass('noscroll');
+    if ($(this.dialog)) {
+      this.closed = true;
+      if (this.grabbed != undefined) {
+        this.grabbed.grab(this.message.firstChild);
+      }
+      this.fireEvent('beforeClose');
+      this.dialog.empty().dispose();
+      Ngn.Dialog.dialogs.erase(this.dialogId);
+      if (this.options.force) this.closeShade();
+      this.fireEvent('close');
+      this.isOkClose ? this.fireEvent('okClose') : this.fireEvent('cancelClose');
+    }
+  },
+
+  initCenterPosition: function(fx) {
+    if (!this.options.center) return;
+    var parXY = this.parentElement.getCoordinates();
+    var parScroll = this.parentElement.getScroll();
+    var elmXY = this.dialog.getCoordinates();
+    var elmWH = this.dialog.getSize();
+    var dialogH = Math.round((parXY.height - elmWH.y) / 5);
+    if (dialogH < 20) dialogH = 20;
+    if (this.options.center !== 'y') {
+      if (fx) new Fx.Tween(this.dialog, { duration: 'short' }).start('left', ((parXY.width - elmWH.x) / 2) + 'px'); else this.dialog.setStyle('left', ((parXY.width - elmWH.x) / 2) + 'px');
+    }
+    if (this.options.center !== 'x') {
+      if (fx) new Fx.Tween(this.dialog, { duration: 'short' }).start('top', (dialogH + parScroll.y) + 'px');
+      //else this.dialog.setStyle('top', (dialogH + parScroll.y) + 'px');
+      else this.dialog.setStyle('top', this.options.top + 'px');
+    }
+  },
+
+  startupLoading: function(flag) {
+    flag ? this.message.addClass('dialog-loading') : this.message.removeClass('dialog-loading');
+    this.loading(flag);
+  },
+
+  loading: function(flag) {
+    this.toggle('ok', !flag);
+    this.toggle('cancel', !flag);
+    if (this.footer) {
+      this.message.removeClass('loading');
+      flag ? this.footer.addClass('loading') : this.footer.removeClass('loading');
+    } else {
+      flag ? this.message.addClass('loading') : this.message.removeClass('loading');
+    }
+  }
+
+});
+
+Ngn.Dialog.openWhenClosed = function(closingDialogObject, openDialogClass, options) {
+  var id = function() {
+    if (!closingDialogObject.closed) return;
+    clearInterval(id);
+    new openDialogClass(options);
+  }.periodical(500);
+};
+
+Ngn.Dialog.dialogs = new Hash({});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.VResize.js|--*/
+Ngn.Dialog.VResize = new Class({
+
+  initialize: function(dialog) {
+    this.dialog = dialog;
+    Ngn.Element._whenElPresents(this.getResizebleEl.bind(this), this.init.bind(this));
+  },
+
+  init: function() {
+    var eResizeble = this.getResizebleEl();
+    this.eHandler = new Element('div', {'class': 'vResizeHandler'}).inject(this.dialog.eMessage);
+    this.dialog.dialog.addClass('vResize');
+    var storeK = this.dialog.options.id + '_height';
+    var h = Ngn.Storage.get(storeK);
+    if (h) eResizeble.setStyle('height', h + 'px');
+    new Drag(eResizeble, {
+      preventDefault: true,
+      stopPropagation: true,
+      snap: 0,
+      handle: this.eHandler,
+      modifiers: {y: 'height', x: null},
+      onComplete: function() {
+        Ngn.Storage.set(storeK, eResizeble.getSize().y);
+      }
+    });
+    this.eHandler.inject(this.dialog.eMessage);
+  },
+
+  getResizebleEl: function() {
+    return this.dialog.eMessage;
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Element.js|--*/
+Ngn.Element = {};
+
+Ngn.Element._whenElPresents = function(elGetter, action, maxAttempts) {
+  var el;
+  el = elGetter();
+  find = function() {
+    return el = elGetter();
+  };
+  if (find()) {
+    action(el);
+    return;
+  }
+  maxAttempts = maxAttempts || 10;
+  var n = 1;
+  var id = function() {
+    n++;
+    if (find()) {
+      clearTimeout(id);
+      action(el);
+      return;
+    }
+    if (n == maxAttempts) {
+      clearTimeout(id);
+      throw new Error('Element not presents after ' + maxAttempts + ' attempts');
+    }
+  }.periodical(200);
+};
+
+Ngn.Element.whenElPresents = function(eParent, selector, action) {
+  return Ngn.Element._whenElPresents(function() {
+    return eParent.getElement(selector);
+  }, action);
+};
+
+Ngn.Element.bindSizes = function(eFrom, eTo) {
+  eFrom.addEvent('resize', function() {
+    eTo.setSize(eFrom.getSize());
+  });
+};
+
+Ngn.Element.initTips = function(els) {
+  if (!Ngn.tips) Ngn.Element.tips = new Tips(els);
+};
+
+Ngn.Element.setTip = function(el, title) {
+  if (!Ngn.Element.tips) Ngn.Element.initTips(el);
+  if (el.retrieve('tip:native')) {
+    Ngn.Element.tips.hide(el);
+    el.store('tip:title', title);
+  } else {
+    Ngn.Element.tips.attach(el);
+  }
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Btn.js|--*/
+// @requires Ngn.Frm
+
+Ngn.Btn = new Class({
+  Implements: [Options],
+
+  options: {
+    usePushed: false,
+    request: false,
+    fileUpload: false
+  },
+
+  pushed: false,
+
+  initialize: function(el, action, options) {
+    //if (options.request) this.request = options.request;
+    this.setOptions(options);
+    this.setAction(action);
+    this.el = el;
+    this.toggleDisabled(true);
+    var up = function() {
+      if (!this.enable) return;
+      if (!this.options.usePushed) this.el.removeClass('pushed');
+    }.bind(this);
+    var down = function() {
+      if (!this.enable) return;
+      if (!this.options.usePushed) this.el.addClass('pushed');
+    }.bind(this);
+    this.el.addEvent('mousedown', down);
+    this.el.addEvent('tap', down);
+    this.el.addEvent('mouseup', up);
+    this.el.addEvent('mouseout', up);
+    this.el.addEvent('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      if (!this.enable) return;
+      //if (this.request) this.toggleDisabled(false);
+      this.runAction();
+    }.bind(this));
+    //if (this.request) {
+    //  this.request.addEvent('complete', function() {
+    //    this.toggleDisabled(true);
+    //  }.bind(this));
+    //}
+    if (this.options.fileUpload) {
+      new Ngn.Btn.FileUpload(this, this.options.fileUpload);
+    }
+    this.init();
+  },
+
+  setAction: function(action) {
+    if (!action) action = function() {
+    };
+    if (typeof(action) == 'function') this.action = { action: action.bind(this) };
+    else {
+      if (action.classAction) {
+        // do nothing. action is class
+      } else {
+        if (action.args) {
+          action.action = action.action.pass(action.args, this);
+        } else {
+          action.action = action.action.bind(this);
+        }
+      }
+      this.action = action;
+    }
+  },
+
+  runAction: function() {
+    if (!this.pushed && this.action.confirm) {
+      var opt = {
+        id: this.action.id,
+        onOkClose: function() {
+          this._action();
+        }.bind(this)
+      };
+      if (typeof(this.action.confirm) == 'string') opt.message = this.action.confirm;
+      new Ngn.Dialog.Confirm.Mem(opt);
+    } else {
+      this._action();
+    }
+  },
+
+  _action: function() {
+    this.action.action();
+    if (this.options.usePushed) this.togglePushed(!this.pushed);
+    if (this.request) this.request.send();
+  },
+
+  init: function() {
+  },
+
+  togglePushed: function(pushed) {
+    this.pushed = pushed;
+    this.pushed ? this.el.addClass('pushed') : this.el.removeClass('pushed');
+  },
+
+  toggleDisabled: function(enable) {
+    this.enable = enable;
+    enable ? this.el.removeClass('nonActive') : this.el.addClass('nonActive');
+  }
+
+});
+
+/**
+ * Создаёт и возвращает html-элемент кнопки
+ *
+ * @param opt
+ * @param opt.cls CSS-класс
+ * @param opt.title Заголовок кнопки
+ * @param opt.caption Значение тега "title"
+ * @returns {HTMLElement}
+ */
+Ngn.Btn.btn = function(opt) {
+  if (!opt) opt = {};
+  if (!opt.cls) opt.cls = '';
+  if (!opt.title && !opt.cls.contains('btn')) opt.cls = 'bordered ' + opt.cls;
+  var a = new Element('a', Object.merge({
+    'class': (opt.cls.contains('icon') ? '' : 'smIcons ') + opt.cls,
+    html: opt.title || ''
+  }, opt.prop || {}));
+  if (opt.caption) {
+    a.set('title', opt.caption);
+    //Ngn.Element.setTip(a, opt.caption);
+  }
+  new Element('i').inject(a, 'top');
+  return a;
+};
+
+/**
+ * Кнопка с заголовком
+ */
+Ngn.Btn.btn1 = function(title, cls, prop) {
+  return Ngn.Btn.btn({
+    title: title,
+    cls: cls,
+    prop: prop
+  });
+};
+
+/**
+ * Кнопка с всплывающей подсказкой
+ */
+Ngn.Btn.btn2 = function(caption, cls, prop) {
+  return Ngn.Btn.btn({
+    caption: caption,
+    cls: cls,
+    prop: prop
+  });
+};
+
+Ngn.Btn.flag1 = function(defaultFirstState, state1, state2) {
+  return Ngn.Btn.__flag(Ngn.Btn.tn1, defaultFirstState, state1, state2);
+};
+
+Ngn.Btn.flag2 = function(defaultFirstState, state1, state2) {
+  return Ngn.Btn.__flag(Ngn.Btn.btn2, defaultFirstState, state1, state2);
+};
+
+Ngn.Btn.__flag = function(btn, defaultFirstState, state1, state2) {
+  var deflt = defaultFirstState ? state1 : state2;
+  return Ngn.Btn._flag(Ngn.Btn.btn2(deflt.title, deflt.cls), state1, state2);
+};
+
+Ngn.Btn._flag = function(eA, state1, state2) {
+  return eA.addEvent('click', function(e) {
+    e.preventDefault();
+    var flag = eA.hasClass(state1.cls);
+    var newState = flag ? state2 : state1;
+    var curState = flag ? state1 : state2;
+    if (curState.confirm !== undefined) if (!confirm(curState.confirm)) return;
+    new Ngn.Request({
+      url: curState.url,
+      onComplete: function() {
+        eA.removeClass(curState.cls);
+        eA.addClass(newState.cls);
+        eA.set('title', newState.title);
+        //Ngn.addTips(eA);
+      }
+    }).send();
+  });
+};
+
+Ngn.Btn.Action = new Class({
+  action: function() {}
+});
+
+Ngn.Btn.FileUpload = new Class({
+  Implements: [Options],
+
+  options: {
+    // url: '',
+    mime: '',
+    onRequest: function() {
+    },
+    onComplete: function() {
+    }
+  },
+
+  initialize: function(btn, options) {
+    this.btn = btn;
+    this.setOptions(options);
+    var eUploadWrapper = new Element('div', {styles: {
+      position: 'relative',
+      display: 'inline-block',
+      overflow: 'hidden'
+    }}).wraps(this.btn.el);
+    var eEile = new Element('input', {type: 'file', accept: this.options.mime, events: {
+      mouseover: function() {
+        this.getParent().getElement('a').addClass('over');
+      },
+      mouseout: function() {
+        this.getParent().getElement('a').removeClass('over');
+      }
+    }, styles: {
+      position: 'absolute',
+      cursor: 'pointer',
+      width: this.btn.el.getSize().x + 'px',
+      height: this.btn.el.getSize().y + 'px',
+      top: '0px',
+      left: '0px',
+      'z-index': 2,
+      'opacity': 0
+    }}).inject(eUploadWrapper, 'bottom');
+    eEile.addEvent('change', function() {
+      req.append('file', this.files[0]);
+      req.send();
+    });
+    this.options.onRequest = this.options.onRequest.bind(this);
+    this.options.onComplete = this.options.onComplete.bind(this);
+    var req = new Ngn.Request.File({
+      url: this.options.url,
+      formData: {
+        name: 'bg'
+      },
+      onRequest: function() {
+        this.btn.toggleDisabled(false);
+        this.options.onRequest();
+      }.bind(this),
+      onProgress: function(event) {
+        var loaded = event.loaded, total = event.total;
+        var proc = parseInt(loaded / total * 100, 10).limit(0, 100);
+        //c ('Загружено ' + proc + '%');
+        //if (proc == 100) console.debug('Загрузка завершена');
+      }.bind(this),
+      onComplete: function(r) {
+        this.btn.toggleDisabled(true);
+        this.options.onComplete(r);
+        eEile.set('value', '');
+        req.clear();
+      }.bind(this)
+    });
+
+  }
+
+});
+
+Ngn.Btn.addAction = function(selector, action, parent) {
+  var esBtn = (parent ? parent : document).getElements(selector);
+  if (!esBtn) return;
+  esBtn.each(function(eBtn) {
+    action = action.pass(eBtn);
+    eBtn.addEvent('click', function(e) {
+      e.preventDefault();
+      action(e);
+    });
+  });
+};
+
+Ngn.Btn.opacity = function(eBtn, outOp, overOp) {
+  var fx = new Fx.Morph(eBtn, { duration: 'short', link: 'cancel' });
+  if (!outOp != undefined) outOp = 0.4;
+  if (!overOp != undefined) overOp = 1;
+  eBtn.setStyle('opacity', outOp);
+  eBtn.addEvent('mouseover', function() {
+    fx.start({'opacity': [outOp, overOp]});
+  });
+  eBtn.addEvent('mouseout', function() {
+    fx.start({'opacity': [overOp, outOp]});
+  });
+  return eBtn;
+};
+
+Ngn.Btn.addAjaxAction = function(eBtn, action, onComplete) {
+  if (!eBtn) return;
+  onComplete = onComplete ? onComplete : Function.from();
+  eBtn.addEvent('click', function(e) {
+    e.preventDefault();
+    if (eBtn.hasClass('confirm') && !Ngn.confirm()) return;
+    if (eBtn.hasClass('loading')) return;
+    if (eBtn.retrieve('disabled')) return;
+    eBtn.addClass('loading');
+    new Ngn.Request({
+      url: eBtn.get('href').replace(action, 'ajax_' + action),
+      onComplete: function() {
+        onComplete();
+        eBtn.removeClass('loading');
+      }
+    }).send();
+  });
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Msg.js|--*/
+Ngn.Dialog.Msg = new Class({
+  Extends: Ngn.Dialog,
+
+  options: {
+    noPadding: false,
+    messageAreaClass: 'dialog-message large',
+    title: false
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
+Ngn.Dialog.Confirm = new Class({
+  Extends: Ngn.Dialog.Msg,
+
+  options: {
+    width: 300,
+    message: 'Вы уверены?'
+  },
+
+  initialize: function(_opts) {
+    var opts = Object.merge(_opts, {
+      cancel: false,
+      titleClose: false,
+      ok: this.closeAction.bind(this, true),
+      cancel: this.closeAction.bind(this, false)
+    });
+    this.parent(opts);
+  },
+
+  closeAction: function(_confirmed) {
+    _confirmed ? this.okClose() : this.close();
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.Mem.js|--*/
+Ngn.Dialog.Confirm.Mem = new Class({
+  Extends: Ngn.Dialog.Confirm,
+
+  options: {
+    width: 250,
+    okText: 'Удалить',
+    bindBuildMessageFunction: true,
+    notAskSomeTime: false
+  },
+
+  timeoutId: null,
+
+  initialize: function(_opts) {
+    this.setOptions(_opts);
+    this.options.dialogClass += ' dialog-confirm';
+    if (this.options.notAskSomeTime) {
+      if (this.timeoutId) clearTimeout(this.timeoutId);
+      this.timeoutId = (function() {
+        Ngn.Storage.remove(this.options.id + 'confirmMem');
+      }).delay(120000, this);
+    }
+    if (Ngn.Storage.get(this.options.id + 'confirmMem')) {
+      this.fireEvent('okClose');
+      return;
+    }
+    this.parent(_opts);
+  },
+
+  buildMessage: function(_msg) {
+    var eMessageCont = new Element('div');
+    if (this.options.notAskSomeTime) {
+      var checkboxCaption = 'Неспрашивать меня об этом какое-то время';
+    } else {
+      var checkboxCaption = 'Больше не спрашивать по этому поводу';
+    }
+    new Element('div', {'html': '<h3 style="margin-top:0px">' + _msg + '</h3>'}).inject(eMessageCont);
+    Elements.from('<span class="checkbox"><input type="checkbox" id="confirmMem' + this.options.id + '" class="confirmMem" /><label for="confirmMem' + this.options.id + '">' + checkboxCaption + '</label></span>')[0].inject(eMessageCont);
+    this.eMemCheckbox = eMessageCont.getElement('.confirmMem');
+    return eMessageCont;
+  },
+
+  finishClose: function() {
+    if (this.isOkClose) {
+      console.debug([this.options.id + 'confirmMem', this.eMemCheckbox.get('checked')]);
+      Ngn.Storage.set(this.options.id + 'confirmMem', this.eMemCheckbox.get('checked'));
+    }
+    this.parent();
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Dotter.js|--*/
+Ngn.Dotter = new Class({
+  Implements: [Options,Events],
+
+  options: {
+    delay: 500,
+    dot: '.',
+    message: 'Loading',
+    numDots: 10,
+    property: 'text',
+    reset: false/*,
+    onDot: Function.from(),
+    onStart: Function.from(),
+    onStop: Function.from()
+    */
+  },
+
+  initialize: function(container, options) {
+    this.setOptions(options);
+    this.container = document.id(container);
+    this.dots = 0;
+    this.running = false;
+  },
+
+  dot: function() {
+    if(this.running) {
+      var text = this.container.get(this.options.property);
+      this.dots++;
+      this.container.set(this.options.property,(this.dots % this.options.numDots != 0 ? text : this.options.message) + '' + this.options.dot);
+    }
+    return this;
+  },
+
+  load: function() {
+    this.loaded = true;
+    this.dots = 0;
+    this.dotter = function(){ this.dot(); this.fireEvent('dot'); }.bind(this);
+    this.periodical = this.dotter.periodical(this.options.delay);
+    this.container.set(this.options.property,this.options.message + '' + this.options.dot);
+    return this;
+  },
+
+  start: function() {
+    if(!this.loaded || this.options.reset) this.load();
+    this.running = true;
+    this.fireEvent('start');
+    return this;
+  },
+
+  stop: function() {
+    this.running = this.loaded = false;
+    clearTimeout(this.periodical);
+    this.fireEvent('stop');
+    return this;
+  }
+
+});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Alert.js|--*/
 Ngn.Dialog.Alert = new Class({
   Extends: Ngn.Dialog,
@@ -14934,6 +14733,860 @@ Ngn.Dialog.Error = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
+Ngn.Form.El.Color = new Class({
+  Extends: Ngn.Form.El,
+
+  init: function() {
+    var el = this.eRow;
+    var eColor = el.getElement('div.color');
+    var eInput = el.getElement('input').addClass('hexInput');
+    eInput.addEvent('change', function() {
+      eColor.setStyle('background-color', eInput.value);
+    });
+    new Ngn.Rainbow(eInput, {
+      eParent: eInput.getParent(),
+      id: 'rainbow_' + eInput.get('name'),
+      //styles: { // и так работает
+      //  'z-index': this.options.dialog.dialog.getStyle('z-index').toInt() + 1
+      //},
+      imgPath: '/i/img/rainbow/small/',
+      wheel: true,
+      startColor: eInput.value ? new Color(eInput.value).rgb : [255, 255, 255],
+      onChange: function(color) {
+        eColor.setStyle('background-color', color.hex);
+        eInput.value = color.hex;
+        eInput.fireEvent('change', color);
+      },
+      onComplete: function(color) {
+        eColor.setStyle('background-color', color.hex);
+        eInput.value = color.hex;
+        eInput.fireEvent('change', color);
+      }
+    });
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Rainbow.js|--*/
+Ngn.Rainbows = [];
+
+Ngn.Rainbow = new Class({
+  options: {
+    id: 'rainbow',
+    styles: {},
+    prefix: 'moor-',
+    imgPath: 'images/',
+    startColor: [255, 0, 0],
+    wheel: false,
+    onComplete: Function.from(),
+    onChange: Function.from(),
+    eParent: null
+  },
+
+  initialize: function(el, options) {
+    this.element = $(el);
+    if (!this.element) return;
+    this.setOptions(options);
+    if (!this.options.eParent) this.options.eParent = document.body;
+    this.sliderPos = 0;
+    this.pickerPos = {x: 0, y: 0};
+    this.backupColor = this.options.startColor;
+    this.currentColor = this.options.startColor;
+    this.sets = {
+      rgb: [],
+      hsb: [],
+      hex: []
+    };
+    this.pickerClick = this.sliderClick = false;
+    if (!this.layout) this.doLayout();
+    this.OverlayEvents();
+    this.sliderEvents();
+    this.backupEvent();
+    if (this.options.wheel) this.wheelEvents();
+    this.element.addEvent('click', function(e) {
+      this.closeAll().toggle(e);
+    }.bind(this));
+
+    this.layout.overlay.setStyle('background-color', this.options.startColor.rgbToHex());
+    //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
+
+    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
+    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
+
+    this.manualSet(this.options.startColor);
+
+    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
+    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
+    this.sliderPos = this.snippet('arrPos') - this.snippet('arrSize', 'int');
+
+    if (window.khtml) this.hide();
+  },
+
+  toggle: function() {
+    this[this.visible ? 'hide' : 'show']();
+  },
+
+  show: function() {
+    this.rePosition();
+    (function() {
+      this.layout.setStyle('display', 'block');
+    }).delay(100, this);
+    this.visible = true;
+  },
+
+  hide: function() {
+    this.layout.setStyles({'display': 'none'});
+    this.visible = false;
+  },
+
+  closeAll: function() {
+    Ngn.Rainbows.each(function(obj) {
+      obj.hide();
+    });
+
+    return this;
+  },
+
+  manualSet: function(color, type) {
+    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
+    var rgb, hsb, hex;
+
+    if (type == 'rgb') {
+      rgb = color;
+      hsb = color.rgbToHsb();
+      hex = color.rgbToHex();
+    } else if (type == 'hsb') {
+      hsb = color;
+      rgb = color.hsbToRgb();
+      hex = rgb.rgbToHex();
+    } else {
+      hex = color;
+      rgb = color.hexToRgb(true);
+      hsb = rgb.rgbToHsb();
+    }
+
+    this.setRainbow(rgb);
+    this.autoSet(hsb);
+  },
+
+  autoSet: function(hsb) {
+    var curH = this.snippet('curSize', 'int').h;
+    var curW = this.snippet('curSize', 'int').w;
+    var oveH = this.layout.overlay.height;
+    var oveW = this.layout.overlay.width;
+    var sliH = this.layout.slider.height;
+    var arwH = this.snippet('arrSize', 'int');
+    var hue;
+
+    var posx = Math.round(((oveW * hsb[1]) / 100) - curW);
+    var posy = Math.round(-((oveH * hsb[2]) / 100) + oveH - curH);
+
+    var c = Math.round(((sliH * hsb[0]) / 360));
+    c = (c == 360) ? 0 : c;
+    var position = sliH - c + this.snippet('slider') - arwH;
+    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
+
+    this.layout.cursor.setStyles({'top': posy, 'left': posx});
+    this.layout.arrows.setStyle('top', position);
+    this.layout.overlay.setStyle('background-color', hue);
+    this.sliderPos = this.snippet('arrPos') - arwH;
+    this.pickerPos.x = this.snippet('curPos').l + curW;
+    this.pickerPos.y = this.snippet('curPos').t + curH;
+  },
+
+  setRainbow: function(color, type) {
+    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
+    var rgb, hsb, hex;
+
+    if (type == 'rgb') {
+      rgb = color;
+      hsb = color.rgbToHsb();
+      hex = color.rgbToHex();
+    } else if (type == 'hsb') {
+      hsb = color;
+      rgb = color.hsbToRgb();
+      hex = rgb.rgbToHex();
+    } else {
+      hex = color;
+      rgb = color.hexToRgb();
+      hsb = rgb.rgbToHsb();
+    }
+    this.sets = {
+      rgb: rgb,
+      hsb: hsb,
+      hex: hex
+    };
+    if (this.pickerPos.x == null) this.autoSet(hsb);
+    this.RedInput.value = rgb[0];
+    this.GreenInput.value = rgb[1];
+    this.BlueInput.value = rgb[2];
+    this.HueInput.value = hsb[0];
+    this.SatuInput.value = hsb[1];
+    this.BrighInput.value = hsb[2];
+    //this.hexInput.value = hex;
+    this.currentColor = rgb;
+    //this.chooseColor.setStyle('background-color', rgb.rgbToHex());
+  },
+
+  parseColors: function(x, y, z) {
+    var s = Math.round((x * 100) / this.layout.overlay.width);
+    var b = 100 - Math.round((y * 100) / this.layout.overlay.height);
+    var h = 360 - Math.round((z * 360) / this.layout.slider.height) + this.snippet('slider') - this.snippet('arrSize', 'int');
+    h -= this.snippet('arrSize', 'int');
+    h = (h >= 360) ? 0 : (h < 0) ? 0 : h;
+    s = (s > 100) ? 100 : (s < 0) ? 0 : s;
+    b = (b > 100) ? 100 : (b < 0) ? 0 : b;
+
+    return [h, s, b];
+  },
+
+  OverlayEvents: function() {
+    var lim, curH, curW, inputs;
+    curH = this.snippet('curSize', 'int').h;
+    curW = this.snippet('curSize', 'int').w;
+    //inputs = Array.from(this.arrRGB).concat(this.arrHSB, this.hexInput);
+    document.addEvent('click', function() {
+      this.hide(this.layout);
+    }.bind(this));
+    /*
+    inputs.each(function(el) {
+      el.addEvent('keydown', this.eventKeydown.bindWithEvent(this, el));
+      el.addEvent('keyup', this.eventKeyup.bindWithEvent(this, el));
+    }, this);
+    */
+    [this.element, this.layout].each(function(el) {
+      el.addEvents({
+        'click': function(e) {
+          e.preventDefault();
+        },
+        'keyup': function(e) {
+          if (e.key == 'esc' && this.visible) this.hide(this.layout);
+        }.bind(this)
+      }, this);
+    }, this);
+    lim = {
+      //x: [0 - curW, this.layout.overlay.width - curW],
+      //y: [0 - curH, this.layout.overlay.height - curH]
+      x: [0 - curW, 80 - curW],
+      y: [0 - curH, 80 - curH]
+    };
+    this.layout.addEvent('click', function(e) {
+      e.stop();
+    });
+    this.layout.drag = new Drag(this.layout.cursor, {
+      limit: lim,
+      onBeforeStart: this.overlayDrag.bind(this),
+      onStart: this.overlayDrag.bind(this),
+      onDrag: this.overlayDrag.bind(this),
+      snap: 0
+    });
+
+    this.layout.overlay2.addEvent('mousedown', function(e) {
+      this.layout.cursor.setStyles({
+        'top': e.page.y - this.layout.overlay.getTop() - curH,
+        'left': e.page.x - this.layout.overlay.getLeft() - curW
+      });
+      this.layout.drag.start(e);
+    }.bind(this));
+
+    /*
+     this.layout.overlay2.addEvent('dblclick', function(){
+     this.ok();
+     }.bind(this));
+     this.okButton.addEvent('click', function() {
+     this.ok();
+     }.bind(this));
+     */
+
+
+    this.transp.addEvent('click', function() {
+      this.hide();
+      this.fireEvent('onComplete', ['transparent', this]);
+    }.bind(this));
+  },
+
+  ok: function() {
+    if (this.currentColor == this.options.startColor) {
+      this.hide();
+      this.fireEvent('onComplete', [this.sets, this]);
+    } else {
+      this.backupColor = this.currentColor;
+      //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
+      this.hide();
+      this.fireEvent('onComplete', [this.sets, this]);
+    }
+  },
+
+  overlayDrag: function() {
+    var curH = this.snippet('curSize', 'int').h;
+    var curW = this.snippet('curSize', 'int').w;
+    this.pickerPos.x = this.snippet('curPos').l + curW;
+    this.pickerPos.y = this.snippet('curPos').t + curH;
+    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
+    this.fireEvent('onChange', [this.sets, this]);
+  },
+
+  sliderEvents: function() {
+    var arwH = this.snippet('arrSize', 'int'), lim;
+    lim = [0 + this.snippet('slider') - arwH, this.layout.slider.height - arwH + this.snippet('slider')];
+    this.layout.sliderDrag = new Drag(this.layout.arrows, {
+      limit: {y: lim},
+      modifiers: {x: false},
+      onBeforeStart: this.sliderDrag.bind(this),
+      onStart: this.sliderDrag.bind(this),
+      onDrag: this.sliderDrag.bind(this),
+      snap: 0
+    });
+
+    this.layout.slider.addEvent('mousedown', function(e) {
+      this.layout.arrows.setStyle('top', e.page.y - this.layout.slider.getTop() + this.snippet('slider') - arwH);
+      this.layout.sliderDrag.start(e);
+    }.bind(this));
+  },
+
+  sliderDrag: function() {
+    var arwH = this.snippet('arrSize', 'int'), hue;
+
+    this.sliderPos = this.snippet('arrPos') - arwH;
+    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
+    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
+    this.layout.overlay.setStyle('background-color', hue);
+    this.fireEvent('onChange', [this.sets, this]);
+  },
+
+  backupEvent: function() {
+    /*
+    this.layout.backup.addEvent('click', function() {
+      this.manualSet(this.backupColor);
+      this.fireEvent('onChange', [this.sets, this]);
+    }.bind(this));
+    */
+  },
+
+  wheelEvents: function() {
+    var arrColors = Object.append(Array.from(this.arrRGB), this.arrHSB);
+    arrColors.each(function(el) {
+      el.addEvents({
+        'mousewheel': function() {
+          this.eventKeys(el);
+        }.bind(this),
+        'keydown': function() {
+          this.eventKeys(el);
+        }.bind(this)
+      });
+    }, this);
+
+    [this.layout.arrows, this.layout.slider].each(function(el) {
+      el.addEvents({
+        'mousewheel': function() {
+          this.eventKeys([this.arrHSB[0], 'slider']);
+        }.bind(this),
+        'keydown': function() {
+          this.eventKeys([this.arrHSB[0], 'slider']);
+        }.bind(this)
+      });
+    }, this);
+  },
+
+  eventKeys: function(e, el, id) {
+    var wheel, type;
+    id = (!id) ? el.id : this.arrHSB[0];
+
+    if (e.type == 'keydown') {
+      if (e.key == 'up') wheel = 1; else if (e.key == 'down') wheel = -1; else return;
+    } else if (e.type == Element.Events.mousewheel.base) wheel = (e.wheel > 0) ? 1 : -1;
+
+    if (this.arrRGB.contains(el)) type = 'rgb'; else if (this.arrHSB.contains(el)) type = 'hsb'; else type = 'hsb';
+
+    if (type == 'rgb') {
+      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
+      var value = (el.value.toInt() || 0) + wheel;
+      value = (value > 255) ? 255 : (value < 0) ? 0 : value;
+
+      switch (el.className) {
+        case prefix + 'rInput':
+          pass = [value, rgb[1], rgb[2]];
+          break;
+        case prefix + 'gInput':
+          pass = [rgb[0], value, rgb[2]];
+          break;
+        case prefix + 'bInput':
+          pass = [rgb[0], rgb[1], value];
+          break;
+        default :
+          pass = rgb;
+      }
+      this.manualSet(pass);
+      this.fireEvent('onChange', [this.sets, this]);
+    } else {
+      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
+      var value = (el.value.toInt() || 0) + wheel;
+
+      if (el.className.test(/(HueInput)/)) value = (value > 359) ? 0 : (value < 0) ? 0 : value; else value = (value > 100) ? 100 : (value < 0) ? 0 : value;
+
+      switch (el.className) {
+        case prefix + 'HueInput':
+          pass = [value, hsb[1], hsb[2]];
+          break;
+        case prefix + 'SatuInput':
+          pass = [hsb[0], value, hsb[2]];
+          break;
+        case prefix + 'BrighInput':
+          pass = [hsb[0], hsb[1], value];
+          break;
+        default :
+          pass = hsb;
+      }
+
+      this.manualSet(pass, 'hsb');
+      this.fireEvent('onChange', [this.sets, this]);
+    }
+    e.stop();
+  },
+
+  eventKeydown: function(e, el) {
+    var n = e.code, k = e.key;
+    if ((!el.className.test(/hexInput/) && !(n >= 48 && n <= 57)) && (k != 'backspace' && k != 'tab' && k != 'delete' && k != 'left' && k != 'right'))
+      e.stop();
+  },
+
+  eventKeyup: function(e, el) {
+    var n = e.code, k = e.key, pass, prefix, chr = el.value.charAt(0);
+    if (el.value == null) return;
+    if (el.className.test(/hexInput/)) {
+      if (chr != "#" && el.value.length != 6) return;
+      if (chr == '#' && el.value.length != 7) return;
+    } else {
+      if (!(n >= 48 && n <= 57) && (!['backspace', 'tab', 'delete', 'left', 'right'].contains(k)) && el.value.length > 3) return;
+    }
+
+    prefix = this.options.prefix;
+
+    if (el.className.test(/(rInput|gInput|bInput)/)) {
+      if (el.value < 0 || el.value > 255) return;
+      switch (el.className) {
+        case prefix + 'rInput':
+          pass = [el.value, this.sets.rgb[1], this.sets.rgb[2]];
+          break;
+        case prefix + 'gInput':
+          pass = [this.sets.rgb[0], el.value, this.sets.rgb[2]];
+          break;
+        case prefix + 'bInput':
+          pass = [this.sets.rgb[0], this.sets.rgb[1], el.value];
+          break;
+        default :
+          pass = this.sets.rgb;
+      }
+      this.manualSet(pass);
+      this.fireEvent('onChange', [this.sets, this]);
+    } else if (!el.className.test(/hexInput/)) {
+      if (el.className.test(/HueInput/) && el.value < 0 || el.value > 360) return; else if (el.className.test(/HueInput/) && el.value == 360) el.value = 0; else if (el.className.test(/(SatuInput|BrighInput)/) && el.value < 0 || el.value > 100) return;
+      switch (el.className) {
+        case prefix + 'HueInput':
+          pass = [el.value, this.sets.hsb[1], this.sets.hsb[2]];
+          break;
+        case prefix + 'SatuInput':
+          pass = [this.sets.hsb[0], el.value, this.sets.hsb[2]];
+          break;
+        case prefix + 'BrighInput':
+          pass = [this.sets.hsb[0], this.sets.hsb[1], el.value];
+          break;
+        default :
+          pass = this.sets.hsb;
+      }
+      this.manualSet(pass, 'hsb');
+      this.fireEvent('onChange', [this.sets, this]);
+    } else {
+      pass = el.value.hexToRgb(true);
+      if (isNaN(pass[0]) || isNaN(pass[1]) || isNaN(pass[2])) return;
+      if (pass != null) {
+        this.manualSet(pass);
+        this.fireEvent('onChange', [this.sets, this]);
+      }
+    }
+  },
+
+  doLayout: function() {
+    var id = this.options.id, prefix = this.options.prefix;
+    var idPrefix = id + ' .' + prefix;
+
+    this.layout = new Element('div', {
+      'styles': Object.merge({ 'display': 'block', 'position': 'absolute', zIndex: 10}, this.options.styles),
+      'id': id
+    }).inject(this.options.eParent);
+
+    Ngn.Rainbows.push(this);
+
+    var box = new Element('div', {
+      'styles': {'position': 'relative'},
+      'class': prefix + 'box'
+    }).inject(this.layout);
+
+    var div = new Element('div', {
+      'styles': {'position': 'absolute', 'overflow': 'hidden'},
+      'class': prefix + 'overlayBox'
+    }).inject(box);
+
+    var ar = new Element('div', {
+      'styles': {
+        'position': 'absolute'
+        //,'zIndex': 1
+      },
+      'class': prefix + 'arrows'
+    }).inject(box);
+    ar.width = ar.getStyle('width').toInt();
+    ar.height = ar.getStyle('height').toInt();
+
+    var ov = new Element('img', {
+      'styles': {
+        'background-color': '#fff',
+        'position': 'relative'
+        //,'zIndex': 2
+      },
+      'src': this.options.imgPath + 'moor_woverlay.png',
+      'class': prefix + 'overlay'
+    }).inject(div);
+
+    var ov2 = new Element('img', {
+      'styles': {'position': 'absolute', 'top': 0, 'left': 0/*, 'zIndex': 2*/},
+      'src': this.options.imgPath + 'moor_boverlay.png',
+      'class': prefix + 'overlay'
+    }).inject(div);
+
+    if (window.ie6) {
+      div.setStyle('overflow', '');
+      var src = ov.src;
+      ov.src = this.options.imgPath + 'blank.gif';
+      ov.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
+      src = ov2.src;
+      ov2.src = this.options.imgPath + 'blank.gif';
+      ov2.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
+    }
+    ov.width = ov2.width = div.getStyle('width').toInt();
+    ov.height = ov2.height = div.getStyle('height').toInt();
+
+    var cr = new Element('div', {
+      'styles': {'overflow': 'hidden', 'position': 'absolute'/*, 'zIndex': 2*/},
+      'class': prefix + 'cursor'
+    }).inject(div);
+    cr.width = cr.getStyle('width').toInt();
+    cr.height = cr.getStyle('height').toInt();
+
+    var sl = new Element('img', {
+      'styles': {'position': 'absolute'/*, 'z-index': 2, marginLeft: '1px'*/},
+      'src': this.options.imgPath + 'moor_slider.png',
+      'class': prefix + 'slider'
+    }).inject(box);
+    this.layout.slider = document.getElement('#' + idPrefix + 'slider');
+    sl.width = sl.getStyle('width').toInt();
+    sl.height = sl.getStyle('height').toInt();
+
+    new Element('div', {
+      'styles': {'position': 'absolute'},
+      'class': prefix + 'colorBox'
+    }).inject(box);
+
+    /*
+     new Element('div', {
+      'styles': {
+      //'zIndex': 2,
+      'position': 'absolute'
+      },
+      'class': prefix + 'chooseColor'
+    }).inject(box);
+
+    this.layout.backup = new Element('div', {
+      'styles': {
+        //'zIndex': 2,
+        'position': 'absolute', 'cursor': 'pointer'},
+      'class': prefix + 'currentColor'
+    }).inject(box);
+    */
+
+    var R = new Element('label').inject(box).setStyle('position', 'absolute');
+    var G = R.clone().inject(box).addClass(prefix + 'gLabel').appendText('G: ');
+    var B = R.clone().inject(box).addClass(prefix + 'bLabel').appendText('B: ');
+    R.appendText('R: ').addClass(prefix + 'rLabel');
+
+    var inputR = new Element('input');
+    var inputG = inputR.clone().inject(G).addClass(prefix + 'gInput');
+    var inputB = inputR.clone().inject(B).addClass(prefix + 'bInput');
+    inputR.inject(R).addClass(prefix + 'rInput');
+
+    var HU = new Element('label').inject(box).setStyle('position', 'absolute');
+    var SA = HU.clone().inject(box).addClass(prefix + 'SatuLabel').appendText('S: ');
+    var BR = HU.clone().inject(box).addClass(prefix + 'BrighLabel').appendText('B: ');
+    HU.appendText('H: ').addClass(prefix + 'HueLabel');
+
+    var inputHU = new Element('input');
+    var inputSA = inputHU.clone().inject(SA).addClass(prefix + 'SatuInput');
+    var inputBR = inputHU.clone().inject(BR).addClass(prefix + 'BrighInput');
+    inputHU.inject(HU).addClass(prefix + 'HueInput');
+    SA.appendText(' %');
+    BR.appendText(' %');
+    new Element('span', {'styles': {'position': 'absolute'}, 'class': prefix + 'ballino'}).set('html', " &deg;").inject(HU, 'after');
+
+    //var hex = new Element('label').inject(box).setStyle('position', 'absolute').addClass(prefix + 'hexLabel').appendText('#hex: ').adopt(new Element('input').addClass(prefix + 'hexInput'));
+
+    /*
+    var ok = new Element('input', {
+      'styles': {'position': 'absolute'},
+      'type': 'button',
+      'value': 'OK',
+      'class': prefix + 'okButton'
+    }).inject(box);
+    */
+
+    var transp = new Element('a', {'style': {'position': 'absolute'}, 'href': '#', 'class': prefix + 'transp'}).inject(box);
+
+    this.rePosition();
+
+    var overlays = $$('#' + idPrefix + 'overlay');
+    this.layout.overlay = overlays[0];
+
+    this.layout.overlay2 = overlays[1];
+    this.layout.cursor = document.getElement('#' + idPrefix + 'cursor');
+    this.layout.arrows = document.getElement('#' + idPrefix + 'arrows');
+    this.chooseColor = document.getElement('#' + idPrefix + 'chooseColor');
+    //this.layout.backup = document.getElement('#' + idPrefix + 'currentColor');
+    this.RedInput = document.getElement('#' + idPrefix + 'rInput');
+    this.GreenInput = document.getElement('#' + idPrefix + 'gInput');
+    this.BlueInput = document.getElement('#' + idPrefix + 'bInput');
+    this.HueInput = document.getElement('#' + idPrefix + 'HueInput');
+    this.SatuInput = document.getElement('#' + idPrefix + 'SatuInput');
+    this.BrighInput = document.getElement('#' + idPrefix + 'BrighInput');
+    //this.hexInput = document.getElement('#' + idPrefix + 'hexInput');
+
+    this.arrRGB = [this.RedInput, this.GreenInput, this.BlueInput];
+    this.arrHSB = [this.HueInput, this.SatuInput, this.BrighInput];
+    //this.okButton = document.getElement('#' + idPrefix + 'okButton');
+    this.transp = box.getElement('.' + prefix + 'transp');
+
+    if (!window.khtml) this.hide();
+  },
+  rePosition: function() {
+    return;
+    var coords = this.element.getCoordinates();
+    this.layout.setStyles({
+      'left': coords.left,
+      'top': coords.top + coords.height + 1
+    });
+  },
+
+  snippet: function(mode, type) {
+    var size;
+    type = (type) ? type : 'none';
+    switch (mode) {
+      case 'arrPos':
+        var t = this.layout.arrows.getStyle('top').toInt();
+        size = t;
+        break;
+      case 'arrSize':
+        var h = this.layout.arrows.height;
+        h = (type == 'int') ? (h / 2).toInt() : h;
+        size = h;
+        break;
+      case 'curPos':
+        var l = this.layout.cursor.getStyle('left').toInt();
+        var t = this.layout.cursor.getStyle('top').toInt();
+        size = {'l': l, 't': t};
+        break;
+      case 'slider':
+        var t = this.layout.slider.getStyle('marginTop').toInt();
+        size = t;
+        break;
+      default :
+        var h = this.layout.cursor.height;
+        var w = this.layout.cursor.width;
+        h = (type == 'int') ? (h / 2).toInt() : h;
+        w = (type == 'int') ? (w / 2).toInt() : w;
+        size = {w: w, h: h};
+    }
+    ;
+    return size;
+  }
+});
+
+Ngn.Rainbow.implement(new Options);
+Ngn.Rainbow.implement(new Events);
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
+Ngn.Dialog.RequestFormBase = new Class({
+  Extends: Ngn.Dialog,
+
+  options: {
+    okDestroy: false,
+    jsonRequest: true,
+    autoSave: false,
+    getFormData: function() {
+      return Ngn.Frm.toObj(this.form.eForm);
+    },
+    onFormResponse: Function.from(),
+    onFormRequest: Function.from(),
+    onSubmitSuccess: Function.from()
+  },
+
+  initialize: function(options) {
+    options = options || {};
+    options.ok = this.submit.bind(this);
+    if (options.submitUrl == undefined) {
+      if (options.jsonSubmit == undefined) options.jsonSubmit = false;
+      options.submitUrl = options.url;
+    }
+    this.parent(options);
+    this.toggle('ok', false);
+    this.iframeUpload = true;
+    window.addEvent('keypress', function(e) {
+      if (e.key != 'enter' || e.target.get('tag') == 'textarea') return;
+      e.preventDefault();
+      this.submit();
+    }.bind(this));
+  },
+
+  form: null,
+  response: null,
+
+  urlResponse: function(r) {
+    this.parent(r);
+    this.response = r;
+    if (r.submitTitle) this.setOkText(r.submitTitle);
+    if (r.jsOptions) {
+      if (r.jsOptions.onOkClose)
+        this.addEvent('okClose', r.jsOptions.onOkClose);
+    }
+    this.setMessage(r.form, false);
+    this.form = Ngn.Form.factory(this.message.getElement('form'), {
+      ajaxSubmit: true,
+      ajaxSubmitUrl: this.options.submitUrl,
+      disableInit: true
+    });
+    this.form.options.dialog = this; // Важно передавать объект Диалога в объект
+    // Формы после выполнения конструктура, иначе объект
+    // Даилога не будет содержать созданого объекта Формы
+    this.form.init();
+    this.fireEvent('formResponse');
+    this.form.addEvent('submit', function(r) {
+      this.fireEvent('formRequest');
+      this.loading(true);
+    }.bind(this));
+    this.form.addEvent('failed', function(r) {
+      this.urlResponse(r);
+      this.loading(false);
+    }.bind(this));
+    this.form.addEvent('complete', function(r) {
+      this.response = r;
+      this.okClose();
+      this.fireEvent('submitSuccess', r);
+    }.bind(this));
+    this.resizeByCols();
+    if (this.options.autoSave) {
+      new Ngn.Frm.Saver(this.form.eForm, {
+        url: this.options.submitUrl,
+        jsonRequest: true
+      });
+    }
+    this.initEvents();
+    this.formInit();
+    this.initPosition();
+  },
+
+  // abstract
+  initEvents: function() {
+  },
+
+  resizeByCols: function() {
+    var cols = this.form.eForm.getElements('.type_col');
+    if (!cols.length) return;
+    //var maxY = 0;
+    var ys = [];
+    var x = 0;
+    for (var i = 0; i < cols.length; i++) {
+      ys[i] = cols[i].getSize().y;
+      x += cols[i].getSize().x;
+    }
+    //for (var i=0; i<cols.length; i++) cols[i].setStyle('height', ys.max() + 'px');
+    this.dialog.setStyle('width', (x + 12) + 'px');
+  },
+
+  formInit: function() {
+  },
+
+  submit: function() {
+    this._submit();
+  },
+
+  finishClose: function() {
+    this.parent();
+    // если в последнем респонзе есть ссылка не следующую форму
+    if (this.isOkClose && this.response.nextFormUrl) {
+      var opt = {};
+      if (this.response.nextFormOptions) opt = Object.merge(opt, this.response.nextFormOptions);
+      opt.url = this.response.nextFormUrl;
+      new Ngn.Dialog.RequestForm(opt);
+    }
+  }
+
+  // abstract
+  //_submit: {}
+
+});
+
+Ngn.Dialog.Form = new Class({
+  Extends: Ngn.Dialog.RequestFormBase,
+
+  options: {
+    onSubmit: Function.from()
+  },
+
+  _submit: function() {
+    this.fireEvent('submit', this.options.getFormData.bind(this)());
+    this.okClose();
+  }
+
+});
+
+Ngn.Dialog.RequestForm = new Class({
+  Extends: Ngn.Dialog.RequestFormBase,
+
+  options: {
+    autoSave: false,
+    formEvents: false
+    //cacheRequest: false
+  },
+
+  _submit: function() {
+    this.form.submit();
+  },
+
+  initEvents: function() {
+    if (!this.options.formEvents) return;
+    var obj = this;
+    for (var i = 0; i < this.options.formEvents.length; i++) {
+      var evnt = this.options.formEvents[i];
+      this.message.getElement('[name=' + evnt.fieldName + ']').addEvent(evnt.fieldEvent, function() {
+        obj.fireEvent(evnt.formEvent, this.get('value'));
+      });
+    }
+  }
+
+});
+
+Ngn.Dialog.RequestForm.Static = new Class({
+  Extends: Ngn.Dialog.RequestForm,
+
+  // options: {
+  //   staticResponse: {
+  //     title: text
+  //     submitTitle: text
+  //     form: html
+  //   }
+  // }
+
+  initFormResponse: function() {
+    this.urlResponse(Ngn.json.process(this.options.staticResponse));
+  }
+
+});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.Saver.js|--*/
 Ngn.Frm.SaverBase = new Class({
   Implements: [Options],
@@ -15372,6 +16025,19 @@ Ngn.Form.El.DialogSelect = new Class({
     };
   }
 });
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.js|--*/
+Ngn.toObj = function(s, value) {
+  var a = s.split('.');
+  for (var i = 0; i < a.length; i++) {
+    var ss = a.slice(0, i + 1).join('.');
+    eval('var def = ' + ss + ' === undefined');
+    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
+  }
+  if (value) eval(s + ' = value');
+};
+
+if (!Ngn.tpls) Ngn.tpls = {};
+
 /*--|/home/user/ngn-env/ngn/more/scripts/js/common/tpl.php| (with request data)--*/
 Ngn.toObj('Ngn.tpls.fontSelect', '<div class="selectItems">\n    <div class="item" data-name="Aero_Matics_Stencil_Regular">\n    Aero_Matics_Stencil_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Ancient_Kyiv">\n    Ancient_Kyiv    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Archive">\n    Archive    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Attentica_4f_Ultralight">\n    Attentica_4f_Ultralight    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Avdira">\n    Avdira    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azamat">\n    Azamat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans">\n    Azoft_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold">\n    Azoft_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold_Italic">\n    Azoft_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Italic">\n    Azoft_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bad_Script">\n    Bad_Script    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bardelin">\n    Bardelin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Barkentina">\n    Barkentina    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender">\n    Bender    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black">\n    Bender_Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black_Italic">\n    Bender_Black_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold">\n    Bender_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold_Italic">\n    Bender_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Italic">\n    Bender_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light">\n    Bender_Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light_Italic">\n    Bender_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boblic">\n    Boblic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bombarda">\n    Bombarda    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boom_Boom">\n    Boom_Boom    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bradobrei">\n    Bradobrei    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella">\n    Brava_Novella    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella_Italic">\n    Brava_Novella_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brush">\n    Brush    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Regular">\n    Corki_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Rounded">\n    Corki_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan">\n    Corki_Tuscan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan_Rounded">\n    Corki_Tuscan_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Danger">\n    Danger    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Days">\n    Days    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decolz">\n    Decolz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decree_Art_Two">\n    Decree_Art_Two    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Derby">\n    Derby    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Deuz_Ex">\n    Deuz_Ex    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Don_Quixote">\n    Don_Quixote    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans">\n    Droid_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans_Bold">\n    Droid_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="FatC">\n    FatC    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Font_Awesome">\n    Font_Awesome    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Free_Font_Pro">\n    Free_Font_Pro    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat">\n    Fregat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold">\n    Fregat_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold_Italic">\n    Fregat_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Italic">\n    Fregat_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Glidesketch">\n    Glidesketch    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Gogol">\n    Gogol    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web">\n    Graublau_Web    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web_Bold">\n    Graublau_Web_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Medium">\n    Hagin_Caps_Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Thin">\n    Hagin_Caps_Thin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo">\n    Hattori_Hanzo    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo_Italic">\n    Hattori_Hanzo_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Helgoland">\n    Helgoland    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Intruder">\n    Intruder    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold">\n    Iwona_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold_Italic">\n    Iwona_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold">\n    Iwona_Condensed_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold_Italic">\n    Iwona_Condensed_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Italic">\n    Iwona_Condensed_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Regular">\n    Iwona_Condensed_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Italic">\n    Iwona_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Italic">\n    Iwona_Condensed_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Regular">\n    Iwona_Condensed_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Medium_Regular">\n    Iwona_Condensed_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Regular">\n    Iwona_Condensed_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condesed_Medium_Italic">\n    Iwona_Condesed_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Italic">\n    Iwona_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Regular">\n    Iwona_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Italic">\n    Iwona_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Italic">\n    Iwona_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Regular">\n    Iwona_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Italic">\n    Iwona_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Regular">\n    Iwona_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Regular">\n    Iwona_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="John_Daniels">\n    John_Daniels    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Juan">\n    Juan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Bold_RU">\n    Kelson_Sans_Bold_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Light_RU">\n    Kelson_Sans_Light_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Regular_RU">\n    Kelson_Sans_Regular_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Bold">\n    Kotyhoroshko_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Regular">\n    Kotyhoroshko_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lloyd">\n    Lloyd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lobster">\n    Lobster    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Audrey_BG">\n    Lovely_Audrey_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Grace_BG">\n    Lovely_Grace_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Sofia_BG">\n    Lovely_Sofia_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed">\n    Lytiga_Pro_Condensed    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed_Italic">\n    Lytiga_Pro_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended">\n    Lytiga_Pro_Extended    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended_Italic">\n    Lytiga_Pro_Extended_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Italic">\n    Lytiga_Pro_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Regular">\n    Lytiga_Pro_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="MS_Reshetka">\n    MS_Reshetka    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Bold">\n    Marta_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Italic">\n    Marta_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Regular">\n    Marta_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs">\n    Mikodacs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs_PCS">\n    Mikodacs_PCS    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Multima_Bold">\n    Multima_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Museo_Sans_500">\n    Museo_Sans_500    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Neonic">\n    Neonic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nikodecs">\n    Nikodecs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG">\n    Nioki_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Bold">\n    Nioki_BG_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Italic">\n    Nioki_BG_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Now_Grotesk">\n    Now_Grotesk    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Bold">\n    Old_Standard_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Italic">\n    Old_Standard_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Regular">\n    Old_Standard_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Oranienbaum">\n    Oranienbaum    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus">\n    Orpheus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Bold">\n    Orpheus_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Italic">\n    Orpheus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold">\n    Palemonas_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold_Italic">\n    Palemonas_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Italic">\n    Palemonas_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Regular">\n    Palemonas_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama">\n    Perforama    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama_Italic">\n    Perforama_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pharmadin">\n    Pharmadin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Philosopher">\n    Philosopher    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Bold">\n    Pixar_One_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Display">\n    Pixar_One_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Regular">\n    Pixar_One_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Bold">\n    Pixar_Two_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Display">\n    Pixar_Two_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Regular">\n    Pixar_Two_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans">\n    Resavska_BG_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold">\n    Resavska_BG_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold_Italic">\n    Resavska_BG_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Italic">\n    Resavska_BG_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Retropecan">\n    Retropecan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Black">\n    SkolaSans-Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BlackItalic">\n    SkolaSans-BlackItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Bold">\n    SkolaSans-Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BoldItalic">\n    SkolaSans-BoldItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Light">\n    SkolaSans-Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-LightItalic">\n    SkolaSans-LightItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Medium">\n    SkolaSans-Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-MediumItalic">\n    SkolaSans-MediumItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Regular">\n    SkolaSans-Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-RegularItalic">\n    SkolaSans-RegularItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Skoropys_XVII">\n    Skoropys_XVII    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sports_World_Regular">\n    Sports_World_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Stiff_Staff">\n    Stiff_Staff    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sumkin">\n    Sumkin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus">\n    Supremus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Condensed_Italic">\n    Supremus_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Italic">\n    Supremus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Tot_Shrift_Bold">\n    Tot_Shrift_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Underdog">\n    Underdog    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Venus_Rising">\n    Venus_Rising    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Zion_Train_Pro_Stencil_Bold">\n    Zion_Train_Pro_Stencil_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Znikomit_No25">\n    Znikomit_No25    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arial">\n    arial    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbd">\n    arialbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbi">\n    arialbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="ariali">\n    ariali    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgia">\n    georgia    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiab">\n    georgiab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiai">\n    georgiai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiaz">\n    georgiaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="impact">\n    impact    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahoma">\n    tahoma    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahomabd">\n    tahomabd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="times">\n    times    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbd">\n    timesbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbi">\n    timesbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesi">\n    timesi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdana">\n    verdana    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanab">\n    verdanab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanai">\n    verdanai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanaz">\n    verdanaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="clear"></div>\n  <script>\n  </script>\n</div>');
 /*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.js|--*/
@@ -17380,683 +18046,69 @@ Ngn.sd.LayersBar = new Class({
   }
 });
 
-/*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('New banner', 'add'), function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/newBanner',
-      width: 200,
-      onSubmitSuccess: function(r) {
-        window.location = '/cpanel/' + r.id;
-      }
-    });
-  });
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedText.js|--*/
-Ngn.sd.blockTypes.push({
-  title: 'Text',
-  data: {
-    type: 'animatedText',
-    subType: 'text'
-  }
-});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.Html.js|--*/
+Ngn.FieldSet.Html = new Class({
+  Extends: Ngn.FieldSet,
 
-Ngn.sd.BlockBAnimatedText = new Class({
-  Extends: Ngn.sd.BlockBFont,
-  init: function() {
-    this.parent();
-  },
-  updateContent: function() {
-    this.parent();
-    Ngn.sd.GlobalSlides.instance().add(this);
-  },
-  hasAnimation: function() {
-    return this.data.font.text.length > 1;
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add text', 'text'), function() {
-    var data = Ngn.sd.getBlockType('animatedText');
-    data.data.position = {
-      x: 0,
-      y: 0
-    };
-    Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), {
-      data: data.data,
-      html: ''
-    }).setToTheTop().save(true);
-  });
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.GlobalSlides.js|--*/
-Ngn.sd.GlobalSlides = new Class({
-
-  duration: 1500,
-  slideSelector: '.cont div',
-
-  hideSlides: function(block) {
-    var slides = block.el.getElements(this.slideSelector);
-    if (slides.length > 1) {
-      for (var i = 1; i < slides.length; i++) {
-        slides[i].setStyle('display', 'none');
-      }
-    }
+  getContainer: function() {
+    return this.eContainerInit;
   },
 
-  slides: [],
-
-  cacheSlides: function() {
-    for (var i = 0; i < this.blocks.length; i++) {
-      this.slides.push(this.blocks[i].el.getElements(this.slideSelector));
-    }
-  },
-
-  frameChange: function() {
-    if (typeof window.callPhantom === 'function') {
-      window.callPhantom({
-        action: 'frameChange'
-      });
-    }
-  },
-
-  currentIndex: 0,
-  nextIndex: 0,
-  animationStarted: false,
-  maxSlidesBlockN: 0,
-
-  initMaxSlidesBlockN: function() {
-    for (var i = 0; i < this.slides.length; i++) {
-      if (this.slides[i].length > this.maxSlidesBlockN) {
-        this.maxSlidesBlockN = i;
-      }
-    }
-  },
-
-  nextSlide: function() {
-    if (this.slides[this.maxSlidesBlockN][this.currentIndex + 1]) {
-      this.nextIndex = this.currentIndex + 1;
-    } else {
-      this.nextIndex = 0;
-    }
-    // hide current
-    for (var i = 0; i < this.slides.length; i++) {
-      if (this.slides[i].length > 1) {
-        if (this.slides[i][this.currentIndex]) this.slides[i][this.currentIndex].setStyle('display', 'none');
-        if (this.slides[i][this.nextIndex]) this.slides[i][this.nextIndex].setStyle('display', 'block');
-      }
-    }
-    // show next
-    this.currentIndex = this.nextIndex;
-    this.frameChange();
-  },
-
-  startAnimation: function() {
-    if (this.animationStarted) return;
-    this.animationStarted = true;
-    this.frameChange();
-    this.cacheSlides();
-    this.initMaxSlidesBlockN();
-    this.nextSlide.periodical(this.duration, this);
-  },
-
-  blocks: [],
-
-  /**
-   * @param block Ngn.sd.BlockB
-   */
-  add: function(block) {
-    this.blocks.push(block);
-    this.hideSlides(block);
-    this.startAnimation.delay(100, this); // Make delay to all blocks will be already added
+  initialize: function(container, options) {
+    this.eContainerInit = $(container);
+    this.parent(this.eContainerInit.getParent(), options);
   }
 
 });
 
-Ngn.sd.GlobalSlides.instance = function() {
-  if (Ngn.sd.GlobalSlides._instance) return Ngn.sd.GlobalSlides._instance;
-  return Ngn.sd.GlobalSlides._instance = new Ngn.sd.GlobalSlides();
-};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.FieldSet.js|--*/
+Ngn.Frm.fieldSets = [];
 
-Ngn.sd.GlobalSlides.lastFrameChangeTime = 0;
+Ngn.Frm.FieldSet = new Class({
+  Extends: Ngn.FieldSet.Html,
+  form: null, // Ngn.Form
 
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedImage.js|--*/
-Ngn.sd.blockTypes.push({
-  title: 'Image',
-  data: {
-    type: 'animatedImage'
+  initialize: function(form, container, options) {
+    this.form = form;
+    Ngn.Frm.fieldSets.include(this);
+    this.parent(container, options);
+    this.initVirtualElement(this.eContainer);
+  },
+
+  initInput: function(eInput) {
+    this.form.initActiveEl(eInput);
+  },
+
+  afterAddRow: function(eNewRow) {
+    this.form.addElements(eNewRow);
   }
+
 });
 
-Ngn.sd.BlockBAnimatedImage = new Class({
-  Extends: Ngn.sd.BlockB,
-  resizeContentEl: function(size) {
-    this.el.getElements('img').each(function(el) {
-      this._resizeEl(el, size);
-    }.bind(this));
-    this.parent(size);
-  },
-  updateContent: function() {
-    this.parent();
-    Ngn.sd.GlobalSlides.instance().add(this);
-  }
-});
+Ngn.Frm.FieldSet.implement(Ngn.Frm.virtualElement);
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.Frm.FieldSetBcreatorImages.js|--*/
+Ngn.Frm.FieldSetBcreatorImages = new Class({
+  Extends: Ngn.Frm.FieldSet,
 
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add image', 'image'), function() {
-    var data = Ngn.sd.getBlockType('animatedImage');
-    data.data.position = {
-      x: 0,
-      y: 0
-    };
-    Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), {
-      data: data.data,
-      html: ''
-    }).setToTheTop().save(true);
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BlockBImage.js|--*/
-Ngn.sd.BlockBImage = new Class({
-  Extends: Ngn.sd.BlockB,
-  replaceContent: function() {
-    this.parent();
-    var eImg = this.el.getElement('img');
-    eImg.set('src', eImg.get('src') /*+ '?' + Math.random(1000)*/);
-  },
-  initControls: function() {
-    this.parent();
-    new Ngn.sd.BlockRotate(this);
-  },
-  resizeContentEl: function(size) {
-    this._resizeEl(this.el.getElement('img'), size);
-    this.parent(size);
-  },
-  initFont: function() {
-  }
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/plugins/background.js|--*/
-Ngn.sd.BlockBBackground = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-Ngn.sd.BackgroundInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'background',
-    title: 'Insert background',
-    okText: 'Insert',
-    dialogClass: 'dialog-images',
-    onRequest: function() {
-      this.initImages();
-    },
-    ok: function() {
-      Ngn.sd.changeBannerBackground(Ngn.sd.selectedBackgroundUrl);
-    }.bind(this)
-  },
-  initialize: function(options) {
-    var w = Ngn.sd.data.bannerSettings.size.w.toInt();
-    if (w < 200) {
-      w = w * 3;
-    } else if (w < 400) {
-      w = w * 2;
-    }
-    var h = Ngn.sd.data.bannerSettings.size.h.toInt();
-    if (h < 200) {
-      //h = h * 2;
-    } else if (h < 400) {
-      //h = h * 2;
-    }
-    this.options.width = w + 56;
-    this.options.height = h + 30;
-    this.options.url = '/cpanel/' + Ngn.sd.bannerId + '/ajax_backgroundSelect';
-    this.parent(options);
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    Ngn.sd.selectedBackgroundUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add background', 'background'), function() {
-    new Ngn.sd.BackgroundInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.ImageInsertDialog.js|--*/
-Ngn.sd.ImageInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'image',
-    title: 'Insert image',
-    okText: 'Insert',
-    width: 400,
-    height: 300,
-    //url: 'ajax_select',
-    //createUrl: 'ajax_select',
-    dialogClass: 'dialog-images',
-    createImageJsonAction: 'createImageBlock',
-    onRequest: function() {
-      this.initImages();
-    }
-  },
-  initialize: function(opts) {
-    if (!opts) opts = {};
-    opts = Object.merge(opts, {
-      ok: this.okAction.bind(this)
-    });
-    this.parent(opts);
-  },
-  okAction: function() {
-    this.insertImage(this.selectedUrl);
-  },
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_' + this.createImageJsonAction + '?url=' + url
-  },
-  insertImage: function(url) {
-    new Ngn.Request.JSON({
-      url: this.createImageUrl(url),
-      onComplete: function() {
-        Ngn.sd.reinit();
-      }
-    }).send();
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    this.selectedUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/plugins/button.js|--*/
-Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-window.addEvent('sdPanelComplete', function() {
-  Ngn.sd.ButtonInsertDialog = new Class({
-    Extends: Ngn.sd.ImageInsertDialog,
-    options: {
-      title: 'Insert button',
-      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect'
-    },
-    createImageUrl: function(url) {
-      return '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?url=' + url
-    }
-  });
-  new Ngn.Btn(Ngn.sd.fbtn('Add button', 'button'), function() {
-    new Ngn.sd.ButtonInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/clipart.js|--*/
-Ngn.sd.BlockBClipart = new Class({
-  Extends: Ngn.sd.BlockBImage
-});
-
-Ngn.sd.ClipartInsertDialog = new Class({
-  Extends: Ngn.sd.ImageInsertDialog,
-  options: {
-    title: 'Insert clipart',
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect'
-  },
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_createClipartBlock?url=' + url
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add clipart', 'clipart'), function() {
-    new Ngn.sd.ClipartInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/fromTemplate.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  Ngn.sd.CreateFromTemplateDialog = new Class({
-    Extends: Ngn.sd.ImageInsertDialog,
-    options: {
-      id: 'template',
-      title: 'Create from template',
-      okText: 'Create',
-      width: 400,
-      height: 300,
-      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_templateSelect'
-    },
-    insertImage: function(url) {
+  createDeleteButton: function(eRow, index) {
+    var fieldSet = this;
+    this.createRowButton(eRow, {
+      caption: this.options.deleteTitle,
+      cls: 'delete'
+    }, function() {
+      if (!confirm('Are you sure?')) return;
+      Ngn.Request.Iface.loading(true);
       new Ngn.Request.JSON({
-        url: '/createFromTemplate/' + url.replace(/.*\/(\d+)\..*/, '$1'),
-        onComplete: function(bannerId) {
-          window.location = '/cpanel/' + bannerId;
+        url: fieldSet.options.deleteImageUrl.replace('{n}', index),
+        onSuccess: function() {
+          Ngn.Request.Iface.loading(false);
+          eRow.dispose();
+          fieldSet.regenInputNames();
+          fieldSet.buttons.erase(this);
+          Ngn.sd.blocks[Ngn.sd.openedPropDialog.options.blockId].reload();
         }
       }).send();
-    }
-  });
-  new Ngn.Btn(Ngn.sd.fbtn('Create from template', 'template'), function() {
-    new Ngn.sd.CreateFromTemplateDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/settings.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Settings', 'settings'), function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/cpanel/' + Ngn.sd.bannerId + '/json_settings',
-      width: 250,
-      onSubmitSuccess: function(r) {
-        Ngn.sd.setBannerSize(r);
-      }
     });
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/render.js|--*/
-Ngn.sd.render = function() {
-  new Ngn.Dialog.HtmlPage({
-    url: url = '/render/' + Ngn.sd.bannerId,
-    title: 'Render',
-    width: Ngn.sd.bannerSize.w.toInt() + 30
-  });
-};
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Render', 'render'), function() {
-    Ngn.sd.render();
-  });
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.HtmlPage.js|--*/
-Ngn.Dialog.HtmlPage = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    noPadding: false,
-    footer: false,
-    reduceHeight: true
   }
 
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/download.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Download', 'download'), function() {
-    var dialog = new Ngn.Dialog.Loader({
-      title: 'Rendering...',
-      width: 200
-    });
-    new Ngn.Request({
-      url: '/download/' + Ngn.sd.bannerId,
-      onComplete: function(bannerUrl) {
-        dialog.close();
-        window.location = bannerUrl;
-      }
-    }).send();
-  });
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Loader.js|--*/
-Ngn.Dialog.Loader = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    bindBuildMessageFunction: true,
-    ok: false,
-    hasFaviconTimer: true // при редиректе, после включения DialogLoader'а FaviconTimer необходимо отключить
-  },
-
-  initialize: function(options) {
-    this.parent(options);
-  },
-
-  start: function() {
-    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.start();
-  },
-
-  stop: function() {
-    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.stop();
-  },
-
-  close: function() {
-    this.stop();
-    this.parent();
-  },
-
-  buildMessage: function() {
-    return '<div class="dialog-progress"></div>';
-  }
-
-});
-
-Ngn.Dialog.Loader.Simple = new Class({
-  Extends: Ngn.Dialog.Loader,
-
-  options: {
-    //cancel: false,
-    titleClose: false,
-    footer: false,
-    messageBoxClass: 'dummy',
-    titleBarClass: 'dialog-loader-title',
-    titleTextClass: 'dummy',
-    messageAreaClass: 'dummy',
-    bindBuildMessageFunction: true
-  }
-
-});
-
-Ngn.Dialog.Loader.Advanced = new Class({
-  Extends: Ngn.Dialog.Loader,
-
-  options: {
-    messageAreaClass: 'dialog-message dialog-message-loader',
-    onContinue: Function.from(),
-    noPadding: false
-  },
-
-  init: function() {
-    this.eProgress = this.message.getElement('.dialog-progress');
-    this.stop();
-  },
-
-  buildMessage: function() {
-    return '<div class="message-text"></div><div class="dialog-progress"></div>';
-  },
-
-  start: function() {
-    this.eProgress.removeClass('stopped');
-    this.parent();
-  },
-
-  stop: function() {
-    this.eProgress.addClass('stopped');
-    this.parent();
-  }
-
-});
-
-Ngn.Dialog.Loader.Request = new Class({
-  Extends: Ngn.Dialog.Loader.Simple,
-
-  options: {
-    loaderUrl: null,
-    onLoaderComplete: Function.from(),
-    titleClose: false,
-    footer: false
-  },
-
-  initialize: function(options) {
-    this.parent(options);
-    new Request({
-      url: this.options.loaderUrl,
-      onComplete: function(r) {
-        this.okClose();
-        this.fireEvent('loaderComplete', r);
-      }.bind(this)
-    }).send();
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FaviconTimer.js|--*/
-Ngn.FaviconTimer = {
-  
-  start: function() {
-    Ngn.Favicon.animate([
-      '/i/img/icons/l/loader1.ico',
-      '/i/img/icons/l/loader2.ico',
-      '/i/img/icons/l/loader3.ico',
-      '/i/img/icons/l/loader4.ico'
-    ]);
-  },
-  
-  stop: function() {
-    Ngn.Favicon.stop();
-  }
-  
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Favicon.js|--*/
-// Favicon.js - Change favicon dynamically [http://ajaxify.com/run/favicon].
-// Copyright (c) 2006 Michael Mahemoff. Only works in Firefox and Opera.
-// Background and MIT License notice at end of file, see the homepage for more.
-
-// USAGE:
-// * favicon.change("/icon/active.ico");  (Optional 2nd arg is new title.)
-// * favicon.animate(new Array("icon1.ico", "icon2.ico", ...));
-//     Tip: Use "" as the last element to make an empty icon between cycles.
-//     To stop the animation, call change() and pass in the new arg.
-//     (Optional 2nd arg is animation pause in millis, overwrites the default.)
-// * favicon.defaultPause = 5000;
-
-Ngn.Favicon = {
-
-  // -- "PUBLIC" ----------------------------------------------------------------
-
-  defaultPause: 1000,
-  initIconUrl: '/favicon.ico',
-
-  change: function(iconURL, optionalDocTitle) {
-    clearTimeout(this.loopTimer);
-    if (optionalDocTitle) {
-      document.title = optionalDocTitle;
-    }
-    this.replaceLink(iconURL);
-  },
-
-  animate: function(iconSequence, optionalDelay) {
-    var links = this.getAllLinks();
-    if (links.length && links[0].href) this.initIconUrl = links[0].href;
-    // --------------------------------------------------
-    this.preloadIcons(iconSequence);
-    this.iconSequence = iconSequence;
-    this.sequencePause = (optionalDelay) ? optionalDelay : this.defaultPause;
-    Ngn.Favicon.index = 0;
-    Ngn.Favicon.change(iconSequence[0]);
-    this.loopTimer = setInterval(function() {
-      Ngn.Favicon.index = (Ngn.Favicon.index + 1) % Ngn.Favicon.iconSequence.length;
-      Ngn.Favicon.replaceLink(Ngn.Favicon.iconSequence[Ngn.Favicon.index], false);
-    }, Ngn.Favicon.sequencePause);
-  },
-
-  stop: function() {
-    clearTimeout(this.loopTimer);
-    this.removeIconLinksIfExists();
-    if (this.initIconUrl) {
-      this.replaceLink(this.initIconUrl);
-    }
-  },
-
-  // -- "PRIVATE" ---------------------------------------------------------------
-
-  loopTimer: null,
-
-  preloadIcons: function(iconSequence) {
-    var dummyImageForPreloading = document.createElement("img");
-    for (var i = 0; i < iconSequence.length; i++) {
-      dummyImageForPreloading.src = iconSequence[i];
-    }
-  },
-
-  replaceLink: function(iconURL) {
-    var link = document.createElement("link");
-    link.type = "image/x-icon";
-    link.rel = "shortcut icon";
-    link.href = iconURL;
-    this.removeIconLinksIfExists();
-    this.docHead.appendChild(link);
-  },
-
-  removeIconLinksIfExists: function() {
-    var links = this.getAllLinks();
-    for (var i = 0; i < links.length; i++) {
-      this.docHead.removeChild(links[i]);
-    }
-  },
-
-  getAllLinks: function() {
-    var r = [];
-    var esLink = this.docHead.getElementsByTagName("link");
-    var n = 0;
-    for (var i = 0; i < esLink.length; i++) {
-      if (esLink[i].type == "image/x-icon"/* && esLink[i].rel == "shortcut icon"*/) {
-        r[n] = esLink[i];
-      }
-    }
-    return r;
-  },
-
-  docHead: document.getElementsByTagName("head")[0]
-}
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorBars.js|--*/
-Ngn.sd.BcreatorBars = new Class({
-  Extends: Ngn.sd.Bars,
-  getLayersBar: function() {
-    return new Ngn.sd.BcreatorLayersBar;
-  }
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorLayersBar.js|--*/
-Ngn.sd.BcreatorLayersBar = new Class({
-  Extends: Ngn.sd.LayersBar,
-  getTitle: function(item) {
-    if (item.data.type == 'animatedText') {
-
-      return '<span class="ico">' + '<img src="/sd/img/font.png"></span>' + //
-      '<span class="text">' + (item.data.font.text && item.data.font.text[0] ? item.data.font.text[0] : 'empty') + '</span>';
-    }
-    else if (item.data.type == 'animatedImage') {
-      return '<span class="ico">' + //
-      (item.data.images && item.data.images[0] ? ('<img src="' + item.data.images[0] + '">') : '') + //
-      '</span>Image';
-    }
-    return this.parent(item);
-  },
-  canEdit: function(item) {
-    if (item.data.type == 'animatedText' || item.data.type == 'animatedImage') {
-      return true;
-    } else {
-      return this.parent(item);
-    }
-  }
 });
