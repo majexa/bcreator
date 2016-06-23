@@ -93,8 +93,8 @@
       </td>
       <td><?= $v['size'] ?></td>
       <td>
-        <? if (!$v['downloadLink']) { ?>
-          Need to render
+        <? if (strtotime($v['dateRender']) > strtotime($v['dateUpdate']) or !$v['downloadLink']) { ?>
+            Need to render
         <? } ?>
       </td>
       <td>
