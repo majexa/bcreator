@@ -1,4 +1,4 @@
-s:291142:"
+s:291180:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -6217,7 +6217,9 @@ Ngn.sd.GlobalSlides = new Class({
     this.phantomFrameChange();
     this.cacheSlides();
     this.initMaxSlidesBlockN();
-    this.animationId = this.nextSlide.periodical(this.duration, this);
+    if (this.slides.length) {
+      this.animationId = this.nextSlide.periodical(this.duration, this);
+    }
   }
 
 });

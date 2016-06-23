@@ -16838,7 +16838,9 @@ Ngn.sd.GlobalSlides = new Class({
     this.phantomFrameChange();
     this.cacheSlides();
     this.initMaxSlidesBlockN();
-    this.animationId = this.nextSlide.periodical(this.duration, this);
+    if (this.slides.length) {
+      this.animationId = this.nextSlide.periodical(this.duration, this);
+    }
   }
 
 });
