@@ -21,7 +21,7 @@ Sql::connectDatabase([
 //Sflm::$debugUrl = 'http://'.SITE_DOMAIN;
 //Sflm::$debugPaths = [
 //  'js' => [
-//    //'Ngn.sd.',
+//    'Ngn.sd.GlobalSlides',
 //  ]
 //];
 

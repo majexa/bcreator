@@ -32,3 +32,12 @@ margin-top: 5px;
 padding-bottom: 5px;
 background: #fff;
 }
+/* dialogs */
+#button_message img {
+max-width: 100px;
+max-height: 50px;
+}
+#clipart_message img {
+max-width: 100px;
+max-height: 50px;
+}

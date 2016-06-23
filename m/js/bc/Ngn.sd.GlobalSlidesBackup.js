@@ -20,7 +20,7 @@ Ngn.sd.GlobalSlides = new Class({
     }
   },
 
-  frameChange: function() {
+  phantomFrameChange: function() {
     if (typeof window.callPhantom === 'function') {
       window.callPhantom({
         action: 'frameChange'
@@ -56,13 +56,13 @@ Ngn.sd.GlobalSlides = new Class({
     }
     // show next
     this.currentIndex = this.nextIndex;
-    this.frameChange();
+    this.phantomFrameChange();
   },
 
   startAnimation: function() {
     if (this.animationStarted) return;
     this.animationStarted = true;
-    this.frameChange();
+    this.phantomFrameChange();
     this.cacheSlides();
     this.initMaxSlidesBlockN();
     this.nextSlide.periodical(this.duration, this);
@@ -74,9 +74,11 @@ Ngn.sd.GlobalSlides = new Class({
    * @param block Ngn.sd.BlockB
    */
   add: function(block) {
+    //console.trace(block);
     this.blocks.push(block);
     this.hideSlides(block);
     this.startAnimation.delay(100, this); // Make delay to all blocks will be already added
+    return this;
   }
 
 });
@@ -85,5 +87,9 @@ Ngn.sd.GlobalSlides.instance = function() {
   if (Ngn.sd.GlobalSlides._instance) return Ngn.sd.GlobalSlides._instance;
   return Ngn.sd.GlobalSlides._instance = new Ngn.sd.GlobalSlides();
 };
+
+window.addEvent('sdAfterInit', function() {
+  if (Ngn.sd.GlobalSlides._instance) delete Ngn.sd.GlobalSlides._instance;
+});
 
 Ngn.sd.GlobalSlides.lastFrameChangeTime = 0;

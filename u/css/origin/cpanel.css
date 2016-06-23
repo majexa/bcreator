@@ -3289,10 +3289,6 @@ border: 1px solid #ccc;
 background: #bfdeff;
 border-color: #555;
 }
-#button_message img {
-max-width: 100px;
-max-height: 50px;
-}
 /*------loginForm--------*/
 .loginForm {
 padding: 50px;

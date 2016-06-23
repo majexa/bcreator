@@ -8,13 +8,6 @@ Ngn.sd.blockTypes.push({
 
 Ngn.sd.BlockBAnimatedText = new Class({
   Extends: Ngn.sd.BlockBFont,
-  init: function() {
-    this.parent();
-  },
-  updateContent: function() {
-    this.parent();
-    Ngn.sd.GlobalSlides.instance().add(this);
-  },
   hasAnimation: function() {
     return this.data.font.text.length > 1;
   }

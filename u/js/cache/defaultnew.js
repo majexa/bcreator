@@ -27,7 +27,7 @@ Ngn.Form = new Class({
 
   initialize: function(eForm, options) {
     this.eForm = eForm;
-    this.eOutsideContainer = new Element('div', { styles: {'display': 'none'}}).inject(this.eForm, 'after');
+    this.eOutsideContainer = new Element('div', {styles: {'display': 'none'}}).inject(this.eForm, 'after');
     if (this.eForm.get('data-init')) throw new Error('This form already initialized');
     this.eForm.set('data-init', true);
     if ((options && !options.forceOcclude) && this.occlude(this.eForm.get('id'), this.eForm)) return this.occluded;
@@ -215,6 +215,7 @@ Ngn.Form = new Class({
       if (!fileSaved) eInputValidator.addClass(eInput.hasClass('required') ? 'validate-' + cls + '-required' : 'validate-' + cls);
       if (eInput.get('data-file')) eInputValidator.set('value', 1);
       var name = eInput.get('name');
+      this.oneFileCompleteEventFired = false;
       var uploadOptions = {
         url: this.uploadOptions.url.replace('{fn}', name),
         loadedFiles: this.uploadOptions.loadedFiles,
@@ -227,6 +228,10 @@ Ngn.Form = new Class({
           }
         },
         onComplete: function(r) {
+          if (this.allUploadsIsEmpty() && this.oneFileCompleteEventFired) {
+            return;
+          }
+          this.oneFileCompleteEventFired = true;
           if (this.hasUploadsInProgress()) return;
           this.submitedAndUploaded(r);
         }.bind(this)
@@ -244,6 +249,7 @@ Ngn.Form = new Class({
     this.submitAjax();
   },
 
+
   /**
    * @property upload Ngn.Form.Upload
    */
@@ -251,8 +257,15 @@ Ngn.Form = new Class({
     this.uploads.push(upload);
   },
 
+  allUploadsIsEmpty: function() {
+    for (var i = 0; i < this.uploads.length; i++) {
+      if (this.uploads[i].file) return false;
+    }
+    return true;
+  },
+
   hasUploadsInProgress: function() {
-    for (var i =0; i<this.uploads.length; i++) {
+    for (var i = 0; i < this.uploads.length; i++) {
       if (this.uploads[i].inProgress) return true;
     }
     return false;
@@ -495,7 +508,7 @@ Ngn.Form.Validator = new Class({
         html: errorMsg
       }).addClass('advice').addClass(cssClass);
       adviceWrapper = new Element('div', {
-        styles: { display: 'none' },
+        styles: {display: 'none'},
         id: 'advice-' + className.split(':')[0] + '-' + this.getFieldId(field)
       }).addClass('advice-wrapper').grab(advice);
       adviceWrapper.grab(new Element('div', {'class': 'corner'}), 'top').setStyle('z-index', 300);
@@ -567,120 +580,105 @@ Ngn.getReadableFileSizeString = function(fileSizeInBytes) {
   return Math.max(fileSizeInBytes, 0.1).toFixed(0) + byteUnits[i];
 };
 
-Form.Validator.addAllThese([
-  ['should-be-changed', {
-    errorMsg: 'значение этого поля должно быть изменено',
-    test: function(element) {
-      if (Ngn.Form.forms[element.getParent('form').get('id')].initValues[element.get('name')] == element.get('value'))
-        return false; else
-        return true;
+Form.Validator.addAllThese([['should-be-changed', {
+  errorMsg: 'значение этого поля должно быть изменено',
+  test: function(element) {
+    if (Ngn.Form.forms[element.getParent('form').get('id')].initValues[element.get('name')] == element.get('value'))
+      return false; else
+      return true;
+  }
+}], ['validate-num-min', {
+  errorMsg: 'слишком маленькое число',
+  test: function(element, props) {
+    if (!element.get('value')) return true;
+    var strict = typeOf(element.get('data-strict')) != 'null';
+    if (typeOf(element.get('data-min')) != 'null') {
+      var value = parseFloat(element.get('value').replace(/\s/g, ''));
+      element.set('value', value);
+      var min = parseFloat(element.get('data-min'));
+      return strict ? value > min : value >= min;
     }
-  }],
-  ['validate-num-min', {
-    errorMsg: 'слишком маленькое число',
-    test: function(element, props) {
-      if (!element.get('value')) return true;
-      var strict = typeOf(element.get('data-strict')) != 'null';
-      if (typeOf(element.get('data-min')) != 'null') {
-        var value = parseFloat(element.get('value').replace(/\s/g, ''));
-        element.set('value', value);
-        var min = parseFloat(element.get('data-min'));
-        return strict ? value > min : value >= min;
-      }
+  }
+}], ['validate-num-max', {
+  errorMsg: 'слишком большое число',
+  test: function(element, props) {
+    if (!element.get('value')) return true;
+    var strict = typeOf(element.get('data-strict')) != 'null';
+    if (typeOf(element.get('data-max')) != 'null') {
+      var value = parseFloat(element.get('value').replace(/\s/g, ''));
+      element.set('value', value);
+      var max = parseFloat(element.get('data-max'));
+      return strict ? value < max : value <= max;
     }
-  }],
-  ['validate-num-max', {
-    errorMsg: 'слишком большое число',
-    test: function(element, props) {
-      if (!element.get('value')) return true;
-      var strict = typeOf(element.get('data-strict')) != 'null';
-      if (typeOf(element.get('data-max')) != 'null') {
-        var value = parseFloat(element.get('value').replace(/\s/g, ''));
-        element.set('value', value);
-        var max = parseFloat(element.get('data-max'));
-        return strict ? value < max : value <= max;
-      }
-    }
-  }],
-  ['validate-name', {
-    errorMsg: 'должно содержать только латинские символы, тире, подчеркивание и не начинаться с цифры',
-    test: function(element) {
-      if (!element.value) return true;
-      if (element.value.match(/^[a-z][a-z0-9-_]*$/i)) return true; else return false;
-    }
-  }],
-  ['validate-fullName', {
-    errorMsg: 'неправильный формат имени',
-    test: function(element) {
-      //return true;
-      if (!element.value) return true;
-      if (element.value.match(/^\S+\s+\S+\s+\S+.*$/i)) return true; else return false;
-    }
-  }],
-  ['validate-domain', {
-    errorMsg: 'неправильный формат',
-    test: function(element) {
-      if (!element.value) return true;
-      if (element.value.match(/^[a-z][a-z0-9-.]*[a-z]$/i)) return true; else return false;
-    }
-  }],
-  ['validate-phone', {
-    errorMsg: 'неправильный формат',
-    test: function(element) {
-      if (!element.value) return true;
-      element.value = element.value.trim();
-      element.value = element.value.replace(/[\s\-\(\)]/g, '');
-      element.value = element.value.replace(/^8(.*)/g, '+7$1');
-      return /^\+\d{11}$/g.test(element.value);
-    }
-  }],
-  ['validate-procent', {
-    errorMsg: 'введите число от 0 до 100',
-    test: function(element) {
-      if (!element.value) return true;
-      element.value = parseInt(element.value);
-      return (element.value >= 0 && element.value <= 100);
-    }
-  }],
-  ['validate-skype', {
-    errorMsg: 'неправильный формат',
-    test: function(element) {
-      if (!element.value) return true;
-      if (element.value.length > 32 || element.value.length < 6) return false;
-      if (element.value.match(/^[a-z][a-z0-9._]*$/i)) return true; else return false;
-    }
-  }],
-  ['required-wisiwig', {
-    errorMsg: 'поле обязательно для заполнения',
-    test: function(element) {
-      return !!Ngn.clearParagraphs(tinyMCE.get(element.get('id')).getContent());
-    }
-  }],
-  ['validate-request', {
-    errorMsg: 'Дождитесь загрузки',
-    test: function(element) {
-      return element.get('value') == 'complete' ? true : false;
-    }
-  }],
-  ['validate-upload-required', {
-    errorMsg: 'Файл не выбран',
-    test: function(element) {
-      return element.get('value') ? true : false;
-    }
-  }],
-  ['validate-multiUpload-required', {
-    errorMsg: 'Файлы не выбраны',
-    test: function(element) {
-      return element.get('value') ? true : false;
-    }
-  }],
-  ['maxFileSizeExceeded', {
-    errorMsg: 'Превышен максимальный размер файла ' + Ngn.getReadableFileSizeString(Ngn.fileSizeMax),
-    test: function() {
-      return false;
-    }
-  }]
-]);
+  }
+}], ['validate-name', {
+  errorMsg: 'должно содержать только латинские символы, тире, подчеркивание и не начинаться с цифры',
+  test: function(element) {
+    if (!element.value) return true;
+    if (element.value.match(/^[a-z][a-z0-9-_]*$/i)) return true; else return false;
+  }
+}], ['validate-fullName', {
+  errorMsg: 'неправильный формат имени',
+  test: function(element) {
+    //return true;
+    if (!element.value) return true;
+    if (element.value.match(/^\S+\s+\S+\s+\S+.*$/i)) return true; else return false;
+  }
+}], ['validate-domain', {
+  errorMsg: 'неправильный формат',
+  test: function(element) {
+    if (!element.value) return true;
+    if (element.value.match(/^[a-z][a-z0-9-.]*[a-z]$/i)) return true; else return false;
+  }
+}], ['validate-phone', {
+  errorMsg: 'неправильный формат',
+  test: function(element) {
+    if (!element.value) return true;
+    element.value = element.value.trim();
+    element.value = element.value.replace(/[\s\-\(\)]/g, '');
+    element.value = element.value.replace(/^8(.*)/g, '+7$1');
+    return /^\+\d{11}$/g.test(element.value);
+  }
+}], ['validate-procent', {
+  errorMsg: 'введите число от 0 до 100',
+  test: function(element) {
+    if (!element.value) return true;
+    element.value = parseInt(element.value);
+    return (element.value >= 0 && element.value <= 100);
+  }
+}], ['validate-skype', {
+  errorMsg: 'неправильный формат',
+  test: function(element) {
+    if (!element.value) return true;
+    if (element.value.length > 32 || element.value.length < 6) return false;
+    if (element.value.match(/^[a-z][a-z0-9._]*$/i)) return true; else return false;
+  }
+}], ['required-wisiwig', {
+  errorMsg: 'поле обязательно для заполнения',
+  test: function(element) {
+    return !!Ngn.clearParagraphs(tinyMCE.get(element.get('id')).getContent());
+  }
+}], ['validate-request', {
+  errorMsg: 'Дождитесь загрузки',
+  test: function(element) {
+    return element.get('value') == 'complete' ? true : false;
+  }
+}], ['validate-upload-required', {
+  errorMsg: 'Файл не выбран',
+  test: function(element) {
+    return element.get('value') ? true : false;
+  }
+}], ['validate-multiUpload-required', {
+  errorMsg: 'Файлы не выбраны',
+  test: function(element) {
+    return element.get('value') ? true : false;
+  }
+}], ['maxFileSizeExceeded', {
+  errorMsg: 'Превышен максимальный размер файла ' + Ngn.getReadableFileSizeString(Ngn.fileSizeMax),
+  test: function() {
+    return false;
+  }
+}]]);
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.elementExtras.js|--*/
 Element.implement({
