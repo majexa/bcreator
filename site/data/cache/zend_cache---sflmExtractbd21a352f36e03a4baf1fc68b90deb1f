@@ -1,4 +1,4 @@
-s:291180:"
+s:291203:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -6577,7 +6577,7 @@ Ngn.sd.blockTypes.push({
 Ngn.sd.BlockBAnimatedText = new Class({
   Extends: Ngn.sd.BlockBFont,
   hasAnimation: function() {
-    return this.data.font.text.length > 1;
+    return this.data.font.text && this.data.font.text.length > 1;
   }
 });
 

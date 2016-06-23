@@ -17198,7 +17198,7 @@ Ngn.sd.blockTypes.push({
 Ngn.sd.BlockBAnimatedText = new Class({
   Extends: Ngn.sd.BlockBFont,
   hasAnimation: function() {
-    return this.data.font.text.length > 1;
+    return this.data.font.text && this.data.font.text.length > 1;
   }
 });
 
