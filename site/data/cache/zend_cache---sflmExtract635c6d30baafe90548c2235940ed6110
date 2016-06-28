@@ -1,4 +1,4 @@
-s:84886:"
+s:85385:"
 /*--|/home/user/ngn-env/ngn/i/css/common/screen.css|--*/
 /* -------------------------------------------------------------- 
   
@@ -81,8 +81,11 @@ background: #fff;
 font-family: Verdana, Tahoma, "Helvetica Neue", Helvetica, sans-serif;
 }
 
-body, input {
+body {
 font-size: 12px;
+}
+input {
+font-size: 14px;
 }
 
 /* Headings
@@ -1714,7 +1717,7 @@ height: 82px;
 
 /*--|/home/user/ngn-env/ngn/i/css/common/tips.css|--*/
 .tip-wrap {
-z-index: 200;
+z-index: 2000;
 }
 .tip {
 background: #FFEB87;
@@ -2899,8 +2902,11 @@ padding: 3px 0px 0px 3px;
 .block {
 border: 1px solid rgba(255, 255, 255, 0.2);
 }
-.block:hover {
+.block:hover:not(.nonEditable) {
 border-color: rgba(255, 255, 255, 0.5);
+}
+.block.active {
+border-color: rgba(255, 255, 255, 1);
 }
 .dragBox {
 width: 15px;
@@ -3241,6 +3247,11 @@ text-decoration: underline;
 color: #00AEEF;
 border-bottom-color: #00AEEF;
 }
+#layers .item.active {
+text-decoration: underline;
+color: #00AEEF;
+border-bottom-color: #00AEEF;
+}
 #layers .title img {
 max-height: 25px;
 max-width: 25px;
@@ -3495,6 +3506,24 @@ margin-top: 10px;
 a:hover.iconBtn, a.over.iconBtn {
 border-color: #575757;
 box-shadow: none;
+}
+
+.questionMark {
+cursor: help;
+background: #B1B1B1;
+border-radius: 15px;
+color: #000;
+display: inline-block;
+font-size: 12px;
+width: 15px;
+height: 15px;
+line-height: 16px;
+text-align: center;
+font-weight: bold;
+}
+
+#layers .questionMark {
+margin-left: 10px;
 }
 /*--|/home/user/ngn-env/ngn/i/css/common/hidebleBar.css|--*/
 .hidebleBarHandler {

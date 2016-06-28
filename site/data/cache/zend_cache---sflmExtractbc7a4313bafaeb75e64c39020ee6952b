@@ -1,4 +1,4 @@
-s:255940:"
+s:231821:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -1207,13 +1207,17 @@ Ngn.Dialog.Msg = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
+Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?"});
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
+// @requiresBefore s2/js/locale/core
 Ngn.Dialog.Confirm = new Class({
   Extends: Ngn.Dialog.Msg,
 
   options: {
     width: 300,
-    message: 'Вы уверены?'
+    message: Locale.get('Core.areYouSure')
   },
 
   initialize: function(_opts) {
@@ -4376,92 +4380,6 @@ Ngn.Frm.Saver = new Class({
   }
   
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.ElSelectDialog.js|--*/
-Ngn.ElSelectDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    dialogClass: 'dialog selectDialog',
-    noPadding: false
-  },
-  okClose: function() {
-    //this.formEl.setVisibleValue(this.getValue());
-    this.fireEvent('changeValue', this.getValue());
-    this.parent();
-  },
-  getValue: function() {
-    throw new Error('Abstract');
-  }
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.DialogSelect.js|--*/
-Ngn.Form.El.DialogSelect = new Class({
-  Extends: Ngn.Form.El,
-  options: {
-    selectTitle: Locale.get('Core.change'),
-    selectClass: ''
-  },
-  baseName: 'defualt',
-  getInitField: function() {
-    return this.eRow.getElement('input') || this.eRow.getElement('select');
-  },
-  getSelectDialogEl: function() {
-    return new Element('a', {
-      'class': 'pseudoLink dgray' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
-      html: this.options.selectTitle
-    }).inject(this.eInitField, 'after');
-  },
-  makeHiddenField: function() {
-    this.eInput = new Element('input', { type: 'hidden', name: this.eInitField.get('name') }).inject(this.eInitField, 'after');
-  },
-  init: function() {
-    this.eInitField = this.getInitField();
-    this.value = this.eInitField.get('value');
-    this.makeHiddenField();
-    this.eSelectDialog = this.getSelectDialogEl();
-    new Element('div', {'class': 'rightFading'}).inject(this.eSelectDialog);
-    this.eInitField.dispose();
-    this.initControlDefault();
-    this.setValue(this.value);
-  },
-  setValue: function(value) {
-    this.setVisibleValue(value);
-    this._setValue(value);
-  },
-  setVisibleValue: function(value) {
-    this.eSelectDialog.set('html', value || 'not defined');
-  },
-  _setValue: function(value) {
-    if (!value) return;
-    this.value = value;
-    this.eInput.set('value', value);
-  },
-  initControl: function() {
-    this.eSelectDialog.addEvent('click', function() {
-      var cls = this.getDialogClass();
-      if (!cls) throw new Error('class not found');
-      new cls(Object.merge({
-        value: this.value
-      }, this.getDialogOptions()));
-    }.bind(this));
-  },
-  initControlDefault: function() {
-    this.initControl();
-  },
-  getDialogClass: function() {
-    throw new Error('Create abstract method getDialogClass()');
-  },
-  getDialogOptions: function() {
-    return {
-      onChangeValue: function(value) {
-        this.setValue(value);
-        if (this.form && this.form.options.dialog) {
-          this.form.options.dialog.fireEvent('change' + this.baseName.capitalize(), value);
-        }
-      }.bind(this)
-    };
-  }
-});
-/*--|/home/user/ngn-env/ngn/more/scripts/js/common/tpl.php| (with request data)--*/
-Ngn.toObj('Ngn.tpls.fontSelect', '<div class="selectItems">\n    <div class="item" data-name="Aero_Matics_Stencil_Regular">\n    Aero_Matics_Stencil_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Ancient_Kyiv">\n    Ancient_Kyiv    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Archive">\n    Archive    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Attentica_4f_Ultralight">\n    Attentica_4f_Ultralight    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Avdira">\n    Avdira    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azamat">\n    Azamat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans">\n    Azoft_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold">\n    Azoft_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold_Italic">\n    Azoft_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Italic">\n    Azoft_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bad_Script">\n    Bad_Script    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bardelin">\n    Bardelin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Barkentina">\n    Barkentina    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender">\n    Bender    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black">\n    Bender_Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black_Italic">\n    Bender_Black_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold">\n    Bender_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold_Italic">\n    Bender_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Italic">\n    Bender_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light">\n    Bender_Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light_Italic">\n    Bender_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boblic">\n    Boblic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bombarda">\n    Bombarda    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boom_Boom">\n    Boom_Boom    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bradobrei">\n    Bradobrei    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella">\n    Brava_Novella    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella_Italic">\n    Brava_Novella_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brush">\n    Brush    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Regular">\n    Corki_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Rounded">\n    Corki_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan">\n    Corki_Tuscan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan_Rounded">\n    Corki_Tuscan_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Danger">\n    Danger    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Days">\n    Days    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decolz">\n    Decolz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decree_Art_Two">\n    Decree_Art_Two    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Derby">\n    Derby    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Deuz_Ex">\n    Deuz_Ex    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Don_Quixote">\n    Don_Quixote    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans">\n    Droid_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans_Bold">\n    Droid_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="FatC">\n    FatC    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Font_Awesome">\n    Font_Awesome    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Free_Font_Pro">\n    Free_Font_Pro    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat">\n    Fregat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold">\n    Fregat_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold_Italic">\n    Fregat_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Italic">\n    Fregat_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Glidesketch">\n    Glidesketch    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Gogol">\n    Gogol    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web">\n    Graublau_Web    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web_Bold">\n    Graublau_Web_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Medium">\n    Hagin_Caps_Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Thin">\n    Hagin_Caps_Thin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo">\n    Hattori_Hanzo    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo_Italic">\n    Hattori_Hanzo_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Helgoland">\n    Helgoland    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Intruder">\n    Intruder    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold">\n    Iwona_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold_Italic">\n    Iwona_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold">\n    Iwona_Condensed_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold_Italic">\n    Iwona_Condensed_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Italic">\n    Iwona_Condensed_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Regular">\n    Iwona_Condensed_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Italic">\n    Iwona_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Italic">\n    Iwona_Condensed_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Regular">\n    Iwona_Condensed_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Medium_Regular">\n    Iwona_Condensed_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Regular">\n    Iwona_Condensed_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condesed_Medium_Italic">\n    Iwona_Condesed_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Italic">\n    Iwona_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Regular">\n    Iwona_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Italic">\n    Iwona_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Italic">\n    Iwona_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Regular">\n    Iwona_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Italic">\n    Iwona_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Regular">\n    Iwona_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Regular">\n    Iwona_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="John_Daniels">\n    John_Daniels    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Juan">\n    Juan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Bold_RU">\n    Kelson_Sans_Bold_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Light_RU">\n    Kelson_Sans_Light_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Regular_RU">\n    Kelson_Sans_Regular_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Bold">\n    Kotyhoroshko_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Regular">\n    Kotyhoroshko_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lloyd">\n    Lloyd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lobster">\n    Lobster    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Audrey_BG">\n    Lovely_Audrey_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Grace_BG">\n    Lovely_Grace_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Sofia_BG">\n    Lovely_Sofia_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed">\n    Lytiga_Pro_Condensed    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed_Italic">\n    Lytiga_Pro_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended">\n    Lytiga_Pro_Extended    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended_Italic">\n    Lytiga_Pro_Extended_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Italic">\n    Lytiga_Pro_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Regular">\n    Lytiga_Pro_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="MS_Reshetka">\n    MS_Reshetka    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Bold">\n    Marta_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Italic">\n    Marta_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Regular">\n    Marta_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs">\n    Mikodacs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs_PCS">\n    Mikodacs_PCS    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Multima_Bold">\n    Multima_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Museo_Sans_500">\n    Museo_Sans_500    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Neonic">\n    Neonic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nikodecs">\n    Nikodecs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG">\n    Nioki_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Bold">\n    Nioki_BG_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Italic">\n    Nioki_BG_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Now_Grotesk">\n    Now_Grotesk    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Bold">\n    Old_Standard_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Italic">\n    Old_Standard_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Regular">\n    Old_Standard_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Oranienbaum">\n    Oranienbaum    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus">\n    Orpheus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Bold">\n    Orpheus_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Italic">\n    Orpheus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold">\n    Palemonas_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold_Italic">\n    Palemonas_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Italic">\n    Palemonas_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Regular">\n    Palemonas_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama">\n    Perforama    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama_Italic">\n    Perforama_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pharmadin">\n    Pharmadin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Philosopher">\n    Philosopher    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Bold">\n    Pixar_One_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Display">\n    Pixar_One_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Regular">\n    Pixar_One_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Bold">\n    Pixar_Two_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Display">\n    Pixar_Two_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Regular">\n    Pixar_Two_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans">\n    Resavska_BG_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold">\n    Resavska_BG_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold_Italic">\n    Resavska_BG_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Italic">\n    Resavska_BG_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Retropecan">\n    Retropecan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Black">\n    SkolaSans-Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BlackItalic">\n    SkolaSans-BlackItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Bold">\n    SkolaSans-Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BoldItalic">\n    SkolaSans-BoldItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Light">\n    SkolaSans-Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-LightItalic">\n    SkolaSans-LightItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Medium">\n    SkolaSans-Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-MediumItalic">\n    SkolaSans-MediumItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Regular">\n    SkolaSans-Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-RegularItalic">\n    SkolaSans-RegularItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Skoropys_XVII">\n    Skoropys_XVII    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sports_World_Regular">\n    Sports_World_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Stiff_Staff">\n    Stiff_Staff    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sumkin">\n    Sumkin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus">\n    Supremus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Condensed_Italic">\n    Supremus_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Italic">\n    Supremus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Tot_Shrift_Bold">\n    Tot_Shrift_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Underdog">\n    Underdog    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Venus_Rising">\n    Venus_Rising    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Zion_Train_Pro_Stencil_Bold">\n    Zion_Train_Pro_Stencil_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Znikomit_No25">\n    Znikomit_No25    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arial">\n    arial    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbd">\n    arialbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbi">\n    arialbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="ariali">\n    ariali    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgia">\n    georgia    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiab">\n    georgiab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiai">\n    georgiai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiaz">\n    georgiaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="impact">\n    impact    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahoma">\n    tahoma    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahomabd">\n    tahomabd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="times">\n    times    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbd">\n    timesbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbi">\n    timesbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesi">\n    timesi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdana">\n    verdana    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanab">\n    verdanab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanai">\n    verdanai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanaz">\n    verdanaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="clear"></div>\n  <script>\n  </script>\n</div>');
 /*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.js|--*/
 // from common
 
@@ -4578,8 +4496,20 @@ Ngn.sd.Font = new Class({
     this.updateFont();
   },
 
+  toggleActive: function(isActive) {
+    if (isActive) {
+      this.el.addClass('active');
+    } else {
+      this.el.removeClass('active');
+    }
+  },
+
   _settingsAction: function() {
     if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
+    Ngn.sd.layersBar.toggleActive(this.id());
+    this.toggleActive(true);
+    if (Ngn.sd.currentEditBlock) Ngn.sd.currentEditBlock.toggleActive(false);
+    Ngn.sd.currentEditBlock = this;
     Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
       onClose: function() {
         Ngn.sd.openedPropDialog = false;
@@ -5034,7 +4964,17 @@ Ngn.sd.BlockB = new Class({
     this.replaceContent();
     this.updateContent();
     this.updateSize();
-    // Ngn.sd.setMinHeight(eContainer); 
+    if (this.canEdit()) {
+      this.el.addEvent('click', function() {
+        this._settingsAction();
+      }.bind(this));
+    } else {
+      //this.el.addClass('nonEditable');
+      this.el.addEvent('click', function() {
+        if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
+      }.bind(this));
+    }
+    // Ngn.sd.setMinHeight(eContainer);
   }, // предназначено для изменения стилей внутренних элементов из данных блока
   setToTheTop: function() {
     var minOrderKey = 1;
@@ -5114,9 +5054,12 @@ Ngn.sd.BlockB = new Class({
     }.bind(this));
   },
   deleteAction: function() {
-    if (!confirm('Are you sure?')) return;
-    this.loading(true);
-    this._deleteAction();
+    new Ngn.Dialog.Confirm({
+      onOkClose: function() {
+        this.loading(true);
+        this._deleteAction();
+      }.bind(this)
+    });
   },
   _deleteAction: function() {
     new Ngn.Request.JSON({
@@ -5254,6 +5197,9 @@ Ngn.sd.BlockB = new Class({
   },
   framesCount: function() {
     return 0;
+  },
+  canEdit: function() {
+    return true;
   }
 });
 
@@ -5979,99 +5925,6 @@ Ngn.sd.updateLayoutContentHeight = function() {
   $('layout').getElement('.lCont').sdSetStyle('min-height', (y + 6) + 'px');
 };
 
-Ngn.sd.SelectDialog = new Class({
-  Extends: Ngn.ElSelectDialog,
-  options: {
-    selectedName: false,
-    footer: false,
-    width: 580,
-    height: 300,
-    savePosition: true,
-    onChangeFont: function() {
-    }
-  },
-  setOptions: function(opts) {
-    this.parent(Object.merge(opts || {}, {id: this.name + 'Select'}));
-  },
-  init: function() {
-    var eSelected;
-    var obj = this;
-    this.message.getElements('div.item').each(function(el) {
-      if (obj.options.selectedName && el.get('data-name') == obj.options.selectedName) {
-        eSelected = el.addClass('selected');
-      }
-      el.addEvent('click', function() {
-        if (eSelected) eSelected.removeClass('selected');
-        el.addClass('selected');
-        eSelected = this;
-        obj.fireEvent('changeValue', el.get('data-name'));
-      });
-    });
-    if (eSelected) (function() {
-      new Fx.Scroll(obj.message).toElement(eSelected)
-    }).delay(500);
-  }
-});
-
-// @requiresBefore s2/js/common/tpl?name=fontSelect&controller=/font/ajax_browse
-Ngn.sd.FontSelectDialog = new Class({
-  Extends: Ngn.sd.SelectDialog,
-  name: 'font',
-  options: {
-    width: 600,
-    message: Ngn.tpls.fontSelect,
-    title: 'Choose Font...'
-  },
-  init: function() {
-    this.parent();
-    this.message.addClass('hLoader');
-    var els = this.message.getElements('div.item');
-    var loaded = 0;
-    els.each(function(el) {
-      Ngn.sd.loadFont(el.get('data-name'), function() {
-        loaded++;
-        Cufon.set('fontFamily', el.get('data-name')).replace(el.getElement('.font'));
-        if (loaded == els.length) this.message.removeClass('hLoader');
-      }.bind(this));
-    }.bind(this));
-  }
-});
-
-Ngn.Form.El.DialogSelect.Sd = new Class({
-  Extends: Ngn.Form.El.DialogSelect,
-
-  getSelectDialogEl: function() {
-    var eSelectDialog = new Element('div', {
-      'class': 'dialogSelect' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
-      title: this.options.selectTitle
-    }).inject(this.eInitField, 'after');
-    new Element('div', {'class': 'rightFading'}).inject(eSelectDialog);
-    return eSelectDialog;
-  }
-
-});
-
-Ngn.Form.El.FontFamilyCufon = new Class({
-  Extends: Ngn.Form.El.DialogSelect.Sd,
-  baseName: 'font',
-  options: {
-    selectClass: 'font'
-  },
-  init: function() {
-    this.parent();
-    this.value ? Ngn.sd.loadFont(this.value, this.initControl.bind(this)) : this.initControl();
-  },
-  initControlDefault: function() {
-  },
-  setValue: function(font) {
-    this.parent(font);
-    Cufon.set('fontFamily', font).replace(this.eSelectDialog);
-  },
-  getDialogClass: function() {
-    return Ngn.sd.FontSelectDialog;
-  }
-});
-
 Ngn.sd.itemTpl = function(k, v) {
   var el = Elements.from(Ngn.tpls[k])[0].getElement('div.item[data-name=' + v + ']');
   if (!el) throw new Error('Element "' + v + '" not found');
@@ -6458,53 +6311,27 @@ Ngn.sd.Bars = new Class({
 Ngn.sd.LayersBar = new Class({
   initialize: function() {
     this.init();
+    Ngn.sd.layersBar = this;
   },
+  items: {},
   init: function() {
     Ngn.sd.eLayers.set('html', '');
-    new Element('div', {
+    var eTitle = new Element('div', {
       html: 'Layers',
       'class': 'lTitle'
     }).inject(Ngn.sd.eLayers);
-    var eLayers = new Element('div', {
+    this.eLayers = new Element('div', {
       'class': 'layers'
     }).inject(Ngn.sd.eLayers);
+    new Tips(new Element('span', {
+      html: '?',
+      title: 'Click any layer and drag to change its position in the layers list',
+      'class': 'questionMark'
+    }).inject(eTitle));
     Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey').each(function(item) {
-      this.getTitle(item);
-      var eItem = new Element('div', {
-        'class': 'item ' + 'item_' + (item.data.subType || item.data.type),
-        'data-id': item._data.id,
-        'data-type': item.data.type,
-        events: {
-          click: function() {
-            if (!Ngn.sd.blocks[item._data.id].canEdit()) return;
-            Ngn.sd.blocks[item._data.id]._settingsAction(Ngn.sd.blocks[item._data.id]);
-          }.bind(this)
-        }
-      });
-      new Element('div', {
-        'class': 'title',
-        html: this.getTitle(item)
-      }).inject(eItem);
-      var eBtns = new Element('div', {
-        'class': 'btns'
-      }).inject(eItem);
-      if (this.canEdit(item)) {
-        new Ngn.Btn( //
-          Ngn.Btn.btn2('Edit', 'edit').inject(eBtns), //
-          Ngn.sd.blocks[item._data.id]._settingsAction.bind(Ngn.sd.blocks[item._data.id]) //
-        );
-      } else {
-        new Element('a', {
-          'class': 'smIcons dummy'
-        }).inject(eBtns);
-      }
-      new Ngn.Btn( //
-        Ngn.Btn.btn2('Delete', 'delete').inject(eBtns), //
-        Ngn.sd.blocks[item._data.id].deleteAction.bind(Ngn.sd.blocks[item._data.id]) //
-      );
-      eItem.inject(eLayers);
+      this.items[item._data.id] = new Ngn.sd.LayersBar.Item(this, item);
     }.bind(this));
-    new Sortables(eLayers, {
+    new Sortables(this.eLayers, {
       onStart: function(eMovingLayer) {
         eMovingLayer.addClass('drag');
       },
@@ -6549,7 +6376,58 @@ Ngn.sd.LayersBar = new Class({
     }
   },
   canEdit: function(item) {
-    return Ngn.sd.blocks[item._data.id].finalData().data.type == 'text';
+    return Ngn.sd.blocks[item._data.id].canEdit();
+  },
+  cauurentActiveId: null,
+  toggleActive: function(blockId) {
+    if (this.cauurentActiveId) this.items[this.cauurentActiveId].toggleActive(false);
+    this.items[blockId].toggleActive(true);
+    this.cauurentActiveId = blockId;
+  }
+});
+
+Ngn.sd.LayersBar.Item = new Class({
+  initialize: function(layersBar, item) {
+    this.eItem = new Element('div', {
+      'class': 'item ' + 'item_' + (item.data.subType || item.data.type),
+      'data-id': item._data.id,
+      'data-type': item.data.type,
+      events: {
+        click: function() {
+          if (!Ngn.sd.blocks[item._data.id].canEdit()) return;
+          Ngn.sd.blocks[item._data.id]._settingsAction(Ngn.sd.blocks[item._data.id]);
+        }.bind(this)
+      }
+    });
+    new Element('div', {
+      'class': 'title',
+      html: layersBar.getTitle(item)
+    }).inject(this.eItem);
+    var eBtns = new Element('div', {
+      'class': 'btns'
+    }).inject(this.eItem);
+    if (layersBar.canEdit(item)) {
+      new Ngn.Btn( //
+        Ngn.Btn.btn2('Edit', 'edit').inject(eBtns), //
+        Ngn.sd.blocks[item._data.id]._settingsAction.bind(Ngn.sd.blocks[item._data.id]) //
+      );
+    } else {
+      new Element('a', {
+        'class': 'smIcons dummy'
+      }).inject(eBtns);
+    }
+    new Ngn.Btn( //
+      Ngn.Btn.btn2('Delete', 'delete').inject(eBtns), //
+      Ngn.sd.blocks[item._data.id].deleteAction.bind(Ngn.sd.blocks[item._data.id]) //
+    );
+    this.eItem.inject(layersBar.eLayers);
+  },
+  toggleActive: function(isActive) {
+    if (isActive) {
+      this.eItem.addClass('active');
+    } else {
+      this.eItem.removeClass('active');
+    }
   }
 });
 
@@ -6650,7 +6528,10 @@ Ngn.sd.BlockBImage = new Class({
 
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/background.js|--*/
 Ngn.sd.BlockBBackground = new Class({
-  Extends: Ngn.sd.BlockBImage
+  Extends: Ngn.sd.BlockBImage,
+  canEdit: function() {
+    return false;
+  }
 });
 
 Ngn.sd.BackgroundInsertDialog = new Class({
@@ -6772,7 +6653,10 @@ Ngn.sd.ImageInsertDialog = new Class({
 
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/button.js|--*/
 Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockBImage
+  Extends: Ngn.sd.BlockBImage,
+  canEdit: function() {
+    return false;
+  }
 });
 
 window.addEvent('sdPanelComplete', function() {
@@ -6794,7 +6678,10 @@ window.addEvent('sdPanelComplete', function() {
 });
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/clipart.js|--*/
 Ngn.sd.BlockBClipart = new Class({
-  Extends: Ngn.sd.BlockBImage
+  Extends: Ngn.sd.BlockBImage,
+  canEdit: function() {
+    return false;
+  }
 });
 
 Ngn.sd.ClipartInsertDialog = new Class({
@@ -7128,13 +7015,6 @@ Ngn.sd.BcreatorLayersBar = new Class({
       '</span>Image';
     }
     return this.parent(item);
-  },
-  canEdit: function(item) {
-    if (item.data.type == 'animatedText' || item.data.type == 'animatedImage') {
-      return true;
-    } else {
-      return this.parent(item);
-    }
   }
 });
 ";

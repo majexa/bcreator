@@ -16,6 +16,7 @@ class SdBlockSettingsFormAnimatedImage extends SdBlockSettingsFormBase {
         'type' => 'fieldListBcreatorImages',
         'name' => 'image',
         'fieldsType' => 'image',
+        'fieldSetJsClass' => 'Ngn.sd.FieldSetAnimatedImages',
         'jsOptions' => [
           'deleteImageUrl' => '/pageBlock/'.$this->block->bannerId.'/json_deleteImage/'.$this->block->id.'/{n}'
         ]

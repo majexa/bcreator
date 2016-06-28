@@ -1,5 +1,8 @@
 Ngn.sd.BlockBClipart = new Class({
-  Extends: Ngn.sd.BlockBImage
+  Extends: Ngn.sd.BlockBImage,
+  canEdit: function() {
+    return false;
+  }
 });
 
 Ngn.sd.ClipartInsertDialog = new Class({

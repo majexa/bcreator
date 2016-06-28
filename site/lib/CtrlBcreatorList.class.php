@@ -29,7 +29,7 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
 
   function action_delete() {
     $this->d['banner'] = Misc::checkEmpty(db()->selectRow('SELECT * FROM bcBanners WHERE id=?d AND userId=?d', $this->req->param(2), Auth::get('id')));
-    $this->d['banner']['title'] = 'ID='.$this->d['banner']['id'];
+    //$this->d['banner']['title'] = 'ID='.$this->d['banner']['id'];
     $this->d['innerTpl'] = 'landing/delete';
   }
 

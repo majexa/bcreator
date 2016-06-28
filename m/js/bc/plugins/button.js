@@ -1,5 +1,8 @@
 Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockBImage
+  Extends: Ngn.sd.BlockBImage,
+  canEdit: function() {
+    return false;
+  }
 });
 
 window.addEvent('sdPanelComplete', function() {

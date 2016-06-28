@@ -27,7 +27,8 @@ class BcreatorSupportForm extends Form {
         'required' => true
       ],
     ], [
-      'placeholders' => true
+      'placeholders' => true,
+      'submitTitle' => 'Send'
     ]);
     if (Auth::get('id')) {
       $defaultData = UsersEditForm::splitName(Auth::get('name'));

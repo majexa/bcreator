@@ -12,12 +12,5 @@ Ngn.sd.BcreatorLayersBar = new Class({
       '</span>Image';
     }
     return this.parent(item);
-  },
-  canEdit: function(item) {
-    if (item.data.type == 'animatedText' || item.data.type == 'animatedImage') {
-      return true;
-    } else {
-      return this.parent(item);
-    }
   }
 });

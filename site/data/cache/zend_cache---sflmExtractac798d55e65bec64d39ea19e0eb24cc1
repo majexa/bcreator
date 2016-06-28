@@ -1,4 +1,4 @@
-
+s:50124:"
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/Ngn.sd.FieldSetAnimatedText.js|--*/
 Ngn.sd.FieldSetAnimatedText = new Class({
   Extends: Ngn.Frm.FieldSet,
@@ -884,3 +884,4 @@ Ngn.sd.FontSelectDialog = new Class({
     }.bind(this));
   }
 });
+";
