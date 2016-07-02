@@ -108,12 +108,12 @@
       </td>
       <td><?= $v['size'] ?></td>
       <td>
-        <? if (strtotime($v['dateRender']) > strtotime($v['dateUpdate']) or !$v['downloadLink']) { ?>
+        <? if (strtotime($v['dateRender']) < strtotime($v['dateUpdate']) or !$v['downloadLink']) { ?>
             Need to render
         <? } ?>
       </td>
       <td>
-        <a href="<?= $v['downloadLink'] ?>" title="Download"><img src="/public/images/images_new/download.png"></a>
+        <a href="<?= $v['downloadLink'] ?>"><img src="/public/images/images_new/download.png" title="Download"></a>
       </td>
       <td>
         <a href="/cpanel/<?= $v['id'] ?>"><img src="/public/images/images_new/edit.png" title="Edit"></a>
@@ -149,6 +149,7 @@
         }, 100);
       });
     });
+    new Tips('img');
   </script>
 
   <div class="ban">

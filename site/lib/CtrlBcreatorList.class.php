@@ -3,6 +3,7 @@
 class CtrlBcreatorList extends CtrlBcreatorLanding {
 
   function action_default() {
+    Sflm::frontend('css')->addLib('i/css/common/tips.css');
     if (!Auth::get('id')) {
       $this->redirect('/');
       return;

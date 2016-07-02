@@ -1,4 +1,4 @@
-s:85385:"
+s:85586:"
 /*--|/home/user/ngn-env/ngn/i/css/common/screen.css|--*/
 /* -------------------------------------------------------------- 
   
@@ -2391,6 +2391,13 @@ height: 16px;
 .tools .money i { background-position: -66px -234px }
 .tools .copy i { background-position: 2px -54px }
 
+.smIcons.drag i {
+background-image: none;
+}
+.smIcons.drag  {
+background-image: url(/i/img/black/drag-bg.gif);
+cursor: url(http://www.google.com/intl/en_ALL/mapfiles/closedhand.cur) 4 4, move;
+}
 /*--|/home/user/ngn-env/ngn/more/scripts/css/common/smIcons.php|--*/
 .smIcons .answer i, .smIcons.answer i { background-position: -183px -290px }
 .smIcons .link i, .smIcons.link i { background-position: -136px -238px }

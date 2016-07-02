@@ -1,4 +1,4 @@
-
+s:380:"
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.FieldSetAnimatedImages.js|--*/
 Ngn.sd.FieldSetAnimatedImages = new Class({
   Extends: Ngn.Frm.FieldSet,
@@ -12,4 +12,4 @@ Ngn.sd.FieldSetAnimatedImages = new Class({
     }).inject(this.eAddRow, 'after'));
   }
 
-});
+});";
