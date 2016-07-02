@@ -100,7 +100,7 @@
         <div class="preview">
         <? if ($v['directLink']) { ?>
           <div class="imageCont">
-            <img src="<?= $v['directLink'] ?>" class="thumb">
+            <img src="<?= $v['directLink'].'?'.strtotime($v['dateRender']) ?>" class="thumb">
             <div class="fullPreview"></div>
           </div>
         <? } ?>
