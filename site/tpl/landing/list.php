@@ -43,9 +43,21 @@
   .table tr:nth-child(odd) {
     background: #eaeaea;
   }
-  .table .preview img {
-    max-height: 100px;
+  .table .preview {
+    position: relative;
+  }
+  .table .preview img.thumb {
+    cursor: pointer;
+    max-height: 50px;
     max-width: 200px;
+  }
+  .table .fullPreview {
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    display: none;
+    position: absolute;
+    z-index: 100;
   }
   .table p {
     margin: 0 0 7px 0;
@@ -87,7 +99,10 @@
         <p><b><?= $v['title'] ?></b></p>
         <div class="preview">
         <? if ($v['directLink']) { ?>
-          <a href="<?= $v['directLink'] ?>" target="_blank"><img src="<?= $v['directLink'] ?>"></a>
+          <div class="imageCont">
+            <img src="<?= $v['directLink'] ?>" class="thumb">
+            <div class="fullPreview"></div>
+          </div>
         <? } ?>
         </div>
       </td>
@@ -109,6 +124,32 @@
     </tr>
   <? } ?>
   </table>
+
+  <script>
+    //var eActiveFullPreview = null;
+    document.getElements('.table .preview img').each(function(el) {
+      var timeoutId = null;
+      var eFullPreview = el.getParent().getElement('.fullPreview');
+      el.addEvent('mouseover', function(e) {
+        clearTimeout(timeoutId);
+        eFullPreview.set('html', '<img src="' + el.get('src') + '">');
+        eFullPreview.setStyle('display', 'block');
+      });
+      eFullPreview.addEvent('mouseover', function(e) {
+        clearTimeout(timeoutId);
+      });
+      eFullPreview.addEvent('mouseout', function(e) {
+        timeoutId = setTimeout(function() {
+          el.getParent().getElement('.fullPreview').setStyle('display', 'none');
+        }, 100);
+      });
+      el.addEvent('mouseout', function(e) {
+        timeoutId = setTimeout(function() {
+          el.getParent().getElement('.fullPreview').setStyle('display', 'none');
+        }, 100);
+      });
+    });
+  </script>
 
   <div class="ban">
     <a href="http://guaranteedsignupssystem.com/" class="link"><img src="/public/images/images_new/banners/4.png" alt=""></a>
