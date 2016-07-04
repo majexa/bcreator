@@ -1,4 +1,4 @@
-s:85586:"
+s:85599:"
 /*--|/home/user/ngn-env/ngn/i/css/common/screen.css|--*/
 /* -------------------------------------------------------------- 
   
@@ -2909,7 +2909,7 @@ padding: 3px 0px 0px 3px;
 .block {
 border: 1px solid rgba(255, 255, 255, 0.2);
 }
-.block:hover:not(.nonEditable) {
+.block:hover:not(.nonEditable):not(.active) {
 border-color: rgba(255, 255, 255, 0.5);
 }
 .block.active {

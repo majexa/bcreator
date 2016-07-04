@@ -1,4 +1,4 @@
-s:292839:"
+s:292903:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -1208,7 +1208,7 @@ Ngn.Dialog.Msg = new Class({
 });
 
 /*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
-Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?"});
+Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
 // @requiresBefore s2/js/locale/core
@@ -1729,13 +1729,14 @@ Ngn.Frm.maxLength = function(eForm, defaultMaxLength) {
 };
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Dotter.js|--*/
+// @requiresBefore s2/js/locale/core
 Ngn.Dotter = new Class({
   Implements: [Options,Events],
 
   options: {
     delay: 500,
     dot: '.',
-    message: 'Loading',
+    message: Locale.get('core.loading'),
     numDots: 10,
     property: 'text',
     reset: false/*,
@@ -4505,11 +4506,15 @@ Ngn.sd.Font = new Class({
   },
 
   _settingsAction: function() {
+    if (Ngn.sd.currentEditBlock && Ngn.sd.currentEditBlock.id() == this.id()) return;
     if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
-    Ngn.sd.layersBar.toggleActive(this.id());
+    Ngn.sd.layersBar.setActive(this.id());
     this.toggleActive(true);
-    if (Ngn.sd.currentEditBlock) Ngn.sd.currentEditBlock.toggleActive(false);
+    if (Ngn.sd.currentEditBlock) {
+      Ngn.sd.currentEditBlock.toggleActive(false);
+    }
     Ngn.sd.currentEditBlock = this;
+    if (!this.canEdit()) return;
     Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
       onClose: function() {
         Ngn.sd.openedPropDialog = false;
@@ -4964,16 +4969,9 @@ Ngn.sd.BlockB = new Class({
     this.replaceContent();
     this.updateContent();
     this.updateSize();
-    if (this.canEdit()) {
-      this.el.addEvent('click', function() {
-        this._settingsAction();
-      }.bind(this));
-    } else {
-      //this.el.addClass('nonEditable');
-      this.el.addEvent('click', function() {
-        if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
-      }.bind(this));
-    }
+    this.el.addEvent('click', function() {
+      this._settingsAction();
+    }.bind(this));
     // Ngn.sd.setMinHeight(eContainer);
   }, // предназначено для изменения стилей внутренних элементов из данных блока
   setToTheTop: function() {
@@ -6331,6 +6329,9 @@ Ngn.sd.LayersBar = new Class({
     Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey').each(function(item) {
       this.items[item._data.id] = new Ngn.sd.LayersBar.Item(this, item);
     }.bind(this));
+    if (this.currentActiveId) {
+      this.setActive(this.currentActiveId);
+    }
     new Sortables(this.eLayers, {
       onStart: function(eMovingLayer) {
         eMovingLayer.addClass('drag');
@@ -6378,11 +6379,12 @@ Ngn.sd.LayersBar = new Class({
   canEdit: function(item) {
     return Ngn.sd.blocks[item._data.id].canEdit();
   },
-  cauurentActiveId: null,
-  toggleActive: function(blockId) {
-    if (this.cauurentActiveId) this.items[this.cauurentActiveId].toggleActive(false);
-    this.items[blockId].toggleActive(true);
-    this.cauurentActiveId = blockId;
+  setActive: function(blockId) {
+    if (this.currentActiveId && blockId != this.currentActiveId) {
+      this.items[this.currentActiveId].setActive(false);
+    }
+    this.items[blockId].setActive(true);
+    this.currentActiveId = blockId;
   }
 });
 
@@ -6422,7 +6424,7 @@ Ngn.sd.LayersBar.Item = new Class({
     );
     this.eItem.inject(layersBar.eLayers);
   },
-  toggleActive: function(isActive) {
+  setActive: function(isActive) {
     if (isActive) {
       this.eItem.addClass('active');
     } else {

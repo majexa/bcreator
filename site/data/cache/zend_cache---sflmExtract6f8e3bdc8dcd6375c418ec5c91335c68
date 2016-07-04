@@ -1,4 +1,4 @@
-s:127187:"
+s:127262:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -3934,7 +3934,7 @@ Ngn.Dialog.Msg = new Class({
 });
 
 /*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
-Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?"});
+Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
 // @requiresBefore s2/js/locale/core
@@ -4015,13 +4015,14 @@ Ngn.Dialog.Confirm.Mem = new Class({
 });
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Dotter.js|--*/
+// @requiresBefore s2/js/locale/core
 Ngn.Dotter = new Class({
   Implements: [Options,Events],
 
   options: {
     delay: 500,
     dot: '.',
-    message: 'Loading',
+    message: Locale.get('core.loading'),
     numDots: 10,
     property: 'text',
     reset: false/*,
