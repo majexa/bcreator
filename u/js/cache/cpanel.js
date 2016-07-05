@@ -15128,6 +15128,7 @@ Ngn.sd.Font = new Class({
 
   _settingsAction: function() {
     if (Ngn.sd.currentEditBlock && Ngn.sd.currentEditBlock.id() == this.id()) return;
+    console.debug('!!!');
     if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
     Ngn.sd.layersBar.setActive(this.id());
     this.toggleActive(true);
@@ -17020,7 +17021,6 @@ Ngn.sd.LayersBar.Item = new Class({
       'data-type': item.data.type,
       events: {
         click: function() {
-          if (!Ngn.sd.blocks[item._data.id].canEdit()) return;
           Ngn.sd.blocks[item._data.id]._settingsAction(Ngn.sd.blocks[item._data.id]);
         }.bind(this)
       }
