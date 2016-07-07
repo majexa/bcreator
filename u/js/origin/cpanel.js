@@ -15128,7 +15128,6 @@ Ngn.sd.Font = new Class({
 
   _settingsAction: function() {
     if (Ngn.sd.currentEditBlock && Ngn.sd.currentEditBlock.id() == this.id()) return;
-    console.debug('!!!');
     if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
     Ngn.sd.layersBar.setActive(this.id());
     this.toggleActive(true);
@@ -16510,6 +16509,7 @@ Ngn.sd.init = function(bannerId) {
       action: 'afterInit'
     });
   }
+  new Ngn.sd.BannersBar();
   window.fireEvent('sdAfterInit', bannerId);
 };
 
@@ -17057,6 +17057,17 @@ Ngn.sd.LayersBar.Item = new Class({
   }
 });
 
+/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BannersBar.js|--*/
+Ngn.sd.BannersBar = new Class({
+
+  initialize: function() {
+    //console.debug(document.getElement('.body'));
+    this.el = new Element('div', {
+      'class': 'bannerBar'
+    }).inject(document.getElement('.body'));
+  }
+
+});
 /*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
 window.addEvent('sdPanelComplete', function() {
   new Ngn.Btn(Ngn.sd.fbtn('New banner', 'add'), function() {
