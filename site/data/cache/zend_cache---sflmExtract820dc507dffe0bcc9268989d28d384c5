@@ -1,4 +1,4 @@
-s:293226:"
+s:293327:"
 /*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
  * Copyright (c) 2009 Simo Kinnunen.
@@ -657,7 +657,13 @@ Ngn.Storage = {
     } else {
       var v = Cookie.read(key);
     }
-    if (v == 'false') return false; else if (v == 'true') return true; else return v;
+    if (v == 'false') {
+      return false;
+    } else if (v == 'true') {
+      return true;
+    } else {
+      return v;
+    }
   },
   set: function(key, value) {
     if (localStorage) {
@@ -4517,8 +4523,10 @@ Ngn.sd.Font = new Class({
     if (!this.canEdit()) return;
     Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
       onClose: function() {
+        Ngn.sd.currentEditBlock = false;
         Ngn.sd.openedPropDialog = false;
-      },
+        this._settingsAction();
+      }.bind(this),
       dialogClass: 'settingsDialog dialog',
       id: this.finalData().data.type + this.id(),
       blockId: this.id(),
@@ -5888,7 +5896,6 @@ Ngn.sd.init = function(bannerId) {
       action: 'afterInit'
     });
   }
-  new Ngn.sd.BannersBar();
   window.fireEvent('sdAfterInit', bannerId);
 };
 
@@ -6118,38 +6125,41 @@ Ngn.HidebleBar = new Class({
     this.positionHandlerShow();
     this.init();
     window.addEvent('resize', this.position.bind(this));
-    var fxHide = new Fx.Slide(this.eBar, {
-      mode: this.slideMode,
-      duration: 100,
-      onComplete: function() {
-        this.hide();
-        Ngn.Storage.set('hidebleBar' + this.id, false);
-      }.bind(this)
-    });
-    var state = Ngn.Storage.bget('hidebleBar' + this.id);
-    if (!state) {
-      (function() {
-        fxHide.hide();
-        this.hide();
-      }).delay(1, this);
-    } else {
-      this.eHandlerShow.setStyle('visibility', 'hidden');
-    }
+    //var fxHide = new Fx.Slide(this.eBar, {
+    //  mode: this.slideMode,
+    //  duration: 100,
+    //  onComplete: function() {
+    //    this.hide();
+    //    Ngn.Storage.set('hidebleBar' + this.id, false);
+    //  }.bind(this)
+    //});
+    //var state = Ngn.Storage.bget('hidebleBar' + this.id);
+    //console.debug(state);
+    //if (!state) {
+    //  (function() {
+    //    fxHide.hide();
+    //    this.hide();
+    //  }).delay(1, this);
+    //} else {
+    //  //this.eHandlerShow.setStyle('visibility', 'hidden');
+    //}
     var fxShow = new Fx.Slide(this.eBar, {
       mode: this.slideMode,
-      duration: 100,
-      onComplete: function() {
-        window.fireEvent('resize');
-        Ngn.Storage.set('hidebleBar' + this.id, true);
-        this.eHandlerShow.setStyle('visibility', 'hidden');
-      }.bind(this)
+      duration: 100
+      //onComplete: function() {
+      //  window.fireEvent('resize');
+      //  Ngn.Storage.set('hidebleBar' + this.id, true);
+      //  this.eHandlerShow.setStyle('visibility', 'hidden');
+      //}.bind(this)
     });
-    this.eHandlerHide.addEvent('click', function() {
-      fxHide.slideOut();
-    });
-    this.eHandlerShow.addEvent('click', function() {
-      fxShow.slideIn();
-    }.bind(this));
+    fxShow.show();
+    //fxShow.slideOut();
+    //this.eHandlerHide.addEvent('click', function() {
+    //  fxHide.slideOut();
+    //});
+    //this.eHandlerShow.addEvent('click', function() {
+    //  fxShow.slideIn();
+    //}.bind(this));
   },
 
   hide: function() {
@@ -6436,17 +6446,6 @@ Ngn.sd.LayersBar.Item = new Class({
   }
 });
 
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BannersBar.js|--*/
-Ngn.sd.BannersBar = new Class({
-
-  initialize: function() {
-    //console.debug(document.getElement('.body'));
-    this.el = new Element('div', {
-      'class': 'bannerBar'
-    }).inject(document.getElement('.body'));
-  }
-
-});
 /*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
 window.addEvent('sdPanelComplete', function() {
   new Ngn.Btn(Ngn.sd.fbtn('New banner', 'add'), function() {

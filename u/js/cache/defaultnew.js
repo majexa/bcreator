@@ -1,4 +1,4 @@
-s:127361:"
+
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -4120,4 +4120,3 @@ Ngn.Dialog.Error = new Class({
   }
 
 });
-";
