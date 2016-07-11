@@ -16,7 +16,7 @@
     Ngn.sd.isTrialUser = true;
     Locale.use('en-US');
     window.addEvent('sdAfterInit', function(bannerId) {
-      new Ngn.sd.BannersBar();
+      //new Ngn.sd.BannersBar();
     });
   </script>
 </head>

@@ -12,7 +12,7 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
     Sflm::frontend('js')->addPath('m/js/bc/plugins/clipart.js');
     Sflm::frontend('js')->addPath('sd/js/plugins/fromTemplate.js');
     Sflm::frontend('js')->addPath('sd/js/plugins/settings.js');
-    Sflm::frontend('js')->addPath('sd/js/plugins/render.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/renderTrial.js');
     Sflm::frontend('js')->addPath('sd/js/plugins/download.js');
   }
 

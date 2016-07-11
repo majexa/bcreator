@@ -3486,6 +3486,7 @@ Ngn.Dialog = new Class({
       Ngn.Dialog.dialogs.erase(this.dialogId);
       if (this.options.force) this.closeShade();
       this.fireEvent('close');
+      console.debug('this.isOkClose: ' + this.isOkClose);
       this.isOkClose ? this.fireEvent('okClose') : this.fireEvent('cancelClose');
     }
   },

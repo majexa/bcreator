@@ -1132,7 +1132,9 @@ color: #FF0000;
 vertical-align: top;
 border-bottom: 1px solid #CCCCCC;
 }
-
+.dialog .apeform input[type=text], .dialog .apeform input[type=password] {
+max-width: 100%;
+}
 .apeform #titlei, .apeform input[name=title], input.fldLarge {
 width: 100%;
 box-sizing: border-box;

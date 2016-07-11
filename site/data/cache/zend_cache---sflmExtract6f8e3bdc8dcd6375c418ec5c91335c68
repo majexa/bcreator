@@ -1,4 +1,4 @@
-s:127361:"
+s:127420:"
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -3486,6 +3486,7 @@ Ngn.Dialog = new Class({
       Ngn.Dialog.dialogs.erase(this.dialogId);
       if (this.options.force) this.closeShade();
       this.fireEvent('close');
+      console.debug('this.isOkClose: ' + this.isOkClose);
       this.isOkClose ? this.fireEvent('okClose') : this.fireEvent('cancelClose');
     }
   },

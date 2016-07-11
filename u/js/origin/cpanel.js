@@ -11093,6 +11093,7 @@ Ngn.Dialog = new Class({
       Ngn.Dialog.dialogs.erase(this.dialogId);
       if (this.options.force) this.closeShade();
       this.fireEvent('close');
+      console.debug('this.isOkClose: ' + this.isOkClose);
       this.isOkClose ? this.fireEvent('okClose') : this.fireEvent('cancelClose');
     }
   },
@@ -15141,11 +15142,20 @@ Ngn.sd.Font = new Class({
       Ngn.sd.currentEditBlock.toggleActive(false);
     }
     Ngn.sd.currentEditBlock = this;
-    if (!this.canEdit()) return;
+    if (!this.canEdit()) {
+      if (Ngn.sd.openedPropDialog) {
+        console.debug('Ngn.sd.openedPropDialog: close');
+        Ngn.sd.openedPropDialog.close();
+      }
+      return;
+    }
+
     Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
       onClose: function() {
         Ngn.sd.currentEditBlock = false;
         Ngn.sd.openedPropDialog = false;
+      }.bind(this),
+      onOkClose: function() {
         this._settingsAction();
       }.bind(this),
       dialogClass: 'settingsDialog dialog',
@@ -17374,20 +17384,29 @@ window.addEvent('sdPanelComplete', function() {
     });
   });
 });
-/*--|/home/user/ngn-env/bc/sd/js/plugins/render.js|--*/
-Ngn.sd.render = function() {
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/renderTrial.js|--*/
+window.addEvent('sdPanelComplete', function() {
+  new Ngn.Btn(Ngn.sd.fbtn('Render', 'render'), function() {
+    if (Ngn.sd.userTrial) {
+      new Ngn.Dialog.Confirm({
+        okText: 'Render',
+        message: 'U have 10 rendering times. If u want to anlarge <a href="/purchice">purchice your account</a>',
+        onOkClose: function() {
+          Ngn.sd.Render();
+        }
+      })
+    }
+  });
+});
+
+/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.Render.js|--*/
+Ngn.sd.Render = function() {
   new Ngn.Dialog.HtmlPage({
     url: url = '/render/' + Ngn.sd.bannerId,
     title: 'Render',
     width: Ngn.sd.bannerSize.w.toInt() + 30
   });
 };
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Render', 'render'), function() {
-    Ngn.sd.render();
-  });
-});
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.HtmlPage.js|--*/
 Ngn.Dialog.HtmlPage = new Class({
