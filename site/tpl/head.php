@@ -13,9 +13,10 @@
   <? } ?>
   <script>
     Ngn.sd.barsClass = Ngn.sd.BcreatorBars;
+    Ngn.sd.isTrialUser = true;
     Locale.use('en-US');
     window.addEvent('sdAfterInit', function(bannerId) {
-      
+      new Ngn.sd.BannersBar();
     });
   </script>
 </head>

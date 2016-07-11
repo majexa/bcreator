@@ -13,4 +13,9 @@ class BcreatorCore {
     return $form;
   }
 
+  static function isTrailUser($userId = null) {
+    $dueTime = db()->selectCell('SELECT UNIX_TIMESTAMP(dueDate) FROM invoice WHERE userId=?d ORDER BY dueDate DESC LIMIT 1', $userId ?: Auth('id'));
+    return $dueTime < time();
+  }
+
 }
