@@ -17391,7 +17391,7 @@ window.addEvent('sdPanelComplete', function() {
     if (Ngn.sd.isTrialUser) {
       new Ngn.Dialog.Confirm({
         okText: 'Render',
-        message: 'U have 10 rendering times. If u want to anlarge <a href="/purchice">purchice your account</a>',
+        message: '<p>You have 9 renders left as part of your Trial account. Are you sure you want to render?</p><p><a href="/trialExpiration">Upgrade your account here</a></p>',
         onOkClose: function() {
           Ngn.sd.Render();
         }
