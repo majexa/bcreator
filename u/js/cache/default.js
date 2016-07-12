@@ -14293,7 +14293,6 @@ Ngn.Dotter = new Class({
   options: {
     delay: 500,
     dot: '.',
-    message: Locale.get('core.loading'),
     numDots: 10,
     property: 'text',
     reset: false/*,
@@ -14305,6 +14304,7 @@ Ngn.Dotter = new Class({
 
   initialize: function(container, options) {
     this.setOptions(options);
+    this.options.message = Locale.get('Core.loading');
     this.container = document.id(container);
     this.dots = 0;
     this.running = false;

@@ -12364,7 +12364,6 @@ Ngn.Dotter = new Class({
   options: {
     delay: 500,
     dot: '.',
-    message: Locale.get('core.loading'),
     numDots: 10,
     property: 'text',
     reset: false/*,
@@ -12376,6 +12375,7 @@ Ngn.Dotter = new Class({
 
   initialize: function(container, options) {
     this.setOptions(options);
+    this.options.message = Locale.get('Core.loading');
     this.container = document.id(container);
     this.dots = 0;
     this.running = false;
@@ -15143,6 +15143,7 @@ Ngn.sd.Font = new Class({
     }
     Ngn.sd.currentEditBlock = this;
     if (!this.canEdit()) {
+
       if (Ngn.sd.openedPropDialog) {
         console.debug('Ngn.sd.openedPropDialog: close');
         Ngn.sd.openedPropDialog.close();
@@ -17387,7 +17388,7 @@ window.addEvent('sdPanelComplete', function() {
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/renderTrial.js|--*/
 window.addEvent('sdPanelComplete', function() {
   new Ngn.Btn(Ngn.sd.fbtn('Render', 'render'), function() {
-    if (Ngn.sd.userTrial) {
+    if (Ngn.sd.isTrialUser) {
       new Ngn.Dialog.Confirm({
         okText: 'Render',
         message: 'U have 10 rendering times. If u want to anlarge <a href="/purchice">purchice your account</a>',
@@ -17537,7 +17538,7 @@ Ngn.Dialog.Loader.Request = new Class({
   }
 
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FaviconTimer.js|--*/
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.faviconTimer.js|--*/
 Ngn.FaviconTimer = {
   
   start: function() {
@@ -17555,7 +17556,7 @@ Ngn.FaviconTimer = {
   
 };
 
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Favicon.js|--*/
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.favicon.js|--*/
 // Favicon.js - Change favicon dynamically [http://ajaxify.com/run/favicon].
 // Copyright (c) 2006 Michael Mahemoff. Only works in Firefox and Opera.
 // Background and MIT License notice at end of file, see the homepage for more.
