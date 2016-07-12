@@ -15458,6 +15458,7 @@ Ngn.sd.BlockAbstract = new Class({
         this.updateElement();
         this.creationEvent();
         this.loading(false);
+        this._settingsAction();
       }.bind(this)
     }).post(this.getDataForSave(create));
   },
