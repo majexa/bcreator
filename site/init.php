@@ -1,7 +1,5 @@
 <?php
 
-//define('SITE_DOMAIN', 'zukulbannercreator.net');
-
 require dirname(NGN_PATH).'/bc/init.php';
 
 O::replaceInjection('DefaultRouter', 'BcreatorRouter');
