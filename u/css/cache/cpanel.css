@@ -3580,8 +3580,17 @@ float: left;
 background: #000;
 }
 
+.bannerBar a.item {
+color: #ccc;
+text-decoration: none;
+text-align: center;
+font-size: 10px;
+overflow: hidden;
+}
+.bannerBar .item div {
+margin-top: 12px;
+}
 .bannerBar .item img {
-max-width: 50px;
 max-height: 50px;
 }
 .bannerBar .item.selected {
