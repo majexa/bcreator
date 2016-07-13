@@ -1,0 +1,13 @@
+Ngn.sd.TrialRender = function() {
+  if (Ngn.sd.isTrialUser) {
+    new Ngn.Dialog.Confirm({
+      okText: 'Render',
+      message: '<p>You have 9 renders left as part of your Trial account. Are you sure you want to render?</p><p><a href="/trialExpiration">Upgrade your account here</a></p>',
+      onOkClose: function() {
+        Ngn.sd.Render();
+      }
+    })
+  } else {
+    Ngn.sd.Render();
+  }
+};
