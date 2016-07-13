@@ -17425,6 +17425,240 @@ Ngn.Dialog.HtmlPage = new Class({
   }
 
 });
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/download.js|--*/
+window.addEvent('sdPanelComplete', function() {
+  new Ngn.Btn(Ngn.sd.fbtn('Download', 'download'), function() {
+    new Ngn.Dialog.Confirm({
+      okText: 'Download',
+      message: '<p>You have 9 renders left as part of your Trial account. Are you sure you want to render?</p><p><a href="/trialExpiration">Upgrade your account here</a></p>',
+      onOkClose: function() {
+        var dialog = new Ngn.Dialog.Loader({
+          title: 'Rendering...',
+          width: 200
+        });
+        new Ngn.Request({
+          url: '/download/' + Ngn.sd.bannerId,
+          onComplete: function(bannerUrl) {
+            dialog.close();
+            window.location = bannerUrl;
+          }
+        }).send();
+      }
+    });
+  });
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Loader.js|--*/
+Ngn.Dialog.Loader = new Class({
+  Extends: Ngn.Dialog,
+
+  options: {
+    bindBuildMessageFunction: true,
+    ok: false,
+    hasFaviconTimer: true // при редиректе, после включения DialogLoader'а FaviconTimer необходимо отключить
+  },
+
+  initialize: function(options) {
+    this.parent(options);
+  },
+
+  start: function() {
+    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.start();
+  },
+
+  stop: function() {
+    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.stop();
+  },
+
+  close: function() {
+    this.stop();
+    this.parent();
+  },
+
+  buildMessage: function() {
+    return '<div class="dialog-progress"></div>';
+  }
+
+});
+
+Ngn.Dialog.Loader.Simple = new Class({
+  Extends: Ngn.Dialog.Loader,
+
+  options: {
+    //cancel: false,
+    titleClose: false,
+    footer: false,
+    messageBoxClass: 'dummy',
+    titleBarClass: 'dialog-loader-title',
+    titleTextClass: 'dummy',
+    messageAreaClass: 'dummy',
+    bindBuildMessageFunction: true
+  }
+
+});
+
+Ngn.Dialog.Loader.Advanced = new Class({
+  Extends: Ngn.Dialog.Loader,
+
+  options: {
+    messageAreaClass: 'dialog-message dialog-message-loader',
+    onContinue: Function.from(),
+    noPadding: false
+  },
+
+  init: function() {
+    this.eProgress = this.message.getElement('.dialog-progress');
+    this.stop();
+  },
+
+  buildMessage: function() {
+    return '<div class="message-text"></div><div class="dialog-progress"></div>';
+  },
+
+  start: function() {
+    this.eProgress.removeClass('stopped');
+    this.parent();
+  },
+
+  stop: function() {
+    this.eProgress.addClass('stopped');
+    this.parent();
+  }
+
+});
+
+Ngn.Dialog.Loader.Request = new Class({
+  Extends: Ngn.Dialog.Loader.Simple,
+
+  options: {
+    loaderUrl: null,
+    onLoaderComplete: Function.from(),
+    titleClose: false,
+    footer: false
+  },
+
+  initialize: function(options) {
+    this.parent(options);
+    new Request({
+      url: this.options.loaderUrl,
+      onComplete: function(r) {
+        this.okClose();
+        this.fireEvent('loaderComplete', r);
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.faviconTimer.js|--*/
+Ngn.FaviconTimer = {
+  
+  start: function() {
+    Ngn.Favicon.animate([
+      '/i/img/icons/l/loader1.ico',
+      '/i/img/icons/l/loader2.ico',
+      '/i/img/icons/l/loader3.ico',
+      '/i/img/icons/l/loader4.ico'
+    ]);
+  },
+  
+  stop: function() {
+    Ngn.Favicon.stop();
+  }
+  
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.favicon.js|--*/
+// Favicon.js - Change favicon dynamically [http://ajaxify.com/run/favicon].
+// Copyright (c) 2006 Michael Mahemoff. Only works in Firefox and Opera.
+// Background and MIT License notice at end of file, see the homepage for more.
+
+// USAGE:
+// * favicon.change("/icon/active.ico");  (Optional 2nd arg is new title.)
+// * favicon.animate(new Array("icon1.ico", "icon2.ico", ...));
+//     Tip: Use "" as the last element to make an empty icon between cycles.
+//     To stop the animation, call change() and pass in the new arg.
+//     (Optional 2nd arg is animation pause in millis, overwrites the default.)
+// * favicon.defaultPause = 5000;
+
+Ngn.Favicon = {
+
+  // -- "PUBLIC" ----------------------------------------------------------------
+
+  defaultPause: 1000,
+  initIconUrl: '/favicon.ico',
+
+  change: function(iconURL, optionalDocTitle) {
+    clearTimeout(this.loopTimer);
+    if (optionalDocTitle) {
+      document.title = optionalDocTitle;
+    }
+    this.replaceLink(iconURL);
+  },
+
+  animate: function(iconSequence, optionalDelay) {
+    var links = this.getAllLinks();
+    if (links.length && links[0].href) this.initIconUrl = links[0].href;
+    // --------------------------------------------------
+    this.preloadIcons(iconSequence);
+    this.iconSequence = iconSequence;
+    this.sequencePause = (optionalDelay) ? optionalDelay : this.defaultPause;
+    Ngn.Favicon.index = 0;
+    Ngn.Favicon.change(iconSequence[0]);
+    this.loopTimer = setInterval(function() {
+      Ngn.Favicon.index = (Ngn.Favicon.index + 1) % Ngn.Favicon.iconSequence.length;
+      Ngn.Favicon.replaceLink(Ngn.Favicon.iconSequence[Ngn.Favicon.index], false);
+    }, Ngn.Favicon.sequencePause);
+  },
+
+  stop: function() {
+    clearTimeout(this.loopTimer);
+    this.removeIconLinksIfExists();
+    if (this.initIconUrl) {
+      this.replaceLink(this.initIconUrl);
+    }
+  },
+
+  // -- "PRIVATE" ---------------------------------------------------------------
+
+  loopTimer: null,
+
+  preloadIcons: function(iconSequence) {
+    var dummyImageForPreloading = document.createElement("img");
+    for (var i = 0; i < iconSequence.length; i++) {
+      dummyImageForPreloading.src = iconSequence[i];
+    }
+  },
+
+  replaceLink: function(iconURL) {
+    var link = document.createElement("link");
+    link.type = "image/x-icon";
+    link.rel = "shortcut icon";
+    link.href = iconURL;
+    this.removeIconLinksIfExists();
+    this.docHead.appendChild(link);
+  },
+
+  removeIconLinksIfExists: function() {
+    var links = this.getAllLinks();
+    for (var i = 0; i < links.length; i++) {
+      this.docHead.removeChild(links[i]);
+    }
+  },
+
+  getAllLinks: function() {
+    var r = [];
+    var esLink = this.docHead.getElementsByTagName("link");
+    var n = 0;
+    for (var i = 0; i < esLink.length; i++) {
+      if (esLink[i].type == "image/x-icon"/* && esLink[i].rel == "shortcut icon"*/) {
+        r[n] = esLink[i];
+      }
+    }
+    return r;
+  },
+
+  docHead: document.getElementsByTagName("head")[0]
+}
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorBars.js|--*/
 Ngn.sd.BcreatorBars = new Class({
   Extends: Ngn.sd.Bars,
