@@ -15373,9 +15373,6 @@ Ngn.sd.BlockAbstract = new Class({
     this.initElement(el);
     this.addCont(this.el);
     this.event = event;
-    this.el.addEvent('click', function() {
-
-    });
     this.setOptions(options);
     this.ctrl = '/pageBlock/' + Ngn.sd.bannerId;
     this.init();
@@ -15599,9 +15596,12 @@ Ngn.sd.BlockB = new Class({
     Ngn.sd.interface.bars.layersBar.init();
     //this.updateContainerHeight();
   },
+  initPosition: function() {
+    this.el.sdSetPosition(this.data.position);
+  },
   init: function() {
     if (this._data.id) Ngn.sd.blocks[this._data.id] = this;
-    this.el.sdSetPosition(this.data.position);
+    this.initPosition();
     this.updateOrder();
     this.initControls();
     this.initFont();
@@ -17175,6 +17175,12 @@ Ngn.sd.BlockBImage = new Class({
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/background.js|--*/
 Ngn.sd.BlockBBackground = new Class({
   Extends: Ngn.sd.BlockBImage,
+  initPosition: function() {
+    this.el.setStyles({
+      top: '-1px',
+      left: '-1px'
+    });
+  },
   canEdit: function() {
     return false;
   }

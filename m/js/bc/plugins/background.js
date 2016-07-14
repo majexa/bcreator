@@ -1,5 +1,11 @@
 Ngn.sd.BlockBBackground = new Class({
   Extends: Ngn.sd.BlockBImage,
+  initPosition: function() {
+    this.el.setStyles({
+      top: '-1px',
+      left: '-1px'
+    });
+  },
   canEdit: function() {
     return false;
   }
