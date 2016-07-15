@@ -10,7 +10,6 @@ class CtrlBcreatorIndex extends CtrlBcreatorLanding {
         $v['active'] = true;
       }
     }
-
   }
 
 }

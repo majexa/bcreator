@@ -10845,6 +10845,7 @@ Ngn.Dialog = new Class({
         'class': this.options.footerClass
       }).inject(this.eMessage);
       new Element('div', {'class': 'foot-wrap'}).inject(this.footer);
+      console.debug(this.options.ok);
       if (this.options.ok !== false) {
         this.createButton('ok', this.options.id, this.options.okText, this.options.okClass, this.options.ok, !this.options.okDestroy, undefined, true).inject(this.footer.firstChild, 'top');
       }
@@ -17400,13 +17401,22 @@ window.addEvent('sdPanelComplete', function() {
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.TrialRender.js|--*/
 Ngn.sd.TrialRender = function() {
   if (Ngn.sd.isTrialUser) {
-    new Ngn.Dialog.Confirm({
-      okText: 'Render',
-      message: '<p>You have 9 renders left as part of your Trial account. Are you sure you want to render?</p><p><a href="/trialExpiration">Upgrade your account here</a></p>',
-      onOkClose: function() {
-        Ngn.sd.Render();
+    Ngn.Request.Iface.loading(true);
+    new Ngn.Request.JSON({
+      url: '/json_trialDialog',
+      onComplete: function(r) {
+        Ngn.Request.Iface.loading(false);
+        new Ngn.Dialog.Msg({
+          width: 300,
+          okText: 'Render',
+          message: r.text,
+          ok: r.cnt > 0,
+          onOkClose: function(r) {
+            Ngn.sd.Render();
+          }
+        });
       }
-    })
+    }).send();
   } else {
     Ngn.sd.Render();
   }
