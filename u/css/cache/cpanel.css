@@ -3555,10 +3555,10 @@ overflow-x: hidden;
 height: 115px;
 overflow-y: hidden;
 overflow-x: auto;
-padding-right: 30px;
 }
 .bannerBarContInner {
 width: 3000px;
+padding-right: 30px;
 }
 .bannerBar .handler {
 position: absolute;
