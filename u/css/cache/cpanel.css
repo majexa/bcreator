@@ -3549,9 +3549,15 @@ z-index: 298;
 background: #212121;
 margin-left: 200px;
 position: relative;
+overflow-x: hidden;
 }
 .bannerBarCont {
-height: 100px;
+height: 115px;
+overflow-y: hidden;
+overflow-x: auto;
+}
+.bannerBarContInner {
+width: 3000px;
 }
 .bannerBar .handler {
 position: absolute;
@@ -3596,7 +3602,6 @@ max-height: 50px;
 .bannerBar .item.selected {
 border-color: #f00;
 }
-
 /*--|/home/user/ngn-env/ngn/i/css/common/hidebleBar.css|--*/
 .hidebleBarHandler {
 cursor: pointer;

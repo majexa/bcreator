@@ -17715,6 +17715,9 @@ Ngn.sd.BannersBar = new Class({
     this.eCont = new Element('div', {
       'class': 'bannerBarCont'
     }).inject(this.eBar);
+    this.eContInner = new Element('div', {
+      'class': 'bannerBarContInner'
+    }).inject(this.eCont);
     var eHandler = new Element('div', {
       'class': 'handler'
     }).inject(this.eBar);
@@ -17729,15 +17732,20 @@ Ngn.sd.BannersBar = new Class({
     new Ngn.Request.JSON({
       url: '/allBanners',
       onComplete: function(r) {
+        var eSelected = null;
         for (var i = 0; i < r.banners.length; i++) {
           var el = new Element('a', {
             'class': 'item',
             href: r.banners[i].editLink,
             html: r.banners[i].downloadLink ? '<img src="' + r.banners[i].directLink + '">' : '<div>need to render</div>'
-          }).inject(this.eCont);
+          }).inject(this.eContInner);
           if (Ngn.sd.bannerId == r.banners[i].id) {
             el.addClass('selected');
+            eSelected = el;
           }
+        }
+        if (eSelected && eSelected.getPosition().x > this.eCont.getSize().x) {
+          new Fx.Scroll(this.eCont).toElement(eSelected);
         }
       }.bind(this)
     }).send();
