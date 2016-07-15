@@ -7,7 +7,7 @@ class BcreatorRender extends BcRender {
     $userId = Auth::get('id');
     db()->query(<<<SQL
 INSERT INTO renderCounts (userId, cnt)
-VALUES (?d, ?d)
+VALUES (?d, 1)
 ON DUPLICATE KEY UPDATE cnt=cnt+1
 SQL
       , $userId, $userId);
