@@ -3238,7 +3238,6 @@ Ngn.Dialog = new Class({
         'class': this.options.footerClass
       }).inject(this.eMessage);
       new Element('div', {'class': 'foot-wrap'}).inject(this.footer);
-      console.debug(this.options.ok);
       if (this.options.ok !== false) {
         this.createButton('ok', this.options.id, this.options.okText, this.options.okClass, this.options.ok, !this.options.okDestroy, undefined, true).inject(this.footer.firstChild, 'top');
       }
