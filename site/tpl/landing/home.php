@@ -47,42 +47,77 @@
 <div class="span-24 last title">
   <h2>Some examples:</h2>
 </div>
-<div class="span-24 last examples">
+<div class="span-24 last examples slider">
   <div class="body">
     <img src="/m/img/landing/left.png" class="left">
     <div id="examples">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
     </div>
     <img src="/m/img/landing/right.png" class="right">
     <div class="clear"></div>
   </div>
-  <script>
-    window.addEvent('domready', function() {
-      var carousel = new Ngn.Carousel(document.getElement('#examples'));
-      document.getElement('.left').addEvent('click', function() {
-        carousel.toPrevious();
-        return false;
-      });
-      document.getElement('.right').addEvent('click', function() {
-        carousel.toNext();
-        return false;
-      });
-    });
-  </script>
 </div>
+<script>
+  new Ngn.Carousel(document.getElement('#examples'), {
+    btnPrevious: document.getElement('.examples .left'),
+    btnNext: document.getElement('.examples .right')
+  });
+</script>
+
 <div class="span-24 last features">
   <div class="item">Free Unlimited Hosting</div>
   <div class="item">Ready Made Templates</div>
   <div class="item">Build Unlimited Banners</div>
 </div>
+<div class="span-24 last responses slider">
+  <div class="bg"></div>
+  <img src="/m/img/landing/left.png" class="left">
+  <div id="responses">
+    <div class="span-24 last item">
+      <div class="cont">
+        <p>
+          <img src="/m/img/landing/responses/face1.png">
+        </p>
+        <p>
+          Banner Creator is an all-in-one toolkit for your online advertising needs.
+          The user interface is user-friendly, making it easy even for non-designers
+          to create professional-level banner design.
+        </p>
+        <p><b>Mike Noodles</b></p>
+      </div>
+    </div>
+    <div class="span-24 last item">
+      <div class="cont">
+        <p>
+          <img src="/m/img/landing/responses/face2.png">
+        </p>
+        <p>
+          Banner Creator is an all-in-one toolkit for your online advertising needs.
+          The user interface is user-friendly, making it easy even for non-designers
+          to create professional-level banner design.
+        </p>
+        <p><b>Kristina Noodles</b></p>
+      </div>
+    </div>
+    <div class="clear"></div>
+  </div>
+  <img src="/m/img/landing/right.png" class="right">
+</div>
+
+<script>
+  new Ngn.Carousel(document.getElement('#responses'), {
+    btnPrevious: document.getElement('.responses .left'),
+    btnNext: document.getElement('.responses .right')
+  });
+</script>

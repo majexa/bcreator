@@ -960,7 +960,6 @@ background: #3A4452;
 text-decoration: underline;
 color: #fff;
 }
-
 .subtitle {
 font-size: 16px;
 margin-bottom: 20px;
@@ -969,13 +968,11 @@ margin-bottom: 20px;
 font-size: 16px;
 margin-bottom: 20px;
 }
-
 .content h1 {
 font-size: 20px;
 margin: 20px 0;
 text-align: center;
 }
-
 .banners {
 position: absolute;
 top: 120px;
@@ -1069,25 +1066,31 @@ background-image: url(/m/img/landing/publish.png)
 .icons h2 {
 font-weight: bold;
 }
-.examples {
+.examples, .responses {
 background: #3A4452;
 margin-bottom: 40px;
+position: relative;
+text-align: center;
+color: #fff;
 }
 .examples .body {
+display: inline-block;
 padding: 20px;
 }
-.examples .left {
-margin-right: 20px;
-}
-.examples .left, .examples .right {
-margin-top: 25px;
+.slider .left, .slider .right {
+position: absolute;
 cursor: pointer;
+top: 70px;
 }
-.examples .left:hover, .examples .right:hover {
-background: #FF8A00;
+.slider .left {
+left: 20px;
 }
-.examples .right {
+.slider .right {
+right: 20px;
 margin-left: 20px;
+}
+.slider .left:hover, .slider .right:hover {
+background: #FF8A00;
 }
 .examples img {
 display: block;
@@ -1123,6 +1126,35 @@ padding-top: 7px;
 padding-left: 40px;
 display: inline-block;
 min-height: 60px;
+}
+.responses, .bg {
+width: 950px;
+height: 245px;
+}
+.responsesWrapper {
+width: 950px;
+z-index: 100;
+position: absolute;
+}
+.responses .bg {
+z-index: 10;
+position: absolute;
+background: url(/m/img/landing/responses-bg.png);
+opacity: 0.3;
+}
+.responses .left,.responses .right {
+z-index: 100;
+top: 90px;
+}
+.responses .item {
+text-align: center;
+}
+.responses .item .cont {
+padding: 30px 250px;
+
+}
+.responses .item img {
+border-radius: 100px;
 }
 /*--|/home/user/ngn-env/projects/bcreator/m/css/landing/form.css|--*/
 .center {
