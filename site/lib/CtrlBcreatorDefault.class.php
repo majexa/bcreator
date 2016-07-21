@@ -6,16 +6,21 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
     return 0;
   }
 
+  const HOMEPAGE_USER_ID = 3;
+
   function action_default() {
     $this->d['tpl'] = 'landing/home';
     $this->d['menu'][0]['active'] = true;
-    $this->setPageTitle('Home');
-    $form = new BcreatorSignupForm;
-    if ($form->update()) {
-      $this->redirect('/registrationComplete');
-      return;
+    $this->d['banners'] = [];
+    foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', self::HOMEPAGE_USER_ID) as $v) {
+      $banner = new BcBanner($v);
+      list($banner->r['w'], $banner->r['h']) = getimagesize($banner['downloadFile']);
+      if ($banner->r['h'] > 150) {
+        $banner->r['w'] = round($banner->r['w'] * 150 / $banner->r['h']);
+      }
+      $this->d['banners'][] = $banner->r;
     }
-    $this->d['signUpForm'] = $form->html().'<br><p><a href="/resetPassword">Restore password</a></p>';
+    $this->setPageTitle('Home');
   }
 
   function action_registrationComplete() {

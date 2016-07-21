@@ -14553,6 +14553,7 @@ Ngn.ResizableTextarea = new Class({
 });
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/carousel/Ngn.Carousel.js|--*/
+// @requiresBefore i/js/ngn/core/Ngn.elementExtras.js
 Ngn.Carousel = new Class({
   Extends: Fx.Scroll,
 
@@ -14579,17 +14580,27 @@ Ngn.Carousel = new Class({
     //this.visibleElementsN = Math.round(this.element.getSize().x / this.elementWidth);
     if (this.options.periodical) this.toNext.periodical(this.options.periodical, this);
     if (this.elements) this.toElementForce(this.elements[this.currentIndex]);
-    if (this.options.btnPrevious) {
-      this.options.btnPrevious.addEvent('click', function() {
-        this.toPrevious();
-        return false;
-      }.bind(this));
-    }
-    if (this.options.btnNext) {
-      this.options.btnNext.addEvent('click', function() {
-        this.toNext();
-        return false;
-      }.bind(this));
+    //console.debug([this.element, this.element.getSize().x, this.wrapper.getSize().x]);
+    if (this.original.getSize().x < this.wrapper.getSize().x) {
+      if (this.options.btnPrevious) {
+        this.options.btnPrevious.setStyle('display', 'none');
+      }
+      if (this.options.btnNext) {
+        this.options.btnNext.setStyle('display', 'none');
+      }
+    } else {
+      if (this.options.btnPrevious) {
+        this.options.btnPrevious.addEvent('click', function() {
+          this.toPrevious();
+          return false;
+        }.bind(this));
+      }
+      if (this.options.btnNext) {
+        this.options.btnNext.addEvent('click', function() {
+          this.toNext();
+          return false;
+        }.bind(this));
+      }
     }
   },
 
@@ -14603,14 +14614,21 @@ Ngn.Carousel = new Class({
       els = this.element.getChildren();
     }
     if (!els[0]) throw new Error('No elements was found');
-    new Element('div', {
+    this.wrapper = new Element('div', {
       'class': (this.element.get('class') || this.element.get('id')) + 'Wrapper',
       styles: {
         'overflow': 'hidden'
       }
     }).wraps(this.element);
-    this.element.setStyle('width', (els.length * els[0].getSizeWithMargin().x) + 'px');
+    var w = 0;
+    for (var i = 0; i < els.length; i++) {
+      //if (!els[i].getSizeWithMargin()) console.debug(els[i]);
+      w += els[i].getSizeWithMargin().x;
+    }
+    //w += eWrapper.getSize().x;
+    this.element.setStyle('width', w + 'px');
     this.elements = els;
+    this.original = this.element;
     return this;
   },
 

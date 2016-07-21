@@ -51,18 +51,9 @@
   <div class="body">
     <img src="/m/img/landing/left.png" class="left">
     <div id="examples">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
-      <img style="width:150px;" src="http://zukulbannercreator.net/u/banner/animated/result/57.gif">
+      <? foreach ($d['banners'] as $v) { ?>
+        <img style="width:<?= $v['w'] ?>px;" src="<?= $v['directLink'] ?>">
+      <? } ?>
     </div>
     <img src="/m/img/landing/right.png" class="right">
     <div class="clear"></div>

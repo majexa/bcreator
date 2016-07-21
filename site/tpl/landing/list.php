@@ -16,6 +16,7 @@
 </div>
 
 <div class="center">
+  <? if ($d['banners']) { ?>
   <div class="table">
     <table>
       <tr>
@@ -84,7 +85,9 @@
       new Tips('.table img');
     </script>
   </div>
+<? } else { ?>
+  <p>You have no banners</p>
+<? } ?>
 </div>
-
 
 

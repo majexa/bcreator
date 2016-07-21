@@ -1034,7 +1034,6 @@ display: inline-block;
 color: #5E554E;
 padding: 4px 0 0 6px;
 }
-
 .icons {
 text-align: center;
 padding: 20px 0;
@@ -1080,7 +1079,7 @@ padding: 20px;
 .slider .left, .slider .right {
 position: absolute;
 cursor: pointer;
-top: 70px;
+top: 40px;
 }
 .slider .left {
 left: 20px;
@@ -1097,7 +1096,7 @@ display: block;
 float: left;
 }
 .examplesWrapper img {
-width: 150px;
+
 max-height: 150px;
 margin-right: 20px;
 }
