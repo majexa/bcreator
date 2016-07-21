@@ -874,6 +874,7 @@ padding: 10px;
 }
 .content {
 padding-bottom: 100px; /* Height of the footer element */
+position: relative;
 }
 .footer {
 background: #33363B;
@@ -973,6 +974,17 @@ margin-bottom: 20px;
 font-size: 20px;
 margin: 20px 0;
 text-align: center;
+}
+
+.banners {
+position: absolute;
+top: 120px;
+}
+.banners.left {
+left: 20px;
+}
+.banners.right {
+right: 20px;
 }
 /*--|/home/user/ngn-env/projects/bcreator/m/css/landing/home.css|--*/
 body {
