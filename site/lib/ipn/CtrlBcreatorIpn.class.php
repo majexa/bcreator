@@ -37,7 +37,7 @@ class CtrlBcreatorIpn extends CtrlBase {
     ))->process( //
       $request, //
       new \Engine\IPN\Adapter\PaymentSystem\JVZoo($secretKey) //
-    );
+    ) ? 'success' : 'failed';
   }
 
 }

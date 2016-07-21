@@ -1,0 +1,65 @@
+.bannersList {
+padding-bottom: 20px;
+}
+.bannersList a {
+text-align: center;
+color: #555;
+font-size: 11px;
+display: inline-block;
+border: 1px solid #ccc;
+background: #fff;
+width: 100px;
+height: 100px;
+margin: 0 10px 10px 0;
+}
+.bannersList a:hover {
+border-color: #555;
+}
+.bannersList span {
+display: block;
+margin-top: 40px;
+}
+.dialog {
+background: #fff;
+}
+.table {
+display: inline-block;
+margin: auto;
+
+}
+.table th {
+background: #353535;
+color: #fff;
+border-right: 1px solid #5d5d5d;
+}
+.table td, .table th {
+padding: 5px 10px;
+}
+.table td {
+border-right: 1px solid #e8e8e8;
+}
+.table tr:nth-child(odd) {
+background: #eaeaea;
+}
+.table .preview {
+position: relative;
+}
+.table .preview img.thumb {
+cursor: pointer;
+max-height: 50px;
+max-width: 200px;
+}
+.table .fullPreview {
+cursor: pointer;
+top: 0;
+left: 0;
+display: none;
+position: absolute;
+z-index: 100;
+}
+.table p {
+margin: 0 0 7px 0;
+}
+.table b {
+font-weight: bold;
+}

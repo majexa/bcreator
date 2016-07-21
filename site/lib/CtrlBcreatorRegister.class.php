@@ -8,9 +8,9 @@ class CtrlBcreatorRegister extends CtrlBcreatorLanding {
     if ($form->update()) {
       $this->redirect('/registrationComplete');
     }
-    $this->d['form'] = '<legend>Register New User</legend>'. //
-      '<div class="form-horizontal">'.$form->html().'</div>';
-    $this->d['innerTpl'] = 'common/form';
+    $this->setPageTitle('Register New User');
+    $this->d['form'] = $form->html();
+    $this->d['innerTpl'] = 'landing/form';
   }
 
 }

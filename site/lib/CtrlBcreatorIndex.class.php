@@ -1,6 +1,6 @@
 <?php
 
-class CtrlBcreatorIndex extends CtrlBcreatorLanding {
+class CtrlBcreatorIndex extends CtrlBCreatorLanding {
 
   protected function init() {
     parent::init();

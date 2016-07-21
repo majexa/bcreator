@@ -7,7 +7,7 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
   }
 
   function action_default() {
-    $this->d['tpl'] = 'landing/default';
+    $this->d['tpl'] = 'landing/home';
     $this->d['menu'][0]['active'] = true;
     $this->setPageTitle('Home');
     $form = new BcreatorSignupForm;

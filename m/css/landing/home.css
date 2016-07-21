@@ -1,0 +1,137 @@
+body {
+font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
+}
+.man {
+height: 331px;
+background: url(/m/img/landing/man.png) no-repeat;
+position: relative;
+}
+.frame {
+position: absolute;
+top: 25px;
+left: 470px;
+width: 333px;
+height: 275px;
+}
+.frame .body {
+height: 170px;
+}
+.frame .foot {
+height: 105px;
+}
+.frame .foot p {
+font-size: 10px;
+}
+.frame .foot .btn {
+margin-bottom: 10px;
+}
+.frame .cont {
+padding: 15px;
+}
+.frame .foot .cont {
+padding-top: 15px;
+}
+a {
+color: #FF8A00;
+}
+a:hover {
+color: #000;
+}
+.format {
+display: inline-block;
+width: 40px;
+height: 20px;
+background: url(/m/img/landing/format.png) no-repeat;
+}
+.format span {
+display: inline-block;
+color: #5E554E;
+padding: 4px 0 0 6px;
+}
+
+.icons {
+text-align: center;
+padding: 20px 0;
+margin-bottom: 15px;
+}
+.icons div {
+color: #3A4452;
+background: center top;
+display: inline-block;
+vertical-align: top;
+width: 250px;
+}
+.icons i {
+display: inline-block;
+width: 94px;
+height: 94px;
+margin-bottom: 15px;
+background: #3A4452;
+}
+.icons .easy i {
+background-image: url(/m/img/landing/easy.png)
+}
+.icons .template i {
+background-image: url(/m/img/landing/template.png)
+}
+.icons .publish i {
+background-image: url(/m/img/landing/publish.png)
+}
+.icons h2 {
+font-weight: bold;
+}
+.examples {
+background: #3A4452;
+margin-bottom: 40px;
+}
+.examples .body {
+padding: 20px;
+}
+.examples .left {
+margin-right: 20px;
+}
+.examples .left, .examples .right {
+margin-top: 25px;
+cursor: pointer;
+}
+.examples .left:hover, .examples .right:hover {
+background: #FF8A00;
+}
+.examples .right {
+margin-left: 20px;
+}
+.examples img {
+display: block;
+float: left;
+}
+.examplesWrapper img {
+width: 150px;
+max-height: 150px;
+margin-right: 20px;
+}
+.examplesWrapper {
+float: left;
+width: 760px;
+}
+.title h2 {
+background: #3A4452;
+display: inline-block;
+margin-left: 150px;
+color: #fff;
+margin-bottom: 0;
+padding: 10px 15px;
+font-weight: bold;
+}
+.features {
+text-align: center;
+}
+.features .item {
+text-align: left;
+margin-right: 30px;
+background: url(/m/img/landing/li.png) no-repeat;
+width: 150px;
+padding-top: 7px;
+padding-left: 40px;
+display: inline-block;
+min-height: 60px;
+}

@@ -8,6 +8,7 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
       $this->redirect('/');
       return;
     }
+    $this->setPageTitle('My Banners');
     $this->d['banners'] = [];
     foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', Auth::get('id')) as $v) {
       $this->d['banners'][] = new BcBanner($v);

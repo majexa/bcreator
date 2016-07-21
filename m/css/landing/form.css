@@ -1,11 +1,23 @@
-.advice-wrapper {
-clear: both;
-color: #f00;
-padding-top: 10px;
+.center {
 text-align: center;
 }
-.pseudoLink {
-text-decoration: none;
-cursor: pointer;
-border-bottom: 1px dotted;
+.apeform {
+text-align: left;
+display: inline-block;
+}
+.apeform .help {
+margin-top: 5px;
+}
+.apeform .element {
+margin-bottom: 20px;
+}
+.apeform input, .apeform select, .apeform textarea {
+font-size: 16px;
+}
+.apeform input, .apeform textarea {
+padding: 5px;
+border: 1px solid #ccc;
+}
+.apeform textarea {
+height: 100px;
 }
