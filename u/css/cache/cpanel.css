@@ -3551,6 +3551,8 @@ z-index: 298;
 background: #212121;
 margin-left: 200px;
 position: relative;
+}
+.bannerBarWrapper:not(.hiddn) .bannerBar {
 overflow-x: hidden;
 }
 .bannerBarCont {

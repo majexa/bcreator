@@ -8,7 +8,6 @@
     <link rel="stylesheet" type="text/css" href="/m/css/home.css" media="screen, projection"/>
   <? } ?>
   <? if (strstr($d['ctrlName'], 'Cpanel')) { ?>
-    <link rel="stylesheet" type="text/css" href="/sd/css/edit.css" media="screen, projection"/>
     <link rel="stylesheet" type="text/css" href="/m/css/edit.css" media="screen, projection"/>
   <? } ?>
   <script>
