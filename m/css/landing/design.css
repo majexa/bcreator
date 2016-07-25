@@ -132,3 +132,21 @@ left: 20px;
 .banners.right {
 right: 20px;
 }
+
+
+.menu ul ul {
+display: none;
+position: absolute;
+top: 31px;
+left: -20px;
+z-index: 200;
+}
+.menu ul ul li {
+width: 170px;
+}
+.menu ul li {
+position: relative;
+}
+.menu ul li:hover ul {
+display: block;
+}

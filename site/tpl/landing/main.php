@@ -35,6 +35,15 @@
         <? foreach ($d['menu'] as $i => $v) { ?>
           <li id="m<?= $i + 1 ?>"<?= $v['active'] ? ' class="active"' : '' ?>>
             <a href="<?= $v['link'] ?>"><?= $v['title'] ?></a>
+            <? if ($v['menu']) { ?>
+              <ul>
+                <? foreach ($v['menu'] as $ii => $vv) { ?>
+                <li>
+                  <a href="<?= $vv['link'] ?>"><?= $vv['title'] ?></a>
+                </li>
+                <? } ?>
+              </ul>
+            <? } ?>
           </li>
         <? } ?>
       </ul>

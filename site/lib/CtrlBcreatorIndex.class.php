@@ -3,6 +3,7 @@
 class CtrlBcreatorIndex extends CtrlBCreatorLanding {
 
   protected function init() {
+    die2(2222222);
     parent::init();
     $this->d['innerTpl'] = 'index'.$this->req->path(1);
     foreach ($this->d['menu'] as &$v) {

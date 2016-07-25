@@ -13,7 +13,7 @@
     <div class="foot">
       <div class="cont">
         <div class="column" style="width:140px">
-          <a href="" class="btn">make a banner</a>
+          <a href="<?= Auth::get('id') ? '/list/create' : '/register' ?>" class="btn">make a banner</a>
           <p>Download formats:</p>
           <p>
             <span class="format"><span>PNG</span></span>
@@ -21,7 +21,7 @@
           </p>
         </div>
         <div class="span-4 last">
-          You don't have to buy today, our banner maker is <a href="/register">FREE</a> to try
+          You don't have to buy today, our banner maker is <a href="<?= Auth::get('id') ? '/list/create' : '/register' ?>">FREE</a> to try
         </div>
         <div class="clear"></div>
       </div>

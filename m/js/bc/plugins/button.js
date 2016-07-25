@@ -8,7 +8,6 @@ Ngn.sd.BlockBButton = new Class({
 window.addEvent('sdPanelComplete', function() {
   Ngn.sd.ButtonInsertDialog = new Class({
     Extends: Ngn.sd.ImageInsertDialog,
-
     options: {
       id: 'button',
       title: 'Insert button',

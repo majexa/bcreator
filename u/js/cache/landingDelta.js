@@ -3134,6 +3134,7 @@ Ngn.Dialog = new Class({
 
   initialize: function(options) {
     this.setOptions(options);
+    this.options.cancelText = Locale.get('Core.cancel');
     // new Image().src = '/i/img/dialog/cross-pushed.png'; // preloading of hover cross
     if (this.options.id == 'dlg') {
       this.options.id = 'dlg' + Ngn.String.rand(5);
@@ -3940,11 +3941,10 @@ Ngn.Dialog.Msg = new Class({
 
 });
 
-/*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
-Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
-
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
+Locale.define("en-US", "Core", {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","cancel":"Cancel","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
-// @requiresBefore s2/js/locale/core
+// @requiresBefore s2/js/locale?key=core
 Ngn.Dialog.Confirm = new Class({
   Extends: Ngn.Dialog.Msg,
 
@@ -4022,7 +4022,7 @@ Ngn.Dialog.Confirm.Mem = new Class({
 });
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Dotter.js|--*/
-// @requiresBefore s2/js/locale/core
+// @requiresBefore s2/js/locale?key=core
 Ngn.Dotter = new Class({
   Implements: [Options,Events],
 

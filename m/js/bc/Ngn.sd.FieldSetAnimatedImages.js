@@ -1,5 +1,5 @@
 Ngn.sd.FieldSetAnimatedImages = new Class({
-  Extends: Ngn.Frm.FieldSet,
+  Extends: Ngn.Frm.FieldSetBcreatorImages,
 
   initRows: function() {
     this.parent();

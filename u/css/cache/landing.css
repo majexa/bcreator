@@ -983,6 +983,25 @@ left: 20px;
 .banners.right {
 right: 20px;
 }
+
+
+.menu ul ul {
+display: none;
+position: absolute;
+top: 31px;
+left: -20px;
+z-index: 200;
+}
+.menu ul ul li {
+width: 170px;
+}
+.menu ul li {
+position: relative;
+}
+.menu ul li:hover ul {
+display: block;
+}
+
 /*--|/home/user/ngn-env/projects/bcreator/m/css/landing/home.css|--*/
 body {
 font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;

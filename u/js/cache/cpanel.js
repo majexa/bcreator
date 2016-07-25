@@ -10641,8 +10641,17 @@ Ngn.toObj = function(s, value) {
 
 if (!Ngn.tpls) Ngn.tpls = {};
 
-/*--|/home/user/ngn-env/bc/scripts/js/base.php|--*/
-Ngn.toObj('Ngn.sd.baseUrl', 'http://bcreator.majexa.ru');
+/*--|/home/user/ngn-env/ngn/more/scripts/js/common/Ngn.php|--*/
+// -- Dynamic Core --
+
+Ngn.projectKey = 'bcreator';
+Ngn.isDebug = true;
+Ngn.fileSizeMax = 104857600;
+Ngn.siteTitle = 'Banner Creator';
+Ngn.sflmFrontend = 'cpanel';
+
+Locale.define('en-US', 'Dummy', 'dummy', 'dummy');
+Locale.use('en-US');
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.RequiredOptions.js|--*/
 Ngn.RequiredOptions = new Class({
@@ -10741,6 +10750,7 @@ Ngn.Dialog = new Class({
 
   initialize: function(options) {
     this.setOptions(options);
+    this.options.cancelText = Locale.get('Core.cancel');
     // new Image().src = '/i/img/dialog/cross-pushed.png'; // preloading of hover cross
     if (this.options.id == 'dlg') {
       this.options.id = 'dlg' + Ngn.String.rand(5);
@@ -11835,11 +11845,10 @@ Ngn.Dialog.Msg = new Class({
 
 });
 
-/*--|/home/user/ngn-env/ngn/more/scripts/js/locale/core.php|--*/
-Locale.define('en-US', 'Core', {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
-
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
+Locale.define("en-US", "Core", {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","cancel":"Cancel","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
-// @requiresBefore s2/js/locale/core
+// @requiresBefore s2/js/locale?key=core
 Ngn.Dialog.Confirm = new Class({
   Extends: Ngn.Dialog.Msg,
 
@@ -12357,7 +12366,7 @@ Ngn.Frm.maxLength = function(eForm, defaultMaxLength) {
 };
 
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.Dotter.js|--*/
-// @requiresBefore s2/js/locale/core
+// @requiresBefore s2/js/locale?key=core
 Ngn.Dotter = new Class({
   Implements: [Options,Events],
 
@@ -15009,7 +15018,11 @@ Ngn.Frm.Saver = new Class({
   }
   
 });
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
+Locale.define("en-US", "Sd", {"layersQuestionMark":"Click any layer and drag to change its position in the layers list"});
 /*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.js|--*/
+// @requiresBefore s2/js/locale?key=sd
+
 // from common
 
 if (!Ngn.sd) Ngn.sd = {};
@@ -15151,6 +15164,7 @@ Ngn.sd.Font = new Class({
     }
     Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
       onClose: function() {
+        Ngn.sd.currentEditBlock.toggleActive(false);
         Ngn.sd.currentEditBlock = false;
         Ngn.sd.openedPropDialog = false;
       }.bind(this),
@@ -16698,6 +16712,7 @@ Ngn.sd.BlockBFont = new Class({
           textShadow: '1px 1px rgba(0, 0, 0, 0.8)'
         };
       }
+      console.debug(this.styleEl());
       Cufon.replace(this.styleEl(), cufonProps);
       Ngn.Request.Iface.loading(false);
       this.phantomCufonLoaded();
@@ -16893,7 +16908,6 @@ Ngn.sd.Bars = new Class({
     new Element('div', {
       'class': 'tit'
     }).inject(Ngn.sd.ePanel);
-    document.getElement('.profileBar').inject(Ngn.sd.ePanel);
     Ngn.sd.eLayers = new Element('div', {'class': 'cont'}).inject($('layers'));
     Ngn.sd.loadData(pg ? pg[1] : 1, function(data) {
       this.layersBar = this.getLayersBar();
@@ -16960,7 +16974,7 @@ Ngn.sd.LayersBar = new Class({
   init: function() {
     Ngn.sd.eLayers.set('html', '');
     var eTitle = new Element('div', {
-      html: 'Layers',
+      html: Locale.get('Sd.layers'),
       'class': 'lTitle'
     }).inject(Ngn.sd.eLayers);
     this.eLayers = new Element('div', {
@@ -16968,7 +16982,7 @@ Ngn.sd.LayersBar = new Class({
     }).inject(Ngn.sd.eLayers);
     new Tips(new Element('span', {
       html: '?',
-      title: 'Click any layer and drag to change its position in the layers list',
+      title: Locale.get('Sd.layersQuestionMark'),
       'class': 'questionMark'
     }).inject(eTitle));
     Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey').each(function(item) {
@@ -17079,7 +17093,7 @@ Ngn.sd.LayersBar.Item = new Class({
 
 /*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
 window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('New banner', 'add'), function() {
+  new Ngn.Btn(Ngn.sd.fbtn(Ngn.Locale.get('Sd.newBanner'), 'add'), function() {
     new Ngn.Dialog.RequestForm({
       url: '/newBanner',
       width: 200,
@@ -17089,6 +17103,14 @@ window.addEvent('sdPanelComplete', function() {
     });
   });
 });
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Locale.js|--*/
+Ngn.Locale = {
+  get: function(key) {
+    return Locale.get(key) || Ngn.String.ucfirst(String(key).replace(/\w+\.(.+)/g, '$1').replace(/[A-Z]/g, function(match){
+      return (' ' + match.charAt(0).toLowerCase());
+    }));
+  }
+};
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedText.js|--*/
 Ngn.sd.blockTypes.push({
   title: 'Text',
@@ -17314,7 +17336,6 @@ Ngn.sd.BlockBButton = new Class({
 window.addEvent('sdPanelComplete', function() {
   Ngn.sd.ButtonInsertDialog = new Class({
     Extends: Ngn.sd.ImageInsertDialog,
-
     options: {
       id: 'button',
       title: 'Insert button',
@@ -17336,19 +17357,18 @@ Ngn.sd.BlockBClipart = new Class({
   }
 });
 
-Ngn.sd.ClipartInsertDialog = new Class({
-  Extends: Ngn.sd.ImageInsertDialog,
-  options: {
-    id: 'clipart',
-    title: 'Insert clipart',
-    url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect'
-  },
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_createClipartBlock?url=' + url
-  }
-});
-
 window.addEvent('sdPanelComplete', function() {
+  Ngn.sd.ClipartInsertDialog = new Class({
+    Extends: Ngn.sd.ImageInsertDialog,
+    options: {
+      id: 'clipart',
+      title: 'Insert clipart',
+      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect'
+    },
+    createImageUrl: function(url) {
+      return '/cpanel/' + Ngn.sd.bannerId + '/json_createClipartBlock?url=' + url
+    }
+  });
   new Ngn.Btn(Ngn.sd.fbtn('Add clipart', 'clipart'), function() {
     new Ngn.sd.ClipartInsertDialog();
   });
@@ -17775,7 +17795,7 @@ Ngn.sd.BannersBar = new Class({
 
 });
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.js|--*/
-// @requiresBefore s2/js/locale/core
+// @requiresBefore s2/js/locale?key=core
 /**
  *
  * <div id="mainElement">
@@ -18986,9 +19006,36 @@ Ngn.sd.FontSelectDialog = new Class({
   }
 });
 
+/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.Frm.FieldSetBcreatorImages.js|--*/
+Ngn.Frm.FieldSetBcreatorImages = new Class({
+  Extends: Ngn.Frm.FieldSet,
+
+  createDeleteButton: function(eRow, index) {
+    var fieldSet = this;
+    this.createRowButton(eRow, {
+      caption: this.options.deleteTitle,
+      cls: 'delete'
+    }, function() {
+      if (!confirm('Are you sure?')) return;
+      Ngn.Request.Iface.loading(true);
+      new Ngn.Request.JSON({
+        url: fieldSet.options.deleteImageUrl.replace('{n}', index),
+        onSuccess: function() {
+          Ngn.Request.Iface.loading(false);
+          eRow.dispose();
+          fieldSet.regenInputNames();
+          fieldSet.buttons.erase(this);
+          Ngn.sd.blocks[Ngn.sd.openedPropDialog.options.blockId].reload();
+        }
+      }).send();
+    });
+  }
+
+});
+
 /*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.FieldSetAnimatedImages.js|--*/
 Ngn.sd.FieldSetAnimatedImages = new Class({
-  Extends: Ngn.Frm.FieldSet,
+  Extends: Ngn.Frm.FieldSetBcreatorImages,
 
   initRows: function() {
     this.parent();

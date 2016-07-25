@@ -2,14 +2,6 @@
 
 class SdBlockSettingsFormAnimatedImage extends SdBlockSettingsFormBase {
 
-//  protected function defineOptions() {
-//    return array_merge(parent::defineOptions(), [
-//      'dataParams' => [
-//        'class' => 'sd.AnimatedImageSettingsForm'
-//      ]
-//    ]);
-//  }
-
   protected function getInitFields() {
     return [
       [
