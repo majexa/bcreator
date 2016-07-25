@@ -11103,7 +11103,6 @@ Ngn.Dialog = new Class({
       Ngn.Dialog.dialogs.erase(this.dialogId);
       if (this.options.force) this.closeShade();
       this.fireEvent('close');
-      console.debug('this.isOkClose: ' + this.isOkClose);
       this.isOkClose ? this.fireEvent('okClose') : this.fireEvent('cancelClose');
     }
   },
@@ -16535,7 +16534,7 @@ Ngn.sd.init = function(bannerId) {
   if (window.location.hash == '#preview') {
     Ngn.sd.previewSwitch();
   }
-  console.debug('callPhantom: afterInit');
+  //console.debug('callPhantom: afterInit');
   if (typeof window.callPhantom === 'function') {
     window.callPhantom({
       action: 'afterInit'
@@ -16611,14 +16610,18 @@ Ngn.sd.GlobalSlides = new Class({
   maxSlidesBlockN: 0,
 
   initMaxSlidesBlockN: function() {
+    var maxSlides = 0;
     for (var i = 0; i < this.slides.length; i++) {
-      if (this.slides[i].length > this.maxSlidesBlockN) {
+      if (this.slides[i].length > maxSlides) {
+        maxSlides = this.slides[i].length;
         this.maxSlidesBlockN = i;
       }
     }
   },
 
   nextSlide: function() {
+    //console.debug(this.slides);
+    //console.debug(this.maxSlidesBlockN);
     if (this.slides[this.maxSlidesBlockN][this.currentIndex + 1]) {
       this.nextIndex = this.currentIndex + 1;
     } else {
@@ -16712,14 +16715,13 @@ Ngn.sd.BlockBFont = new Class({
           textShadow: '1px 1px rgba(0, 0, 0, 0.8)'
         };
       }
-      console.debug(this.styleEl());
       Cufon.replace(this.styleEl(), cufonProps);
       Ngn.Request.Iface.loading(false);
       this.phantomCufonLoaded();
     }.bind(this));
   },
   phantomCufonLoaded: function() {
-    console.debug('callPhantom: cufonLoaded');
+    //console.debug('callPhantom: cufonLoaded');
     if (typeof window.callPhantom === 'function') {
       window.callPhantom({
         action: 'cufonLoaded'
