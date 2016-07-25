@@ -55,14 +55,16 @@
   </div>
   <div class="span-24 last footer">
     <div class="cont">
+      <div class="body">
       <p>
-        <a href="">Privacy Policy</a> |
-        <a href="">Terms of Service</a> |
-        <a href="">Contact Us</a>
+        <a href="/index/privacy">Privacy Policy</a> |
+        <a href="/index/terms">Terms of Service</a> |
+        <a href="/support">Contact Us</a>
       </p>
       <p>
         &copy; 2016 Banner Creator, All rights reserved
       </p>
+      </div>
     </div>
   </div>
 </div>

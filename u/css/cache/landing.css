@@ -882,13 +882,20 @@ height: 100px;
 position: absolute;
 bottom: 0;
 left: 0;
+text-align: center;
 }
 .footer .cont {
+text-align: left;
+display: inline-block;
+width: 330px;
 margin: 20px;
 background: url(/m/img/landing/zukul.png) no-repeat;
 color: #CACBCF;
 min-height: 70px;
-padding-left: 150px;
+}
+.footer .cont .body {
+padding: 8px 0 0 70px;
+
 }
 .footer .cont a {
 color: #E8E9EA;
