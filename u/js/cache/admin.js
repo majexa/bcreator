@@ -438,6 +438,128 @@ String.extend('uniqueID', function(){
 /*
 ---
 
+name: Object
+
+description: Object generic methods
+
+license: MIT-style license.
+
+requires: Type
+
+provides: [Object, Hash]
+
+...
+*/
+
+(function(){
+
+Object.extend({
+
+	subset: function(object, keys){
+		var results = {};
+		for (var i = 0, l = keys.length; i < l; i++){
+			var k = keys[i];
+			if (k in object) results[k] = object[k];
+		}
+		return results;
+	},
+
+	map: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			results[key] = fn.call(bind, object[key], key, object);
+		}
+		return results;
+	},
+
+	filter: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i], value = object[key];
+			if (fn.call(bind, value, key, object)) results[key] = value;
+		}
+		return results;
+	},
+
+	every: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (!fn.call(bind, object[key], key)) return false;
+		}
+		return true;
+	},
+
+	some: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (fn.call(bind, object[key], key)) return true;
+		}
+		return false;
+	},
+
+	values: function(object){
+		var values = [];
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var k = keys[i];
+			values.push(object[k]);
+		}
+		return values;
+	},
+
+	getLength: function(object){
+		return Object.keys(object).length;
+	},
+
+	keyOf: function(object, value){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (object[key] === value) return key;
+		}
+		return null;
+	},
+
+	contains: function(object, value){
+		return Object.keyOf(object, value) != null;
+	},
+
+	toQueryString: function(object, base){
+		var queryString = [];
+
+		Object.each(object, function(value, key){
+			if (base) key = base + '[' + key + ']';
+			var result;
+			switch (typeOf(value)){
+				case 'object': result = Object.toQueryString(value, key); break;
+				case 'array':
+					var qs = {};
+					value.each(function(val, i){
+						qs[i] = val;
+					});
+					result = Object.toQueryString(qs, key);
+					break;
+				default: result = key + '=' + encodeURIComponent(value);
+			}
+			if (value != null) queryString.push(result);
+		});
+
+		return queryString.join('&');
+	}
+
+});
+
+})();
+
+
+/*
+---
+
 name: Array
 
 description: Contains Array Prototypes like each, contains, and erase.
@@ -1025,128 +1147,6 @@ try {
 
 
 })();
-/*
----
-
-name: Object
-
-description: Object generic methods
-
-license: MIT-style license.
-
-requires: Type
-
-provides: [Object, Hash]
-
-...
-*/
-
-(function(){
-
-Object.extend({
-
-	subset: function(object, keys){
-		var results = {};
-		for (var i = 0, l = keys.length; i < l; i++){
-			var k = keys[i];
-			if (k in object) results[k] = object[k];
-		}
-		return results;
-	},
-
-	map: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			results[key] = fn.call(bind, object[key], key, object);
-		}
-		return results;
-	},
-
-	filter: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i], value = object[key];
-			if (fn.call(bind, value, key, object)) results[key] = value;
-		}
-		return results;
-	},
-
-	every: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (!fn.call(bind, object[key], key)) return false;
-		}
-		return true;
-	},
-
-	some: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (fn.call(bind, object[key], key)) return true;
-		}
-		return false;
-	},
-
-	values: function(object){
-		var values = [];
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var k = keys[i];
-			values.push(object[k]);
-		}
-		return values;
-	},
-
-	getLength: function(object){
-		return Object.keys(object).length;
-	},
-
-	keyOf: function(object, value){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (object[key] === value) return key;
-		}
-		return null;
-	},
-
-	contains: function(object, value){
-		return Object.keyOf(object, value) != null;
-	},
-
-	toQueryString: function(object, base){
-		var queryString = [];
-
-		Object.each(object, function(value, key){
-			if (base) key = base + '[' + key + ']';
-			var result;
-			switch (typeOf(value)){
-				case 'object': result = Object.toQueryString(value, key); break;
-				case 'array':
-					var qs = {};
-					value.each(function(val, i){
-						qs[i] = val;
-					});
-					result = Object.toQueryString(qs, key);
-					break;
-				default: result = key + '=' + encodeURIComponent(value);
-			}
-			if (value != null) queryString.push(result);
-		});
-
-		return queryString.join('&');
-	}
-
-});
-
-})();
-
-
 /*
 ---
 name: Slick.Parser
@@ -3475,430 +3475,6 @@ if (document.createElement('div').getAttributeNode('id')) Element.Properties.id 
 /*
 ---
 
-name: Event
-
-description: Contains the Event Type, to make the event object cross-browser.
-
-license: MIT-style license.
-
-requires: [Window, Document, Array, Function, String, Object]
-
-provides: Event
-
-...
-*/
-
-(function(){
-
-var _keys = {};
-var normalizeWheelSpeed = function(event){
-	var normalized;
-	if (event.wheelDelta){
-		normalized = event.wheelDelta % 120 == 0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
-	} else {
-		var rawAmount = event.deltaY || event.detail || 0;
-		normalized = -(rawAmount % 3 == 0 ? rawAmount / 3 : rawAmount * 10);
-	}
-	return normalized;
-};
-
-var DOMEvent = this.DOMEvent = new Type('DOMEvent', function(event, win){
-	if (!win) win = window;
-	event = event || win.event;
-	if (event.$extended) return event;
-	this.event = event;
-	this.$extended = true;
-	this.shift = event.shiftKey;
-	this.control = event.ctrlKey;
-	this.alt = event.altKey;
-	this.meta = event.metaKey;
-	var type = this.type = event.type;
-	var target = event.target || event.srcElement;
-	while (target && target.nodeType == 3) target = target.parentNode;
-	this.target = document.id(target);
-
-	if (type.indexOf('key') == 0){
-		var code = this.code = (event.which || event.keyCode);
-		if (!this.shift || type != 'keypress') this.key = _keys[code];
-		if (type == 'keydown' || type == 'keyup'){
-			if (code > 111 && code < 124) this.key = 'f' + (code - 111);
-			else if (code > 95 && code < 106) this.key = code - 96;
-		}
-		if (this.key == null) this.key = String.fromCharCode(code).toLowerCase();
-	} else if (type == 'click' || type == 'dblclick' || type == 'contextmenu' || type == 'wheel' || type == 'DOMMouseScroll' || type.indexOf('mouse') == 0){
-		var doc = win.document;
-		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
-		this.page = {
-			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
-			y: (event.pageY != null) ? event.pageY : event.clientY + doc.scrollTop
-		};
-		this.client = {
-			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
-			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
-		};
-		if (type == 'DOMMouseScroll' || type == 'wheel' || type == 'mousewheel') this.wheel = normalizeWheelSpeed(event);
-		this.rightClick = (event.which == 3 || event.button == 2);
-		if (type == 'mouseover' || type == 'mouseout' || type == 'mouseenter' || type == 'mouseleave'){
-			var overTarget = type == 'mouseover' || type == 'mouseenter';
-			var related = event.relatedTarget || event[(overTarget ? 'from' : 'to') + 'Element'];
-			while (related && related.nodeType == 3) related = related.parentNode;
-			this.relatedTarget = document.id(related);
-		}
-	} else if (type.indexOf('touch') == 0 || type.indexOf('gesture') == 0){
-		this.rotation = event.rotation;
-		this.scale = event.scale;
-		this.targetTouches = event.targetTouches;
-		this.changedTouches = event.changedTouches;
-		var touches = this.touches = event.touches;
-		if (touches && touches[0]){
-			var touch = touches[0];
-			this.page = {x: touch.pageX, y: touch.pageY};
-			this.client = {x: touch.clientX, y: touch.clientY};
-		}
-	}
-
-	if (!this.client) this.client = {};
-	if (!this.page) this.page = {};
-});
-
-DOMEvent.implement({
-
-	stop: function(){
-		return this.preventDefault().stopPropagation();
-	},
-
-	stopPropagation: function(){
-		if (this.event.stopPropagation) this.event.stopPropagation();
-		else this.event.cancelBubble = true;
-		return this;
-	},
-
-	preventDefault: function(){
-		if (this.event.preventDefault) this.event.preventDefault();
-		else this.event.returnValue = false;
-		return this;
-	}
-
-});
-
-DOMEvent.defineKey = function(code, key){
-	_keys[code] = key;
-	return this;
-};
-
-DOMEvent.defineKeys = DOMEvent.defineKey.overloadSetter(true);
-
-DOMEvent.defineKeys({
-	'38': 'up', '40': 'down', '37': 'left', '39': 'right',
-	'27': 'esc', '32': 'space', '8': 'backspace', '9': 'tab',
-	'46': 'delete', '13': 'enter'
-});
-
-})();
-
-
-
-
-/*
----
-
-name: Element.Event
-
-description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events, if necessary.
-
-license: MIT-style license.
-
-requires: [Element, Event]
-
-provides: Element.Event
-
-...
-*/
-
-(function(){
-
-Element.Properties.events = {set: function(events){
-	this.addEvents(events);
-}};
-
-[Element, Window, Document].invoke('implement', {
-
-	addEvent: function(type, fn){
-		var events = this.retrieve('events', {});
-		if (!events[type]) events[type] = {keys: [], values: []};
-		if (events[type].keys.contains(fn)) return this;
-		events[type].keys.push(fn);
-		var realType = type,
-			custom = Element.Events[type],
-			condition = fn,
-			self = this;
-		if (custom){
-			if (custom.onAdd) custom.onAdd.call(this, fn, type);
-			if (custom.condition){
-				condition = function(event){
-					if (custom.condition.call(this, event, type)) return fn.call(this, event);
-					return true;
-				};
-			}
-			if (custom.base) realType = Function.convert(custom.base).call(this, type);
-		}
-		var defn = function(){
-			return fn.call(self);
-		};
-		var nativeEvent = Element.NativeEvents[realType];
-		if (nativeEvent){
-			if (nativeEvent == 2){
-				defn = function(event){
-					event = new DOMEvent(event, self.getWindow());
-					if (condition.call(self, event) === false) event.stop();
-				};
-			}
-			this.addListener(realType, defn, arguments[2]);
-		}
-		events[type].values.push(defn);
-		return this;
-	},
-
-	removeEvent: function(type, fn){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		var list = events[type];
-		var index = list.keys.indexOf(fn);
-		if (index == -1) return this;
-		var value = list.values[index];
-		delete list.keys[index];
-		delete list.values[index];
-		var custom = Element.Events[type];
-		if (custom){
-			if (custom.onRemove) custom.onRemove.call(this, fn, type);
-			if (custom.base) type = Function.convert(custom.base).call(this, type);
-		}
-		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
-	},
-
-	addEvents: function(events){
-		for (var event in events) this.addEvent(event, events[event]);
-		return this;
-	},
-
-	removeEvents: function(events){
-		var type;
-		if (typeOf(events) == 'object'){
-			for (type in events) this.removeEvent(type, events[type]);
-			return this;
-		}
-		var attached = this.retrieve('events');
-		if (!attached) return this;
-		if (!events){
-			for (type in attached) this.removeEvents(type);
-			this.eliminate('events');
-		} else if (attached[events]){
-			attached[events].keys.each(function(fn){
-				this.removeEvent(events, fn);
-			}, this);
-			delete attached[events];
-		}
-		return this;
-	},
-
-	fireEvent: function(type, args, delay){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		args = Array.convert(args);
-
-		events[type].keys.each(function(fn){
-			if (delay) fn.delay(delay, this, args);
-			else fn.apply(this, args);
-		}, this);
-		return this;
-	},
-
-	cloneEvents: function(from, type){
-		from = document.id(from);
-		var events = from.retrieve('events');
-		if (!events) return this;
-		if (!type){
-			for (var eventType in events) this.cloneEvents(from, eventType);
-		} else if (events[type]){
-			events[type].keys.each(function(fn){
-				this.addEvent(type, fn);
-			}, this);
-		}
-		return this;
-	}
-
-});
-
-Element.NativeEvents = {
-	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
-	wheel: 2, mousewheel: 2, DOMMouseScroll: 2, //mouse wheel
-	mouseover: 2, mouseout: 2, mousemove: 2, selectstart: 2, selectend: 2, //mouse movement
-	keydown: 2, keypress: 2, keyup: 2, //keyboard
-	orientationchange: 2, // mobile
-	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
-	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
-	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
-	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
-	hashchange: 1, popstate: 2, pageshow: 2, pagehide: 2, // history
-	error: 1, abort: 1, scroll: 1, message: 2 //misc
-};
-
-Element.Events = {
-	mousewheel: {
-		base: 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll'
-	}
-};
-
-var check = function(event){
-	var related = event.relatedTarget;
-	if (related == null) return true;
-	if (!related) return false;
-	return (related != this && related.prefix != 'xul' && typeOf(this) != 'document' && !this.contains(related));
-};
-
-if ('onmouseenter' in document.documentElement){
-	Element.NativeEvents.mouseenter = Element.NativeEvents.mouseleave = 2;
-	Element.MouseenterCheck = check;
-} else {
-	Element.Events.mouseenter = {
-		base: 'mouseover',
-		condition: check
-	};
-
-	Element.Events.mouseleave = {
-		base: 'mouseout',
-		condition: check
-	};
-}
-
-/*<ltIE9>*/
-if (!window.addEventListener){
-	Element.NativeEvents.propertychange = 2;
-	Element.Events.change = {
-		base: function(){
-			var type = this.type;
-			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change';
-		},
-		condition: function(event){
-			return event.type != 'propertychange' || event.event.propertyName == 'checked';
-		}
-	};
-}
-/*</ltIE9>*/
-
-
-
-})();
-/*
----
-
-name: DOMReady
-
-description: Contains the custom event domready.
-
-license: MIT-style license.
-
-requires: [Browser, Element, Element.Event]
-
-provides: [DOMReady, DomReady]
-
-...
-*/
-
-(function(window, document){
-
-var ready,
-	loaded,
-	checks = [],
-	shouldPoll,
-	timer,
-	testElement = document.createElement('div');
-
-var domready = function(){
-	clearTimeout(timer);
-	if (!ready){
-		Browser.loaded = ready = true;
-		document.removeListener('DOMContentLoaded', domready).removeListener('readystatechange', check);
-		document.fireEvent('domready');
-		window.fireEvent('domready');
-	}
-	// cleanup scope vars
-	document = window = testElement = null;
-};
-
-var check = function(){
-	for (var i = checks.length; i--;) if (checks[i]()){
-		domready();
-		return true;
-	}
-	return false;
-};
-
-var poll = function(){
-	clearTimeout(timer);
-	if (!check()) timer = setTimeout(poll, 10);
-};
-
-document.addListener('DOMContentLoaded', domready);
-
-/*<ltIE8>*/
-// doScroll technique by Diego Perini http://javascript.nwbox.com/IEContentLoaded/
-// testElement.doScroll() throws when the DOM is not ready, only in the top window
-var doScrollWorks = function(){
-	try {
-		testElement.doScroll();
-		return true;
-	} catch (e){}
-	return false;
-};
-// If doScroll works already, it can't be used to determine domready
-//   e.g. in an iframe
-if (testElement.doScroll && !doScrollWorks()){
-	checks.push(doScrollWorks);
-	shouldPoll = true;
-}
-/*</ltIE8>*/
-
-if (document.readyState) checks.push(function(){
-	var state = document.readyState;
-	return (state == 'loaded' || state == 'complete');
-});
-
-if ('onreadystatechange' in document) document.addListener('readystatechange', check);
-else shouldPoll = true;
-
-if (shouldPoll) poll();
-
-Element.Events.domready = {
-	onAdd: function(fn){
-		if (ready) fn.call(this);
-	}
-};
-
-// Make sure that domready fires before load
-Element.Events.load = {
-	base: 'load',
-	onAdd: function(fn){
-		if (loaded && this == window) fn.call(this);
-	},
-	condition: function(){
-		if (this == window){
-			domready();
-			delete Element.Events.load;
-		}
-		return true;
-	}
-};
-
-// This is based on the custom load event
-window.addEvent('load', function(){
-	loaded = true;
-});
-
-})(window, document);
-/*
----
-
 name: Class
 
 description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
@@ -4352,6 +3928,616 @@ if (typeof process !== 'undefined' && typeof process.nextTick === 'function'){
 		setTimeout(fn, 0);
 	};
 }
+
+})();
+/*
+---
+
+name: Request
+
+description: Powerful all purpose Request Class. Uses XMLHTTPRequest.
+
+license: MIT-style license.
+
+requires: [Object, Element, Chain, Events, Options, Class.Thenable, Browser]
+
+provides: Request
+
+...
+*/
+
+(function(){
+
+var empty = function(){},
+	progressSupport = ('onprogress' in new Browser.Request);
+
+var Request = this.Request = new Class({
+
+	Implements: [Chain, Events, Options, Class.Thenable],
+
+	options: {/*
+		onRequest: function(){},
+		onLoadstart: function(event, xhr){},
+		onProgress: function(event, xhr){},
+		onComplete: function(){},
+		onCancel: function(){},
+		onSuccess: function(responseText, responseXML){},
+		onFailure: function(xhr){},
+		onException: function(headerName, value){},
+		onTimeout: function(){},
+		user: '',
+		password: '',
+		withCredentials: false,*/
+		url: '',
+		data: '',
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest',
+			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+		},
+		async: true,
+		format: false,
+		method: 'post',
+		link: 'ignore',
+		isSuccess: null,
+		emulation: true,
+		urlEncoded: true,
+		encoding: 'utf-8',
+		evalScripts: false,
+		evalResponse: false,
+		timeout: 0,
+		noCache: false
+	},
+
+	initialize: function(options){
+		this.xhr = new Browser.Request();
+		this.setOptions(options);
+		this.headers = this.options.headers;
+	},
+
+	onStateChange: function(){
+		var xhr = this.xhr;
+		if (xhr.readyState != 4 || !this.running) return;
+		this.running = false;
+		this.status = 0;
+		Function.attempt(function(){
+			var status = xhr.status;
+			this.status = (status == 1223) ? 204 : status;
+		}.bind(this));
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
+		if (this.timer){
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+
+		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
+		if (this.options.isSuccess.call(this, this.status))
+			this.success(this.response.text, this.response.xml);
+		else
+			this.failure();
+	},
+
+	isSuccess: function(){
+		var status = this.status;
+		return (status >= 200 && status < 300);
+	},
+
+	isRunning: function(){
+		return !!this.running;
+	},
+
+	processScripts: function(text){
+		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return Browser.exec(text);
+		return text.stripScripts(this.options.evalScripts);
+	},
+
+	success: function(text, xml){
+		this.onSuccess(this.processScripts(text), xml);
+		this.resolve({text: text, xml: xml});
+	},
+
+	onSuccess: function(){
+		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
+	},
+
+	failure: function(){
+		this.onFailure();
+		this.reject({reason: 'failure', xhr: this.xhr});
+	},
+
+	onFailure: function(){
+		this.fireEvent('complete').fireEvent('failure', this.xhr);
+	},
+
+	loadstart: function(event){
+		this.fireEvent('loadstart', [event, this.xhr]);
+	},
+
+	progress: function(event){
+		this.fireEvent('progress', [event, this.xhr]);
+	},
+
+	timeout: function(){
+		this.fireEvent('timeout', this.xhr);
+		this.reject({reason: 'timeout', xhr: this.xhr});
+	},
+
+	setHeader: function(name, value){
+		this.headers[name] = value;
+		return this;
+	},
+
+	getHeader: function(name){
+		return Function.attempt(function(){
+			return this.xhr.getResponseHeader(name);
+		}.bind(this));
+	},
+
+	check: function(){
+		if (!this.running) return true;
+		switch (this.options.link){
+			case 'cancel': this.cancel(); return true;
+			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
+		}
+		return false;
+	},
+
+	send: function(options){
+		if (!this.check(options)) return this;
+
+		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
+		this.running = true;
+
+		var type = typeOf(options);
+		if (type == 'string' || type == 'element') options = {data: options};
+
+		var old = this.options;
+		options = Object.append({data: old.data, url: old.url, method: old.method}, options);
+		var data = options.data, url = String(options.url), method = options.method.toLowerCase();
+
+		switch (typeOf(data)){
+			case 'element': data = document.id(data).toQueryString(); break;
+			case 'object': case 'hash': data = Object.toQueryString(data);
+		}
+
+		if (this.options.format){
+			var format = 'format=' + this.options.format;
+			data = (data) ? format + '&' + data : format;
+		}
+
+		if (this.options.emulation && !['get', 'post'].contains(method)){
+			var _method = '_method=' + method;
+			data = (data) ? _method + '&' + data : _method;
+			method = 'post';
+		}
+
+		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
+			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
+			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
+		}
+
+		if (!url) url = document.location.pathname;
+
+		var trimPosition = url.lastIndexOf('/');
+		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
+
+		if (this.options.noCache)
+			url += (url.indexOf('?') > -1 ? '&' : '?') + String.uniqueID();
+
+		if (data && (method == 'get' || method == 'delete')){
+			url += (url.indexOf('?') > -1 ? '&' : '?') + data;
+			data = null;
+		}
+
+		var xhr = this.xhr;
+		if (progressSupport){
+			xhr.onloadstart = this.loadstart.bind(this);
+			xhr.onprogress = this.progress.bind(this);
+		}
+
+		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
+		if ((this.options.withCredentials) && 'withCredentials' in xhr) xhr.withCredentials = true;
+
+		xhr.onreadystatechange = this.onStateChange.bind(this);
+
+		Object.each(this.headers, function(value, key){
+			try {
+				xhr.setRequestHeader(key, value);
+			} catch (e){
+				this.fireEvent('exception', [key, value]);
+				this.reject({reason: 'exception', xhr: xhr, exception: e});
+			}
+		}, this);
+
+		if (this.getThenableState() !== 'pending'){
+			this.resetThenable({reason: 'send'});
+		}
+		this.fireEvent('request');
+		xhr.send(data);
+		if (!this.options.async) this.onStateChange();
+		else if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
+		return this;
+	},
+
+	cancel: function(){
+		if (!this.running) return this;
+		this.running = false;
+		var xhr = this.xhr;
+		xhr.abort();
+		if (this.timer){
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
+		this.xhr = new Browser.Request();
+		this.fireEvent('cancel');
+		this.reject({reason: 'cancel', xhr: xhr});
+		return this;
+	}
+
+});
+
+var methods = {};
+['get', 'post', 'put', 'delete', 'patch', 'head', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'].each(function(method){
+	methods[method] = function(data){
+		var object = {
+			method: method
+		};
+		if (data != null) object.data = data;
+		return this.send(object);
+	};
+});
+
+Request.implement(methods);
+
+Element.Properties.send = {
+
+	set: function(options){
+		var send = this.get('send').cancel();
+		send.setOptions(options);
+		return this;
+	},
+
+	get: function(){
+		var send = this.retrieve('send');
+		if (!send){
+			send = new Request({
+				data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
+			});
+			this.store('send', send);
+		}
+		return send;
+	}
+
+};
+
+Element.implement({
+
+	send: function(url){
+		var sender = this.get('send');
+		sender.send({data: this, url: url || sender.options.url});
+		return this;
+	}
+
+});
+
+})();
+/*
+---
+
+name: Event
+
+description: Contains the Event Type, to make the event object cross-browser.
+
+license: MIT-style license.
+
+requires: [Window, Document, Array, Function, String, Object]
+
+provides: Event
+
+...
+*/
+
+(function(){
+
+var _keys = {};
+var normalizeWheelSpeed = function(event){
+	var normalized;
+	if (event.wheelDelta){
+		normalized = event.wheelDelta % 120 == 0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
+	} else {
+		var rawAmount = event.deltaY || event.detail || 0;
+		normalized = -(rawAmount % 3 == 0 ? rawAmount / 3 : rawAmount * 10);
+	}
+	return normalized;
+};
+
+var DOMEvent = this.DOMEvent = new Type('DOMEvent', function(event, win){
+	if (!win) win = window;
+	event = event || win.event;
+	if (event.$extended) return event;
+	this.event = event;
+	this.$extended = true;
+	this.shift = event.shiftKey;
+	this.control = event.ctrlKey;
+	this.alt = event.altKey;
+	this.meta = event.metaKey;
+	var type = this.type = event.type;
+	var target = event.target || event.srcElement;
+	while (target && target.nodeType == 3) target = target.parentNode;
+	this.target = document.id(target);
+
+	if (type.indexOf('key') == 0){
+		var code = this.code = (event.which || event.keyCode);
+		if (!this.shift || type != 'keypress') this.key = _keys[code];
+		if (type == 'keydown' || type == 'keyup'){
+			if (code > 111 && code < 124) this.key = 'f' + (code - 111);
+			else if (code > 95 && code < 106) this.key = code - 96;
+		}
+		if (this.key == null) this.key = String.fromCharCode(code).toLowerCase();
+	} else if (type == 'click' || type == 'dblclick' || type == 'contextmenu' || type == 'wheel' || type == 'DOMMouseScroll' || type.indexOf('mouse') == 0){
+		var doc = win.document;
+		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
+		this.page = {
+			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
+			y: (event.pageY != null) ? event.pageY : event.clientY + doc.scrollTop
+		};
+		this.client = {
+			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
+			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
+		};
+		if (type == 'DOMMouseScroll' || type == 'wheel' || type == 'mousewheel') this.wheel = normalizeWheelSpeed(event);
+		this.rightClick = (event.which == 3 || event.button == 2);
+		if (type == 'mouseover' || type == 'mouseout' || type == 'mouseenter' || type == 'mouseleave'){
+			var overTarget = type == 'mouseover' || type == 'mouseenter';
+			var related = event.relatedTarget || event[(overTarget ? 'from' : 'to') + 'Element'];
+			while (related && related.nodeType == 3) related = related.parentNode;
+			this.relatedTarget = document.id(related);
+		}
+	} else if (type.indexOf('touch') == 0 || type.indexOf('gesture') == 0){
+		this.rotation = event.rotation;
+		this.scale = event.scale;
+		this.targetTouches = event.targetTouches;
+		this.changedTouches = event.changedTouches;
+		var touches = this.touches = event.touches;
+		if (touches && touches[0]){
+			var touch = touches[0];
+			this.page = {x: touch.pageX, y: touch.pageY};
+			this.client = {x: touch.clientX, y: touch.clientY};
+		}
+	}
+
+	if (!this.client) this.client = {};
+	if (!this.page) this.page = {};
+});
+
+DOMEvent.implement({
+
+	stop: function(){
+		return this.preventDefault().stopPropagation();
+	},
+
+	stopPropagation: function(){
+		if (this.event.stopPropagation) this.event.stopPropagation();
+		else this.event.cancelBubble = true;
+		return this;
+	},
+
+	preventDefault: function(){
+		if (this.event.preventDefault) this.event.preventDefault();
+		else this.event.returnValue = false;
+		return this;
+	}
+
+});
+
+DOMEvent.defineKey = function(code, key){
+	_keys[code] = key;
+	return this;
+};
+
+DOMEvent.defineKeys = DOMEvent.defineKey.overloadSetter(true);
+
+DOMEvent.defineKeys({
+	'38': 'up', '40': 'down', '37': 'left', '39': 'right',
+	'27': 'esc', '32': 'space', '8': 'backspace', '9': 'tab',
+	'46': 'delete', '13': 'enter'
+});
+
+})();
+
+
+
+
+/*
+---
+
+name: Element.Event
+
+description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events, if necessary.
+
+license: MIT-style license.
+
+requires: [Element, Event]
+
+provides: Element.Event
+
+...
+*/
+
+(function(){
+
+Element.Properties.events = {set: function(events){
+	this.addEvents(events);
+}};
+
+[Element, Window, Document].invoke('implement', {
+
+	addEvent: function(type, fn){
+		var events = this.retrieve('events', {});
+		if (!events[type]) events[type] = {keys: [], values: []};
+		if (events[type].keys.contains(fn)) return this;
+		events[type].keys.push(fn);
+		var realType = type,
+			custom = Element.Events[type],
+			condition = fn,
+			self = this;
+		if (custom){
+			if (custom.onAdd) custom.onAdd.call(this, fn, type);
+			if (custom.condition){
+				condition = function(event){
+					if (custom.condition.call(this, event, type)) return fn.call(this, event);
+					return true;
+				};
+			}
+			if (custom.base) realType = Function.convert(custom.base).call(this, type);
+		}
+		var defn = function(){
+			return fn.call(self);
+		};
+		var nativeEvent = Element.NativeEvents[realType];
+		if (nativeEvent){
+			if (nativeEvent == 2){
+				defn = function(event){
+					event = new DOMEvent(event, self.getWindow());
+					if (condition.call(self, event) === false) event.stop();
+				};
+			}
+			this.addListener(realType, defn, arguments[2]);
+		}
+		events[type].values.push(defn);
+		return this;
+	},
+
+	removeEvent: function(type, fn){
+		var events = this.retrieve('events');
+		if (!events || !events[type]) return this;
+		var list = events[type];
+		var index = list.keys.indexOf(fn);
+		if (index == -1) return this;
+		var value = list.values[index];
+		delete list.keys[index];
+		delete list.values[index];
+		var custom = Element.Events[type];
+		if (custom){
+			if (custom.onRemove) custom.onRemove.call(this, fn, type);
+			if (custom.base) type = Function.convert(custom.base).call(this, type);
+		}
+		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
+	},
+
+	addEvents: function(events){
+		for (var event in events) this.addEvent(event, events[event]);
+		return this;
+	},
+
+	removeEvents: function(events){
+		var type;
+		if (typeOf(events) == 'object'){
+			for (type in events) this.removeEvent(type, events[type]);
+			return this;
+		}
+		var attached = this.retrieve('events');
+		if (!attached) return this;
+		if (!events){
+			for (type in attached) this.removeEvents(type);
+			this.eliminate('events');
+		} else if (attached[events]){
+			attached[events].keys.each(function(fn){
+				this.removeEvent(events, fn);
+			}, this);
+			delete attached[events];
+		}
+		return this;
+	},
+
+	fireEvent: function(type, args, delay){
+		var events = this.retrieve('events');
+		if (!events || !events[type]) return this;
+		args = Array.convert(args);
+
+		events[type].keys.each(function(fn){
+			if (delay) fn.delay(delay, this, args);
+			else fn.apply(this, args);
+		}, this);
+		return this;
+	},
+
+	cloneEvents: function(from, type){
+		from = document.id(from);
+		var events = from.retrieve('events');
+		if (!events) return this;
+		if (!type){
+			for (var eventType in events) this.cloneEvents(from, eventType);
+		} else if (events[type]){
+			events[type].keys.each(function(fn){
+				this.addEvent(type, fn);
+			}, this);
+		}
+		return this;
+	}
+
+});
+
+Element.NativeEvents = {
+	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
+	wheel: 2, mousewheel: 2, DOMMouseScroll: 2, //mouse wheel
+	mouseover: 2, mouseout: 2, mousemove: 2, selectstart: 2, selectend: 2, //mouse movement
+	keydown: 2, keypress: 2, keyup: 2, //keyboard
+	orientationchange: 2, // mobile
+	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
+	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
+	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
+	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
+	hashchange: 1, popstate: 2, pageshow: 2, pagehide: 2, // history
+	error: 1, abort: 1, scroll: 1, message: 2 //misc
+};
+
+Element.Events = {
+	mousewheel: {
+		base: 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll'
+	}
+};
+
+var check = function(event){
+	var related = event.relatedTarget;
+	if (related == null) return true;
+	if (!related) return false;
+	return (related != this && related.prefix != 'xul' && typeOf(this) != 'document' && !this.contains(related));
+};
+
+if ('onmouseenter' in document.documentElement){
+	Element.NativeEvents.mouseenter = Element.NativeEvents.mouseleave = 2;
+	Element.MouseenterCheck = check;
+} else {
+	Element.Events.mouseenter = {
+		base: 'mouseover',
+		condition: check
+	};
+
+	Element.Events.mouseleave = {
+		base: 'mouseout',
+		condition: check
+	};
+}
+
+/*<ltIE9>*/
+if (!window.addEventListener){
+	Element.NativeEvents.propertychange = 2;
+	Element.Events.change = {
+		base: function(){
+			var type = this.type;
+			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change';
+		},
+		condition: function(event){
+			return event.type != 'propertychange' || event.event.propertyName == 'checked';
+		}
+	};
+}
+/*</ltIE9>*/
+
+
 
 })();
 /*
@@ -5263,299 +5449,6 @@ Fx.Transitions.extend({
 		return Math.pow(p, i + 2);
 	});
 });
-/*
----
-
-name: Request
-
-description: Powerful all purpose Request Class. Uses XMLHTTPRequest.
-
-license: MIT-style license.
-
-requires: [Object, Element, Chain, Events, Options, Class.Thenable, Browser]
-
-provides: Request
-
-...
-*/
-
-(function(){
-
-var empty = function(){},
-	progressSupport = ('onprogress' in new Browser.Request);
-
-var Request = this.Request = new Class({
-
-	Implements: [Chain, Events, Options, Class.Thenable],
-
-	options: {/*
-		onRequest: function(){},
-		onLoadstart: function(event, xhr){},
-		onProgress: function(event, xhr){},
-		onComplete: function(){},
-		onCancel: function(){},
-		onSuccess: function(responseText, responseXML){},
-		onFailure: function(xhr){},
-		onException: function(headerName, value){},
-		onTimeout: function(){},
-		user: '',
-		password: '',
-		withCredentials: false,*/
-		url: '',
-		data: '',
-		headers: {
-			'X-Requested-With': 'XMLHttpRequest',
-			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-		},
-		async: true,
-		format: false,
-		method: 'post',
-		link: 'ignore',
-		isSuccess: null,
-		emulation: true,
-		urlEncoded: true,
-		encoding: 'utf-8',
-		evalScripts: false,
-		evalResponse: false,
-		timeout: 0,
-		noCache: false
-	},
-
-	initialize: function(options){
-		this.xhr = new Browser.Request();
-		this.setOptions(options);
-		this.headers = this.options.headers;
-	},
-
-	onStateChange: function(){
-		var xhr = this.xhr;
-		if (xhr.readyState != 4 || !this.running) return;
-		this.running = false;
-		this.status = 0;
-		Function.attempt(function(){
-			var status = xhr.status;
-			this.status = (status == 1223) ? 204 : status;
-		}.bind(this));
-		xhr.onreadystatechange = empty;
-		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
-		if (this.timer){
-			clearTimeout(this.timer);
-			delete this.timer;
-		}
-
-		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
-		if (this.options.isSuccess.call(this, this.status))
-			this.success(this.response.text, this.response.xml);
-		else
-			this.failure();
-	},
-
-	isSuccess: function(){
-		var status = this.status;
-		return (status >= 200 && status < 300);
-	},
-
-	isRunning: function(){
-		return !!this.running;
-	},
-
-	processScripts: function(text){
-		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return Browser.exec(text);
-		return text.stripScripts(this.options.evalScripts);
-	},
-
-	success: function(text, xml){
-		this.onSuccess(this.processScripts(text), xml);
-		this.resolve({text: text, xml: xml});
-	},
-
-	onSuccess: function(){
-		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
-	},
-
-	failure: function(){
-		this.onFailure();
-		this.reject({reason: 'failure', xhr: this.xhr});
-	},
-
-	onFailure: function(){
-		this.fireEvent('complete').fireEvent('failure', this.xhr);
-	},
-
-	loadstart: function(event){
-		this.fireEvent('loadstart', [event, this.xhr]);
-	},
-
-	progress: function(event){
-		this.fireEvent('progress', [event, this.xhr]);
-	},
-
-	timeout: function(){
-		this.fireEvent('timeout', this.xhr);
-		this.reject({reason: 'timeout', xhr: this.xhr});
-	},
-
-	setHeader: function(name, value){
-		this.headers[name] = value;
-		return this;
-	},
-
-	getHeader: function(name){
-		return Function.attempt(function(){
-			return this.xhr.getResponseHeader(name);
-		}.bind(this));
-	},
-
-	check: function(){
-		if (!this.running) return true;
-		switch (this.options.link){
-			case 'cancel': this.cancel(); return true;
-			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
-		}
-		return false;
-	},
-
-	send: function(options){
-		if (!this.check(options)) return this;
-
-		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
-		this.running = true;
-
-		var type = typeOf(options);
-		if (type == 'string' || type == 'element') options = {data: options};
-
-		var old = this.options;
-		options = Object.append({data: old.data, url: old.url, method: old.method}, options);
-		var data = options.data, url = String(options.url), method = options.method.toLowerCase();
-
-		switch (typeOf(data)){
-			case 'element': data = document.id(data).toQueryString(); break;
-			case 'object': case 'hash': data = Object.toQueryString(data);
-		}
-
-		if (this.options.format){
-			var format = 'format=' + this.options.format;
-			data = (data) ? format + '&' + data : format;
-		}
-
-		if (this.options.emulation && !['get', 'post'].contains(method)){
-			var _method = '_method=' + method;
-			data = (data) ? _method + '&' + data : _method;
-			method = 'post';
-		}
-
-		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
-			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
-			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
-		}
-
-		if (!url) url = document.location.pathname;
-
-		var trimPosition = url.lastIndexOf('/');
-		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
-
-		if (this.options.noCache)
-			url += (url.indexOf('?') > -1 ? '&' : '?') + String.uniqueID();
-
-		if (data && (method == 'get' || method == 'delete')){
-			url += (url.indexOf('?') > -1 ? '&' : '?') + data;
-			data = null;
-		}
-
-		var xhr = this.xhr;
-		if (progressSupport){
-			xhr.onloadstart = this.loadstart.bind(this);
-			xhr.onprogress = this.progress.bind(this);
-		}
-
-		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
-		if ((this.options.withCredentials) && 'withCredentials' in xhr) xhr.withCredentials = true;
-
-		xhr.onreadystatechange = this.onStateChange.bind(this);
-
-		Object.each(this.headers, function(value, key){
-			try {
-				xhr.setRequestHeader(key, value);
-			} catch (e){
-				this.fireEvent('exception', [key, value]);
-				this.reject({reason: 'exception', xhr: xhr, exception: e});
-			}
-		}, this);
-
-		if (this.getThenableState() !== 'pending'){
-			this.resetThenable({reason: 'send'});
-		}
-		this.fireEvent('request');
-		xhr.send(data);
-		if (!this.options.async) this.onStateChange();
-		else if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
-		return this;
-	},
-
-	cancel: function(){
-		if (!this.running) return this;
-		this.running = false;
-		var xhr = this.xhr;
-		xhr.abort();
-		if (this.timer){
-			clearTimeout(this.timer);
-			delete this.timer;
-		}
-		xhr.onreadystatechange = empty;
-		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
-		this.xhr = new Browser.Request();
-		this.fireEvent('cancel');
-		this.reject({reason: 'cancel', xhr: xhr});
-		return this;
-	}
-
-});
-
-var methods = {};
-['get', 'post', 'put', 'delete', 'patch', 'head', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'].each(function(method){
-	methods[method] = function(data){
-		var object = {
-			method: method
-		};
-		if (data != null) object.data = data;
-		return this.send(object);
-	};
-});
-
-Request.implement(methods);
-
-Element.Properties.send = {
-
-	set: function(options){
-		var send = this.get('send').cancel();
-		send.setOptions(options);
-		return this;
-	},
-
-	get: function(){
-		var send = this.retrieve('send');
-		if (!send){
-			send = new Request({
-				data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
-			});
-			this.store('send', send);
-		}
-		return send;
-	}
-
-};
-
-Element.implement({
-
-	send: function(url){
-		var sender = this.get('send');
-		sender.send({data: this, url: url || sender.options.url});
-		return this;
-	}
-
-});
-
-})();
 /*
 ---
 
@@ -10619,40 +10512,240 @@ Swiff.remote = function(obj, fn){
 };
 
 })();
-
-/*--|/home/user/ngn-env/bc/sd/js/cufon-yui.js|--*/
 /*
- * Copyright (c) 2009 Simo Kinnunen.
- * Licensed under the MIT license.
- *
- * @version 1.09i
- */
-var Cufon=(function(){var m=function(){return m.replace.apply(null,arguments)};var x=m.DOM={ready:(function(){var C=false,E={loaded:1,complete:1};var B=[],D=function(){if(C){return}C=true;for(var F;F=B.shift();F()){}};if(document.addEventListener){document.addEventListener("DOMContentLoaded",D,false);window.addEventListener("pageshow",D,false)}if(!window.opera&&document.readyState){(function(){E[document.readyState]?D():setTimeout(arguments.callee,10)})()}if(document.readyState&&document.createStyleSheet){(function(){try{document.body.doScroll("left");D()}catch(F){setTimeout(arguments.callee,1)}})()}q(window,"load",D);return function(F){if(!arguments.length){D()}else{C?F():B.push(F)}}})(),root:function(){return document.documentElement||document.body}};var n=m.CSS={Size:function(C,B){this.value=parseFloat(C);this.unit=String(C).match(/[a-z%]*$/)[0]||"px";this.convert=function(D){return D/B*this.value};this.convertFrom=function(D){return D/this.value*B};this.toString=function(){return this.value+this.unit}},addClass:function(C,B){var D=C.className;C.className=D+(D&&" ")+B;return C},color:j(function(C){var B={};B.color=C.replace(/^rgba\((.*?),\s*([\d.]+)\)/,function(E,D,F){B.opacity=parseFloat(F);return"rgb("+D+")"});return B}),fontStretch:j(function(B){if(typeof B=="number"){return B}if(/%$/.test(B)){return parseFloat(B)/100}return{"ultra-condensed":0.5,"extra-condensed":0.625,condensed:0.75,"semi-condensed":0.875,"semi-expanded":1.125,expanded:1.25,"extra-expanded":1.5,"ultra-expanded":2}[B]||1}),getStyle:function(C){var B=document.defaultView;if(B&&B.getComputedStyle){return new a(B.getComputedStyle(C,null))}if(C.currentStyle){return new a(C.currentStyle)}return new a(C.style)},gradient:j(function(F){var G={id:F,type:F.match(/^-([a-z]+)-gradient\(/)[1],stops:[]},C=F.substr(F.indexOf("(")).match(/([\d.]+=)?(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)/ig);for(var E=0,B=C.length,D;E<B;++E){D=C[E].split("=",2).reverse();G.stops.push([D[1]||E/(B-1),D[0]])}return G}),quotedList:j(function(E){var D=[],C=/\s*((["'])([\s\S]*?[^\\])\2|[^,]+)\s*/g,B;while(B=C.exec(E)){D.push(B[3]||B[1])}return D}),recognizesMedia:j(function(G){var E=document.createElement("style"),D,C,B;E.type="text/css";E.media=G;try{E.appendChild(document.createTextNode("/**/"))}catch(F){}C=g("head")[0];C.insertBefore(E,C.firstChild);D=(E.sheet||E.styleSheet);B=D&&!D.disabled;C.removeChild(E);return B}),removeClass:function(D,C){var B=RegExp("(?:^|\\s+)"+C+"(?=\\s|$)","g");D.className=D.className.replace(B,"");return D},supports:function(D,C){var B=document.createElement("span").style;if(B[D]===undefined){return false}B[D]=C;return B[D]===C},textAlign:function(E,D,B,C){if(D.get("textAlign")=="right"){if(B>0){E=" "+E}}else{if(B<C-1){E+=" "}}return E},textShadow:j(function(F){if(F=="none"){return null}var E=[],G={},B,C=0;var D=/(#[a-f0-9]+|[a-z]+\(.*?\)|[a-z]+)|(-?[\d.]+[a-z%]*)|,/ig;while(B=D.exec(F)){if(B[0]==","){E.push(G);G={};C=0}else{if(B[1]){G.color=B[1]}else{G[["offX","offY","blur"][C++]]=B[2]}}}E.push(G);return E}),textTransform:(function(){var B={uppercase:function(C){return C.toUpperCase()},lowercase:function(C){return C.toLowerCase()},capitalize:function(C){return C.replace(/\b./g,function(D){return D.toUpperCase()})}};return function(E,D){var C=B[D.get("textTransform")];return C?C(E):E}})(),whiteSpace:(function(){var D={inline:1,"inline-block":1,"run-in":1};var C=/^\s+/,B=/\s+$/;return function(H,F,G,E){if(E){if(E.nodeName.toLowerCase()=="br"){H=H.replace(C,"")}}if(D[F.get("display")]){return H}if(!G.previousSibling){H=H.replace(C,"")}if(!G.nextSibling){H=H.replace(B,"")}return H}})()};n.ready=(function(){var B=!n.recognizesMedia("all"),E=false;var D=[],H=function(){B=true;for(var K;K=D.shift();K()){}};var I=g("link"),J=g("style");function C(K){return K.disabled||G(K.sheet,K.media||"screen")}function G(M,P){if(!n.recognizesMedia(P||"all")){return true}if(!M||M.disabled){return false}try{var Q=M.cssRules,O;if(Q){search:for(var L=0,K=Q.length;O=Q[L],L<K;++L){switch(O.type){case 2:break;case 3:if(!G(O.styleSheet,O.media.mediaText)){return false}break;default:break search}}}}catch(N){}return true}function F(){if(document.createStyleSheet){return true}var L,K;for(K=0;L=I[K];++K){if(L.rel.toLowerCase()=="stylesheet"&&!C(L)){return false}}for(K=0;L=J[K];++K){if(!C(L)){return false}}return true}x.ready(function(){if(!E){E=n.getStyle(document.body).isUsable()}if(B||(E&&F())){H()}else{setTimeout(arguments.callee,10)}});return function(K){if(B){K()}else{D.push(K)}}})();function s(D){var C=this.face=D.face,B={"\u0020":1,"\u00a0":1,"\u3000":1};this.glyphs=D.glyphs;this.w=D.w;this.baseSize=parseInt(C["units-per-em"],10);this.family=C["font-family"].toLowerCase();this.weight=C["font-weight"];this.style=C["font-style"]||"normal";this.viewBox=(function(){var F=C.bbox.split(/\s+/);var E={minX:parseInt(F[0],10),minY:parseInt(F[1],10),maxX:parseInt(F[2],10),maxY:parseInt(F[3],10)};E.width=E.maxX-E.minX;E.height=E.maxY-E.minY;E.toString=function(){return[this.minX,this.minY,this.width,this.height].join(" ")};return E})();this.ascent=-parseInt(C.ascent,10);this.descent=-parseInt(C.descent,10);this.height=-this.ascent+this.descent;this.spacing=function(L,N,E){var O=this.glyphs,M,K,G,P=[],F=0,J=-1,I=-1,H;while(H=L[++J]){M=O[H]||this.missingGlyph;if(!M){continue}if(K){F-=G=K[H]||0;P[I]-=G}F+=P[++I]=~~(M.w||this.w)+N+(B[H]?E:0);K=M.k}P.total=F;return P}}function f(){var C={},B={oblique:"italic",italic:"oblique"};this.add=function(D){(C[D.style]||(C[D.style]={}))[D.weight]=D};this.get=function(H,I){var G=C[H]||C[B[H]]||C.normal||C.italic||C.oblique;if(!G){return null}I={normal:400,bold:700}[I]||parseInt(I,10);if(G[I]){return G[I]}var E={1:1,99:0}[I%100],K=[],F,D;if(E===undefined){E=I>400}if(I==500){I=400}for(var J in G){if(!k(G,J)){continue}J=parseInt(J,10);if(!F||J<F){F=J}if(!D||J>D){D=J}K.push(J)}if(I<F){I=F}if(I>D){I=D}K.sort(function(M,L){return(E?(M>=I&&L>=I)?M<L:M>L:(M<=I&&L<=I)?M>L:M<L)?-1:1});return G[K[0]]}}function r(){function D(F,G){if(F.contains){return F.contains(G)}return F.compareDocumentPosition(G)&16}function B(G){var F=G.relatedTarget;if(!F||D(this,F)){return}C(this,G.type=="mouseover")}function E(F){C(this,F.type=="mouseenter")}function C(F,G){setTimeout(function(){var H=d.get(F).options;m.replace(F,G?h(H,H.hover):H,true)},10)}this.attach=function(F){if(F.onmouseenter===undefined){q(F,"mouseover",B);q(F,"mouseout",B)}else{q(F,"mouseenter",E);q(F,"mouseleave",E)}}}function u(){var C=[],D={};function B(H){var E=[],G;for(var F=0;G=H[F];++F){E[F]=C[D[G]]}return E}this.add=function(F,E){D[F]=C.push(E)-1};this.repeat=function(){var E=arguments.length?B(arguments):C,F;for(var G=0;F=E[G++];){m.replace(F[0],F[1],true)}}}function A(){var D={},B=0;function C(E){return E.cufid||(E.cufid=++B)}this.get=function(E){var F=C(E);return D[F]||(D[F]={})}}function a(B){var D={},C={};this.extend=function(E){for(var F in E){if(k(E,F)){D[F]=E[F]}}return this};this.get=function(E){return D[E]!=undefined?D[E]:B[E]};this.getSize=function(F,E){return C[F]||(C[F]=new n.Size(this.get(F),E))};this.isUsable=function(){return !!B}}function q(C,B,D){if(C.addEventListener){C.addEventListener(B,D,false)}else{if(C.attachEvent){C.attachEvent("on"+B,function(){return D.call(C,window.event)})}}}function v(C,B){var D=d.get(C);if(D.options){return C}if(B.hover&&B.hoverables[C.nodeName.toLowerCase()]){b.attach(C)}D.options=B;return C}function j(B){var C={};return function(D){if(!k(C,D)){C[D]=B.apply(null,arguments)}return C[D]}}function c(F,E){var B=n.quotedList(E.get("fontFamily").toLowerCase()),D;for(var C=0;D=B[C];++C){if(i[D]){return i[D].get(E.get("fontStyle"),E.get("fontWeight"))}}return null}function g(B){return document.getElementsByTagName(B)}function k(C,B){return C.hasOwnProperty(B)}function h(){var C={},B,F;for(var E=0,D=arguments.length;B=arguments[E],E<D;++E){for(F in B){if(k(B,F)){C[F]=B[F]}}}return C}function o(E,M,C,N,F,D){var K=document.createDocumentFragment(),H;if(M===""){return K}var L=N.separate;var I=M.split(p[L]),B=(L=="words");if(B&&t){if(/^\s/.test(M)){I.unshift("")}if(/\s$/.test(M)){I.push("")}}for(var J=0,G=I.length;J<G;++J){H=z[N.engine](E,B?n.textAlign(I[J],C,J,G):I[J],C,N,F,D,J<G-1);if(H){K.appendChild(H)}}return K}function l(D,M){var C=D.nodeName.toLowerCase();if(M.ignore[C]){return}var E=!M.textless[C];var B=n.getStyle(v(D,M)).extend(M);var F=c(D,B),G,K,I,H,L,J;if(!F){return}for(G=D.firstChild;G;G=I){K=G.nodeType;I=G.nextSibling;if(E&&K==3){if(H){H.appendData(G.data);D.removeChild(G)}else{H=G}if(I){continue}}if(H){D.replaceChild(o(F,n.whiteSpace(H.data,B,H,J),B,M,G,D),H);H=null}if(K==1){if(G.firstChild){if(G.nodeName.toLowerCase()=="cufon"){z[M.engine](F,null,B,M,G,D)}else{arguments.callee(G,M)}}J=G}}}var t=" ".split(/\s+/).length==0;var d=new A();var b=new r();var y=new u();var e=false;var z={},i={},w={autoDetect:false,engine:null,forceHitArea:false,hover:false,hoverables:{a:true},ignore:{applet:1,canvas:1,col:1,colgroup:1,head:1,iframe:1,map:1,optgroup:1,option:1,script:1,select:1,style:1,textarea:1,title:1,pre:1},printable:true,selector:(window.Sizzle||(window.jQuery&&function(B){return jQuery(B)})||(window.dojo&&dojo.query)||(window.Ext&&Ext.query)||(window.YAHOO&&YAHOO.util&&YAHOO.util.Selector&&YAHOO.util.Selector.query)||(window.$$&&function(B){return $$(B)})||(window.$&&function(B){return $(B)})||(document.querySelectorAll&&function(B){return document.querySelectorAll(B)})||g),separate:"words",textless:{dl:1,html:1,ol:1,table:1,tbody:1,thead:1,tfoot:1,tr:1,ul:1},textShadow:"none"};var p={words:/\s/.test("\u00a0")?/[^\S\u00a0]+/:/\s+/,characters:"",none:/^/};m.now=function(){x.ready();return m};m.refresh=function(){y.repeat.apply(y,arguments);return m};m.registerEngine=function(C,B){if(!B){return m}z[C]=B;return m.set("engine",C)};m.registerFont=function(D){if(!D){return m}var B=new s(D),C=B.family;if(!i[C]){i[C]=new f()}i[C].add(B);return m.set("fontFamily",'"'+C+'"')};m.replace=function(D,C,B){C=h(w,C);if(!C.engine){return m}if(!e){n.addClass(x.root(),"cufon-active cufon-loading");n.ready(function(){n.addClass(n.removeClass(x.root(),"cufon-loading"),"cufon-ready")});e=true}if(C.hover){C.forceHitArea=true}if(C.autoDetect){delete C.fontFamily}if(typeof C.textShadow=="string"){C.textShadow=n.textShadow(C.textShadow)}if(typeof C.color=="string"&&/^-/.test(C.color)){C.textGradient=n.gradient(C.color)}else{delete C.textGradient}if(!B){y.add(D,arguments)}if(D.nodeType||typeof D=="string"){D=[D]}n.ready(function(){for(var F=0,E=D.length;F<E;++F){var G=D[F];if(typeof G=="string"){m.replace(C.selector(G),C,true)}else{l(G,C)}}});return m};m.set=function(B,C){w[B]=C;return m};return m})();Cufon.registerEngine("vml",(function(){var e=document.namespaces;if(!e){return}e.add("cvml","urn:schemas-microsoft-com:vml");e=null;var b=document.createElement("cvml:shape");b.style.behavior="url(#default#VML)";if(!b.coordsize){return}b=null;var h=(document.documentMode||0)<8;document.write(('<style type="text/css">cufoncanvas{text-indent:0;}@media screen{cvml\\:shape,cvml\\:rect,cvml\\:fill,cvml\\:shadow{behavior:url(#default#VML);display:block;antialias:true;position:absolute;}cufoncanvas{position:absolute;text-align:left;}cufon{display:inline-block;position:relative;vertical-align:'+(h?"middle":"text-bottom")+";}cufon cufontext{position:absolute;left:-10000in;font-size:1px;}a cufon{cursor:pointer}}@media print{cufon cufoncanvas{display:none;}}</style>").replace(/;/g,"!important;"));function c(i,j){return a(i,/(?:em|ex|%)$|^[a-z-]+$/i.test(j)?"1em":j)}function a(l,m){if(m==="0"){return 0}if(/px$/i.test(m)){return parseFloat(m)}var k=l.style.left,j=l.runtimeStyle.left;l.runtimeStyle.left=l.currentStyle.left;l.style.left=m.replace("%","em");var i=l.style.pixelLeft;l.style.left=k;l.runtimeStyle.left=j;return i}function f(l,k,j,n){var i="computed"+n,m=k[i];if(isNaN(m)){m=k.get(n);k[i]=m=(m=="normal")?0:~~j.convertFrom(a(l,m))}return m}var g={};function d(p){var q=p.id;if(!g[q]){var n=p.stops,o=document.createElement("cvml:fill"),i=[];o.type="gradient";o.angle=180;o.focus="0";o.method="sigma";o.color=n[0][1];for(var m=1,l=n.length-1;m<l;++m){i.push(n[m][0]*100+"% "+n[m][1])}o.colors=i.join(",");o.color2=n[l][1];g[q]=o}return g[q]}return function(ac,G,Y,C,K,ad,W){var n=(G===null);if(n){G=K.alt}var I=ac.viewBox;var p=Y.computedFontSize||(Y.computedFontSize=new Cufon.CSS.Size(c(ad,Y.get("fontSize"))+"px",ac.baseSize));var y,q;if(n){y=K;q=K.firstChild}else{y=document.createElement("cufon");y.className="cufon cufon-vml";y.alt=G;q=document.createElement("cufoncanvas");y.appendChild(q);if(C.printable){var Z=document.createElement("cufontext");Z.appendChild(document.createTextNode(G));y.appendChild(Z)}if(!W){y.appendChild(document.createElement("cvml:shape"))}}var ai=y.style;var R=q.style;var l=p.convert(I.height),af=Math.ceil(l);var V=af/l;var P=V*Cufon.CSS.fontStretch(Y.get("fontStretch"));var U=I.minX,T=I.minY;R.height=af;R.top=Math.round(p.convert(T-ac.ascent));R.left=Math.round(p.convert(U));ai.height=p.convert(ac.height)+"px";var F=Y.get("color");var ag=Cufon.CSS.textTransform(G,Y).split("");var L=ac.spacing(ag,f(ad,Y,p,"letterSpacing"),f(ad,Y,p,"wordSpacing"));if(!L.length){return null}var k=L.total;var x=-U+k+(I.width-L[L.length-1]);var ah=p.convert(x*P),X=Math.round(ah);var O=x+","+I.height,m;var J="r"+O+"ns";var u=C.textGradient&&d(C.textGradient);var o=ac.glyphs,S=0;var H=C.textShadow;var ab=-1,aa=0,w;while(w=ag[++ab]){var D=o[ag[ab]]||ac.missingGlyph,v;if(!D){continue}if(n){v=q.childNodes[aa];while(v.firstChild){v.removeChild(v.firstChild)}}else{v=document.createElement("cvml:shape");q.appendChild(v)}v.stroked="f";v.coordsize=O;v.coordorigin=m=(U-S)+","+T;v.path=(D.d?"m"+D.d+"xe":"")+"m"+m+J;v.fillcolor=F;if(u){v.appendChild(u.cloneNode(false))}var ae=v.style;ae.width=X;ae.height=af;if(H){var s=H[0],r=H[1];var B=Cufon.CSS.color(s.color),z;var N=document.createElement("cvml:shadow");N.on="t";N.color=B.color;N.offset=s.offX+","+s.offY;if(r){z=Cufon.CSS.color(r.color);N.type="double";N.color2=z.color;N.offset2=r.offX+","+r.offY}N.opacity=B.opacity||(z&&z.opacity)||1;v.appendChild(N)}S+=L[aa++]}var M=v.nextSibling,t,A;if(C.forceHitArea){if(!M){M=document.createElement("cvml:rect");M.stroked="f";M.className="cufon-vml-cover";t=document.createElement("cvml:fill");t.opacity=0;M.appendChild(t);q.appendChild(M)}A=M.style;A.width=X;A.height=af}else{if(M){q.removeChild(M)}}ai.width=Math.max(Math.ceil(p.convert(k*P)),0);if(h){var Q=Y.computedYAdjust;if(Q===undefined){var E=Y.get("lineHeight");if(E=="normal"){E="1em"}else{if(!isNaN(E)){E+="em"}}Y.computedYAdjust=Q=0.5*(a(ad,E)-parseFloat(ai.height))}if(Q){ai.marginTop=Math.ceil(Q)+"px";ai.marginBottom=Q+"px"}}return y}})());Cufon.registerEngine("canvas",(function(){var b=document.createElement("canvas");if(!b||!b.getContext||!b.getContext.apply){return}b=null;var a=Cufon.CSS.supports("display","inline-block");var e=!a&&(document.compatMode=="BackCompat"||/frameset|transitional/i.test(document.doctype.publicId));var f=document.createElement("style");f.type="text/css";f.appendChild(document.createTextNode(("cufon{text-indent:0;}@media screen,projection{cufon{display:inline;display:inline-block;position:relative;vertical-align:middle;"+(e?"":"font-size:1px;line-height:1px;")+"}cufon cufontext{display:-moz-inline-box;display:inline-block;width:0;height:0;overflow:hidden;text-indent:-10000in;}"+(a?"cufon canvas{position:relative;}":"cufon canvas{position:absolute;}")+"}@media print{cufon{padding:0;}cufon canvas{display:none;}}").replace(/;/g,"!important;")));document.getElementsByTagName("head")[0].appendChild(f);function d(p,h){var n=0,m=0;var g=[],o=/([mrvxe])([^a-z]*)/g,k;generate:for(var j=0;k=o.exec(p);++j){var l=k[2].split(",");switch(k[1]){case"v":g[j]={m:"bezierCurveTo",a:[n+~~l[0],m+~~l[1],n+~~l[2],m+~~l[3],n+=~~l[4],m+=~~l[5]]};break;case"r":g[j]={m:"lineTo",a:[n+=~~l[0],m+=~~l[1]]};break;case"m":g[j]={m:"moveTo",a:[n=~~l[0],m=~~l[1]]};break;case"x":g[j]={m:"closePath"};break;case"e":break generate}h[g[j].m].apply(h,g[j].a)}return g}function c(m,k){for(var j=0,h=m.length;j<h;++j){var g=m[j];k[g.m].apply(k,g.a)}}return function(V,w,P,t,C,W){var k=(w===null);if(k){w=C.getAttribute("alt")}var A=V.viewBox;var m=P.getSize("fontSize",V.baseSize);var B=0,O=0,N=0,u=0;var z=t.textShadow,L=[];if(z){for(var U=z.length;U--;){var F=z[U];var K=m.convertFrom(parseFloat(F.offX));var I=m.convertFrom(parseFloat(F.offY));L[U]=[K,I];if(I<B){B=I}if(K>O){O=K}if(I>N){N=I}if(K<u){u=K}}}var Z=Cufon.CSS.textTransform(w,P).split("");var E=V.spacing(Z,~~m.convertFrom(parseFloat(P.get("letterSpacing"))||0),~~m.convertFrom(parseFloat(P.get("wordSpacing"))||0));if(!E.length){return null}var h=E.total;O+=A.width-E[E.length-1];u+=A.minX;var s,n;if(k){s=C;n=C.firstChild}else{s=document.createElement("cufon");s.className="cufon cufon-canvas";s.setAttribute("alt",w);n=document.createElement("canvas");s.appendChild(n);if(t.printable){var S=document.createElement("cufontext");S.appendChild(document.createTextNode(w));s.appendChild(S)}}var aa=s.style;var H=n.style;var j=m.convert(A.height);var Y=Math.ceil(j);var M=Y/j;var G=M*Cufon.CSS.fontStretch(P.get("fontStretch"));var J=h*G;var Q=Math.ceil(m.convert(J+O-u));var o=Math.ceil(m.convert(A.height-B+N));n.width=Q;n.height=o;H.width=Q+"px";H.height=o+"px";B+=A.minY;H.top=Math.round(m.convert(B-V.ascent))+"px";H.left=Math.round(m.convert(u))+"px";var r=Math.max(Math.ceil(m.convert(J)),0)+"px";if(a){aa.width=r;aa.height=m.convert(V.height)+"px"}else{aa.paddingLeft=r;aa.paddingBottom=(m.convert(V.height)-1)+"px"}var X=n.getContext("2d"),D=j/A.height;X.scale(D,D*M);X.translate(-u,-B);X.save();function T(){var x=V.glyphs,ab,l=-1,g=-1,y;X.scale(G,1);while(y=Z[++l]){var ab=x[Z[l]]||V.missingGlyph;if(!ab){continue}if(ab.d){X.beginPath();if(ab.code){c(ab.code,X)}else{ab.code=d("m"+ab.d,X)}X.fill()}X.translate(E[++g],0)}X.restore()}if(z){for(var U=z.length;U--;){var F=z[U];X.save();X.fillStyle=F.color;X.translate.apply(X,L[U]);T()}}var q=t.textGradient;if(q){var v=q.stops,p=X.createLinearGradient(0,A.minY,0,A.maxY);for(var U=0,R=v.length;U<R;++U){p.addColorStop.apply(p,v[U])}X.fillStyle=p}else{X.fillStyle=P.get("color")}T();return s}})());
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.js|--*/
-Ngn.toObj = function(s, value) {
-  var a = s.split('.');
-  for (var i = 0; i < a.length; i++) {
-    var ss = a.slice(0, i + 1).join('.');
-    eval('var def = ' + ss + ' === undefined');
-    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
-  }
-  if (value) eval(s + ' = value');
+---
+name: Table
+description: LUA-Style table implementation.
+license: MIT-style license
+authors:
+  - Valerio Proietti
+requires: [Core/Array]
+provides: [Table]
+...
+*/
+
+(function(){
+
+var Table = this.Table = function(){
+
+	this.length = 0;
+	var keys = [],
+		values = [];
+
+	this.set = function(key, value){
+		var index = keys.indexOf(key);
+		if (index == -1){
+			var length = keys.length;
+			keys[length] = key;
+			values[length] = value;
+			this.length++;
+		} else {
+			values[index] = value;
+		}
+		return this;
+	};
+
+	this.get = function(key){
+		var index = keys.indexOf(key);
+		return (index == -1) ? null : values[index];
+	};
+
+	this.erase = function(key){
+		var index = keys.indexOf(key);
+		if (index != -1){
+			this.length--;
+			keys.splice(index, 1);
+			return values.splice(index, 1)[0];
+		}
+		return null;
+	};
+
+	this.each = this.forEach = function(fn, bind){
+		for (var i = 0, l = this.length; i < l; i++) fn.call(bind, keys[i], values[i], this);
+	};
+
 };
 
-if (!Ngn.tpls) Ngn.tpls = {};
+if (this.Type) new Type('Table', Table);
 
-/*--|/home/user/ngn-env/ngn/more/scripts/js/common/Ngn.php|--*/
-// -- Dynamic Core --
+})();
 
-Ngn.projectKey = 'bcreator';
-Ngn.isDebug = true;
-Ngn.fileSizeMax = 104857600;
-Ngn.siteTitle = 'Banner Creator';
-Ngn.sflmFrontend = 'cpanel';
+/*--|/home/user/ngn-env/ngn/i/js/ngn/cp/Ngn.cp.js|--*/
+Ngn.cp = {
+  init: function() {
+    if (Browser.ie) {
+      alert('Броузер Internet Explorer не боддерживается Панелью управления.');
+      window.location = '/';
+      return;
+    }
+    this.initConfirms();
+    this.initSaveAndReturn();
+    //this.repairEmptyTds();
+    this.initTooltips();
+    //this.initHelp();
+    this.initFormBases();
+    this.colorizeSelects();
+    //new Ngn.HidebleBar('bottom', 'down');
+    //new Ngn.HidebleBar.H('header', 'up');
+    //Ngn.Lightbox.add(document.getElements('a.lightbox'));
+  },
+  initHelp: function() {
+    $$('a[class=help]').each(function(el){
+      el.addEvent('click', function() {
+        new Ngn.Dialog.Alert({
+          force: true,
+          title: el.get('text'),
+          url: el.get('href')
+        });
+        return false;
+      })
+    });
+    //
+  },
+  initTooltips: function() {
+    new Ngn.Tips('.tools a,.tooltips a,.tooltip');
+  },
+  repairEmptyTds: function() {
+    $('itemsTable').getElements('td').each(function(eTd, i) {
+      if (eTd.get('html').trim() == '') 
+        eTd.set('html', '&nbsp;');
+    });
+  },
+  submitTitles: null,
+  formSubmitTimeout: 600000,
+  forms: {},
+  addSubmitEvent: function(eForm) {
+    var id = eForm.get('id');
+    if (!id) {
+      //c('Form with no id can not be initialized.');
+      return;
+    }
+    if (this.forms[id]) {
+      // If already exists
+      return;
+    }
+    
+    this.forms[id] = eForm;
+    eForm.addEvent('submit', function(e) {
+      // Проверяем валидность если существуют валидационные функции
+      if (this.validations[id]) {
+        if (!this.validations[id]()) {
+          e.preventDefault();
+          return;
+        }
+      }
+      // Инициализируем возврат формы в активное положение
+      this.returnSubmitTimeout.delay(this.formSubmitTimeout, this, eForm);
+      // Делаем все INPUT элементы формы неактивными
+      /*
+      eForm.getElements('input').each(function(el, i) {
+        el.setProperty('disabled', true);
+      });
+      */
+      
+      
+      // Меняем названия кнопок на герундий
+      eForm.getElements('input[type=submit]').each(function(btn, i) {
+        btn.setProperty('disabled', true);
+        var title = this.submitTitles[btn.get('value')];
+        if (title) btn.set('value', title + '...');
+      }.bind(this));
+      
+      ///c('submitting');
+      
+    }.bind(this));
+  },
+  validations: {},
+  addFormValidation: function(eForm, validation) {
+    var id = eForm.get('id');
+    if (!id) // ID not defined in form tag
+      return;
+    this.validations[id] = validation;
+  },
+  removeFormValidations: function(eForm) {
+    var id = eForm.get('id');
+    if (!id) // ID not defined in form tag
+      return;
+    this.validations[id] = null;
+  },
+  returnSubmitTimeout: function(eForm) {
+    alert('Нет ответа от сервера. Попробуйте отправить форму повторно.');
+    this.returnSubmitTitles(eForm);
+  },
+  returnSubmitTitles: function(eForm) {
+    if (!this.submitTitles) alert('this.submitTitles not defined');
+    /*
+    eForm.getElements('input').each(function(el, i) {
+      el.setProperty('disabled', false);
+    });
+    */
+    eForm.getElements('input[type=submit]').each(function(btn, i) {
+      btn.setProperty('disabled', false);
+      var newTitles = {};
+      for (k in this.submitTitles)
+        newTitles[this.submitTitles[k]] = k;
+      var title = newTitles[btn.get('value').replace('...', '')];
+      if (title) btn.set('value', title);
+    }.bind(this));
+  },
+  initConfirms: function() {
+    // Добавляем диалоговое окно подтверждения операции для ссылок с классом
+    // "confirm"
+    document.getElements('a[class~=confirm]').each(function(a, i) {
+      a.addEvent('click', function(e){
+        e.preventDefault();
+        var title = this.get('text');
+        if (!title) title = this.get('title');
+        if (confirm(
+          (title ? 'Вы действительно хотите ' + title.toLowerCase() : 'Вы уверены') + '?'))
+          window.location = this.href;
+      });
+    });
+  },
+  initSaveAndReturn: function() {
+    var eSaveAndReturn = $('saveAndReturn');
+    if (eSaveAndReturn) {
+      eSaveAndReturn.addEvent('change', function(){
+        Cookie.write('saveAndReturn', eSaveAndReturn.get('checked') ? 1 : 0);
+      });
+      eSaveAndReturn.set('checked', Cookie.read('saveAndReturn') == 1 ? true : false);
+    }
+  },
+  
+  initFormBases: function() {
+    var div = document.getElement('.apeform');
+    if (!div) return;
+    if (div.hasClass('forceDefaultInit')) return;
+    var eForm = div.getElement('form');
+    if (!eForm) throw new Error('.apeform tag has no form');
+    Ngn.Form.factory(eForm);
+  },
+  
+  colors: ['#FFFACE', '#FFE8CE', '#FFCEEA', '#EFCEFF', '#CFCEFF', '#CEEFFF', '#CEFFEE', '#CEFFD0', '#E8FFCE'],
+  
+  colorizeSelects: function() {
+    var i = 0;
+    $$('select').each(function(eSelect){
+      eSelect.getElements('option').each(function(eOption, n){
+        eOption.setStyle('background-color', this.colors[i]);
+        i++;
+        if (i == this.colors.length) i = 0;
+      }.bind(this));
+    }.bind(this));
+  },
+  
+  getMainAreaHeight: function() {
+    var b1 = $('bottom') ? $('bottom').getParent().getSize().y : 0;
+    var b2 = $('bottom') ? $('bottom').getSize().y : 0;
+    return window.getSize().y
+      - (b1 == 0 ? 0 : b2)
+      - ($('top').getParent().getSize().y == 0 ? 0 : $('top').getSize().y);
+  }
 
-Locale.define('en-US', 'Dummy', 'dummy', 'dummy');
-Locale.use('en-US');
+};
 
+
+Ngn.cp.modules = {};
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.RequiredOptions.js|--*/
 Ngn.RequiredOptions = new Class({
   Extends: Options,
@@ -12430,180 +12523,43 @@ Ngn.Dotter = new Class({
   }
 
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
-Ngn.Dialog.RequestFormBase = new Class({
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Alert.js|--*/
+Ngn.Dialog.Alert = new Class({
   Extends: Ngn.Dialog,
 
   options: {
-    okDestroy: false,
-    jsonRequest: true,
-    autoSave: false,
-    getFormData: function() {
-      return Ngn.Frm.toObj(this.form.eForm);
-    },
-    onFormResponse: Function.from(),
-    onFormRequest: Function.from(),
-    onSubmitSuccess: Function.from()
+    noPadding: false,
+    title: false
   },
 
-  initialize: function(options) {
-    options = options || {};
-    options.ok = this.submit.bind(this);
-    if (options.submitUrl == undefined) {
-      if (options.jsonSubmit == undefined) options.jsonSubmit = false;
-      options.submitUrl = options.url;
-    }
-    this.parent(options);
-    this.toggle('ok', false);
-    this.iframeUpload = true;
-    window.addEvent('keypress', function(e) {
-      if (e.key != 'enter' || e.target.get('tag') == 'textarea') return;
-      e.preventDefault();
-      this.submit();
-    }.bind(this));
-  },
-
-  form: null,
-  response: null,
-
-  urlResponse: function(r) {
-    this.parent(r);
-    this.response = r;
-    if (r.submitTitle) this.setOkText(r.submitTitle);
-    if (r.jsOptions) {
-      if (r.jsOptions.onOkClose)
-        this.addEvent('okClose', r.jsOptions.onOkClose);
-    }
-    this.setMessage(r.form, false);
-    this.form = Ngn.Form.factory(this.message.getElement('form'), {
-      ajaxSubmit: true,
-      ajaxSubmitUrl: this.options.submitUrl,
-      disableInit: true
+  initialize: function(_opts) {
+    var opts = Object.merge(_opts, {
+      cancel: false,
+      titleClose: false,
+      bindBuildMessageFunction: true
     });
-    this.form.options.dialog = this; // Важно передавать объект Диалога в объект
-    // Формы после выполнения конструктура, иначе объект
-    // Даилога не будет содержать созданого объекта Формы
-    this.form.init();
-    this.fireEvent('formResponse');
-    this.form.addEvent('submit', function(r) {
-      this.fireEvent('formRequest');
-      this.loading(true);
-    }.bind(this));
-    this.form.addEvent('failed', function(r) {
-      this.urlResponse(r);
-      this.loading(false);
-    }.bind(this));
-    this.form.addEvent('complete', function(r) {
-      this.response = r;
-      this.okClose();
-      this.fireEvent('submitSuccess', r);
-    }.bind(this));
-    this.resizeByCols();
-    if (this.options.autoSave) {
-      new Ngn.Frm.Saver(this.form.eForm, {
-        url: this.options.submitUrl,
-        jsonRequest: true
-      });
-    }
-    this.initEvents();
-    this.formInit();
-    this.initPosition();
+    this.parent(opts);
   },
 
-  // abstract
-  initEvents: function() {
-  },
-
-  resizeByCols: function() {
-    var cols = this.form.eForm.getElements('.type_col');
-    if (!cols.length) return;
-    //var maxY = 0;
-    var ys = [];
-    var x = 0;
-    for (var i = 0; i < cols.length; i++) {
-      ys[i] = cols[i].getSize().y;
-      x += cols[i].getSize().x;
-    }
-    //for (var i=0; i<cols.length; i++) cols[i].setStyle('height', ys.max() + 'px');
-    this.dialog.setStyle('width', (x + 12) + 'px');
-  },
-
-  formInit: function() {
-  },
-
-  submit: function() {
-    this._submit();
-  },
-
-  finishClose: function() {
-    this.parent();
-    // если в последнем респонзе есть ссылка не следующую форму
-    if (this.isOkClose && this.response.nextFormUrl) {
-      var opt = {};
-      if (this.response.nextFormOptions) opt = Object.merge(opt, this.response.nextFormOptions);
-      opt.url = this.response.nextFormUrl;
-      new Ngn.Dialog.RequestForm(opt);
-    }
+  buildMessage: function(msg) {
+    var message_box = new Element('div');
+    new Element('div', {'class': 'icon-button alert-icon goleft'}).inject(message_box);
+    new Element('div', {'class': 'mav-alert-msg goleft', 'html': msg}).inject(message_box);
+    new Element('div', {'class': 'clear'}).inject(message_box);
+    return message_box;
   }
-
-  // abstract
-  //_submit: {}
-
 });
 
-Ngn.Dialog.Form = new Class({
-  Extends: Ngn.Dialog.RequestFormBase,
-
-  options: {
-    onSubmit: Function.from()
-  },
-
-  _submit: function() {
-    this.fireEvent('submit', this.options.getFormData.bind(this)());
-    this.okClose();
-  }
-
-});
-
-Ngn.Dialog.RequestForm = new Class({
-  Extends: Ngn.Dialog.RequestFormBase,
-
-  options: {
-    autoSave: false,
-    formEvents: false
-    //cacheRequest: false
-  },
-
-  _submit: function() {
-    this.form.submit();
-  },
-
-  initEvents: function() {
-    if (!this.options.formEvents) return;
-    var obj = this;
-    for (var i = 0; i < this.options.formEvents.length; i++) {
-      var evnt = this.options.formEvents[i];
-      this.message.getElement('[name=' + evnt.fieldName + ']').addEvent(evnt.fieldEvent, function() {
-        obj.fireEvent(evnt.formEvent, this.get('value'));
-      });
-    }
-  }
-
-});
-
-Ngn.Dialog.RequestForm.Static = new Class({
-  Extends: Ngn.Dialog.RequestForm,
-
-  // options: {
-  //   staticResponse: {
-  //     title: text
-  //     submitTitle: text
-  //     form: html
-  //   }
-  // }
-
-  initFormResponse: function() {
-    this.urlResponse(Ngn.json.process(this.options.staticResponse));
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Tips.js|--*/
+Ngn.Tips = new Class({
+  Extends: Tips,
+  
+  toElement: function() {
+    // by masted
+    var lastTip = document.getElement('.'+this.options.className);
+    if (lastTip) lastTip.dispose();
+    // --------------
+    return this.parent();
   }
 
 });
@@ -14917,33 +14873,6 @@ Ngn.IframeFormRequest.JSON = new Class({
   }
   
 });
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Alert.js|--*/
-Ngn.Dialog.Alert = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    noPadding: false,
-    title: false
-  },
-
-  initialize: function(_opts) {
-    var opts = Object.merge(_opts, {
-      cancel: false,
-      titleClose: false,
-      bindBuildMessageFunction: true
-    });
-    this.parent(opts);
-  },
-
-  buildMessage: function(msg) {
-    var message_box = new Element('div');
-    new Element('div', {'class': 'icon-button alert-icon goleft'}).inject(message_box);
-    new Element('div', {'class': 'mav-alert-msg goleft', 'html': msg}).inject(message_box);
-    new Element('div', {'class': 'clear'}).inject(message_box);
-    return message_box;
-  }
-});
-
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Error.js|--*/
 Ngn.Dialog.Error = new Class({
   Extends: Ngn.Dialog.Alert,
@@ -14960,6 +14889,1285 @@ Ngn.Dialog.Error = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/i/js/ngn/cp/Ngn.cp.TwoPanels.js|--*/
+Ngn.cp.TwoPanels = new Class({
+  Implements: [Options],
+  
+  options: {
+    storeId: 'twoPanels',
+    leftExcludeEls: [],
+    rightExcludeEls: [],
+    addLeftWrapper: true,
+    addRightWrapper: true,
+    dragOptions: {}
+  },
+  
+  initialize: function(eLeft, eRight, eHandler, options) {
+    this.setOptions(options);
+    this.eLeft = eLeft;
+    this.eRight = eRight;
+    this.eHandler = eHandler;
+    if (this.options.addLeftWrapper) this.eLeft = Ngn.addWrapper(this.eLeft, 'panelWrapper');
+    if (this.options.addRightWrapper) this.eRight = Ngn.addWrapper(this.eRight, 'panelWrapper');
+    this.options.dragOptions.onDrag = this.resize.bind(this);
+    Ngn.hHandler(this.eHandler, this.eLeft, this.options.storeId, this.options.dragOptions);
+    this.handlerW = this.eHandler.getSize().x;
+    // Элементы, высоты которых нужно вычитать не успевают отрендериться, поэтому ставим задержку
+    (function() {
+      this.init();
+    }).delay(100, this);
+  },
+  
+  leftMinusH: 0,
+  //rightMinusH: 0,
+  
+  init: function() {
+    window.addEvent('resize', this.resize.bind(this));
+    this.resize();
+  },
+
+  getLeftMinusHeight: function() {
+    var h = 0;
+    for (i=0; i<this.options.leftExcludeEls.length; i++)
+      h += this.options.leftExcludeEls[i].getSize().y;
+    return h;
+  },
+
+  getRightMinusHeight: function() {
+    var h = 0;
+    for (i=0; i<this.options.rightExcludeEls.length; i++)
+      h += this.options.rightExcludeEls[i].getSize().y;
+    return h;
+  },
+  
+  resize: function() {
+    if (this.resizeTid) clearTimeout(this.resizeTid);
+    this.resizeTid = this._resize.delay(10, this);
+  },
+
+  _resize: function() {
+    this.eRight.setStyle('width', (window.getSize().x - (this.eHandler.getPosition().x + this.handlerW)) + 'px');
+    var maH = Ngn.cp.getMainAreaHeight();
+    this.eLeft.setStyle('height', (maH - this.getLeftMinusHeight()) + 'px');
+    this.eRight.setStyle('height', (maH - this.getRightMinusHeight()) + 'px');
+    this.eHandler.setStyle('height', maH + 'px');
+  }
+  
+});
+
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/cp/Ngn.cp.ddFieldType.js|--*/
+Ngn.cp.ddFieldType = {};
+Ngn.cp.ddFieldType.types = {};
+
+Ngn.cp.ddFieldType.Properties = new Class({
+
+  initialize: function(eForm, name) {
+    var init = function(type) {
+      var changingTypes = ['required', 'defaultDisallow', 'system', 'notList', 'filterable'];
+      for (var i = 0; i < changingTypes.length; i++) {
+        var eRow = eForm.getElement('.row_' + changingTypes[i]);
+        if (!eRow) continue;
+        eRow.setStyle('display', 'block').getElements('input,select').set('disabled', false);
+      }
+      if (Ngn.cp.ddFieldType.types[type].disable) {
+        var disable = Ngn.cp.ddFieldType.types[type].disable;
+        for (i in disable) {
+          var eRow = eForm.getElement('.row_' + disable[i]);
+          if (!eRow) continue;
+          eRow.setStyle('display', 'none').getElements('input,select').set('disabled', true);
+        }
+      }
+    }
+    Ngn.Frm.addEvent('change', name, init);
+    init(Ngn.Frm.getValueByName(name));
+    var selType = Ngn.Frm.getValueByName(name);
+    if (Ngn.cp.ddFieldType.types[selType].virtual) init(selType);
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Items.js|--*/
+Ngn.Items = new Class({
+  Implements: [Options, Events],
+  
+  options: {
+    idParam: 'id',
+    mainElementSelector: '.mainContent',
+    eItems: 'items',
+    itemElementSelector: '.item',
+    deleteAction: 'delete',
+    isSorting: false,
+    itemsLayout: 'details',
+    reloadOnDelete: false,
+    disableInit: false
+  },
+  
+  initialize: function(options) {
+    this.setOptions(options);
+    this.options.itemDoubleParent = this.options.itemsLayout == 'tile' ? false : true;
+    if (!this.options.disableInit) this.init();
+    return this;
+  },
+
+  init: function() {
+    this.initItems();
+  },
+  
+  getId: function(eItem) {
+    if (!eItem.get('id')) console.debug(eItem);
+    return eItem.get('id').split('_')[1];
+  },
+
+  toolBtnAction: function(cls, action) {
+    for (var i=0; i<this.esItems.length; i++) {
+      var id = this.getId(this.esItems[i]);
+      Ngn.addBtnAction('.tools a[.'+cls+']', action.pass(id), this.esItems[i]);
+    }
+  },
+  
+  initItems: function() {
+    this.eItems = $(this.options.eItems);
+    var esItems = this.eItems.getElements(this.options.itemElementSelector);
+    this.esItems = {};
+    for (var i=0; i<esItems.length; i++) {
+      var id = this.getId(esItems[i]);
+      this.esItems[id] = esItems[i];
+      this.esItems[id].store('itemId', id);
+    }
+    this.initToolActions();
+  },
+
+  loading: function(id, flag) {
+    if (!this.esItems[id]) return;
+    flag ? this.esItems[id].addClass('loading') : this.esItems[id].removeClass('loading');
+  },
+
+  initToolActions: function() {
+    this.addBtnsActions([
+      ['.delete', function(id, eBtn, eItem) {
+        new Ngn.Dialog.Confirm.Mem({
+          id: 'itemsDelete',
+          notAskSomeTime: true,
+          onOkClose: function() {
+            this.loading(id, true);
+            var g = {};
+            g[this.options.idParam] = id;
+            new Request({
+              url: this.getLink() + '?a=ajax_' + this.options.deleteAction,
+              onComplete: function() {
+                this.options.reloadOnDelete ? this.reload() : eItem.destroy();
+              }.bind(this)
+            }).GET(g);
+          }.bind(this)
+        });
+      }.bind(this)],
+      ['a[class~=flagOn],a[class~=flagOff]', function(id, eBtn) {
+        /*
+        var eFlagName = eBtn.getElement('i');
+        var flagName = eFlagName.get('title');
+        eFlagName.removeProperty('title');
+        el.addEvent('click', function(e){
+          var flag = eBtn.get('class').match(/flagOn/) ? true : false;
+          e.preventDefault();
+          //eLoading.addClass('loading');
+          var post = {};
+          post[this.options.idParam] = id;
+          post.k = flagName;
+          post.v = flag ? 0 : 1;
+          new Request({
+            url: window.location.pathname + '?a=ajax_updateDirect',
+            onComplete: function() {
+              eBtn.removeClass(flag ? 'flagOn' : 'flagOff');
+              eBtn.addClass(flag ? 'flagOff' : 'flagOn');
+              //eLoading.removeClass('loading');
+            }
+          }).GET(post);
+        }.bind(this));
+        */
+      }.bind(this)]
+    ]);
+    this.addBtnAction();
+  },
+
+  switcherClasses: [],
+
+  _addBtnAction: function(eItem, selector, action) {
+    if (!eItem) return;
+    var eBtn = eItem.getElement(selector);
+    if (!eBtn) return;
+    eBtn.addEvent('click', function(e){
+      e.preventDefault();
+      action(eItem.retrieve('itemId'), eBtn, eItem);
+    }.bind(this));
+  },
+
+  addBtnAction: function(selector, action) {
+    Object.every(this.esItems, function(eItem) {
+      this._addBtnAction(eItem, selector, action);
+    }.bind(this));
+  },
+  
+  addBtnsActions: function(actions) {
+    for (var i in this.esItems) {
+      var eItem = this.esItems[i];
+      for (var j=0; j<actions.length; j++) {
+        this._addBtnAction(eItem, actions[j][0], actions[j][1]);
+      }
+    }
+  },
+  
+  reload: function() {
+    Ngn.Request.Iface.loading(true);
+    new Request({
+      url: window.location.pathname + '?a=ajax_reload',
+      onComplete: function(html) {
+        this.eItems.empty();
+        this.eItems.set('html', html);
+        this.init();
+        Ngn.cp.initTooltips();
+        Ngn.Request.Iface.loading(false);
+        this.fireEvent('reloadComplete');
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Items.Table.js|--*/
+/**
+ * Компонент для вывода и редактирования табличных данных
+ */
+Ngn.Items.Table = new Class({
+  Extends: Ngn.Items,
+
+  options: {
+    eItems: 'itemsTable', // контейнер таблицы
+    itemElementSelector: 'tbody tr', // селектор строки
+    isSorting: true,
+    handle: '.dragBox',
+    onMoveComplete: Function.from(),
+    basePath: window.location.pathname
+  },
+
+  initSorting: function() {
+    if (!this.options.isSorting) return;
+    var sortablesOptions = {};
+    if (this.options.handle) {
+      sortablesOptions.handle = this.options.handle;
+      var dragBoxes = this.eItems.getElements(this.options.handle);
+      dragBoxes.each(function(el) {
+        el.addEvent('mouseover', function() {
+          el.addClass('over');
+        });
+        el.addEvent('mouseout', function() {
+          el.removeClass('over');
+        });
+      });
+    }
+    this.ST = new Sortables(this.eItemsTableBody, sortablesOptions);
+    this.dragStarts = false;
+    this.orderState = this.ST.serialize().join(',');
+    this.ST.addEvent('complete', function(el, clone) {
+      el.removeClass('move');
+      // Если в процессе переноса или если положение не изменилось
+      if (!this.dragStarts || this.orderState == this.ST.serialize().join(',')) return;
+      el.addClass('loading');
+      new Request({
+        url: this.options.basePath + '?a=ajax_reorder',
+        onComplete: function() {
+          this.dragStarts = false;
+          //this.orderState = this.ST.serialize(false, function(el) { return el.get('data-id') }).join(',');
+          this.orderState = this.ST.serialize().join(',');
+          el.removeClass('loading');
+          this.fireEvent('moveComplete');
+        }.bind(this)
+      }).POST({
+          'ids': this.ST.serialize(false, function(el) {
+            return el.get('data-id');
+          })
+        });
+    }.bind(this));
+    this.ST.addEvent('start', function(el, clone) {
+      this.dragStarts = true;
+      el.addClass('move');
+    }.bind(this));
+    if (!this.options.handle) {
+      // Подсвечивать строку только в том случае если нет специального бокса дял переноса
+      this.eItemsTableBody.addEvents({
+        'mousedown': function(e) {
+          this.eItemsTableBody.set('styles', {'cursor': 'move'});
+        }.bind(this),
+        'mouseup': function(e) {
+          this.eItemsTableBody.set('styles', {'cursor': 'auto'});
+        }.bind(this)
+      });
+      this.eItemsTableBody.getElements('tr').each(function(el, i) {
+        el.addEvents({
+          'mousedown': function(e) {
+            el.addClass('move');
+          },
+          'mouseup': function(e) {
+            el.removeClass('move');
+          }
+        });
+      });
+    }
+  },
+
+  initItems: function() {
+    this.parent();
+    this.eItemsTableBody = this.eItems.getElement('tbody');
+    Ngn.Html.fixEmptyTds(this.eItemsTableBody);
+    this.initSorting();
+  }
+
+});
+
+Ngn.ColResizer = new Class({
+
+  initialize: function(eHandler, n, grid) {
+    var initW;
+    var eWidth = grid.esTh[n - 1];
+    if (!eWidth) return;
+    new Drag(eHandler, {
+      modifiers: {
+        x: 'left'
+      },
+      snap: 0,
+      onStart: function() {
+        eWidth.store('initW', eWidth.getSize().x);
+        grid.initThSizes();
+      },
+      onDrag: function() {
+        var offset = parseInt(eHandler.getStyle('left'));
+        eWidth.setStyle('width', (eWidth.retrieve('initW') + offset) + 'px');
+      }.bind(this)
+    });
+  }
+
+});
+
+Ngn.Items.toolActions = {
+
+  switcher: {
+    init: function(items, cls, row) {
+      row.tools[cls].on = !!parseInt(row.tools[cls].on);
+      if (!Ngn.Items.toolActions.switcher.switchers[cls]) throw new Error('Ngn.Items.switcher[' + cls + '] not defined');
+      var switcher = Ngn.Items.toolActions.switcher.switchers[cls];
+      if (switcher.initRowEl) switcher.initRowEl(row);
+      var switcherOpts = switcher.getOptions(items, row);
+      var el = new Element('a', {
+        'href': '#',
+        'class': 'iconBtn ' + (row.tools[cls].on ? switcherOpts.classOn : switcherOpts.classOff),
+        'html': '<i></i>',
+        'title': row.tools[cls].on ? switcherOpts.titleOn : switcherOpts.titleOff
+      }).inject(new Element('td').inject(row.eTools));
+      var switcher = new Ngn.SwitcherLink(el, switcherOpts);
+      //switcher.addEvent('click', items.loading.pass([row.id, true], items));
+      switcher.addEvent('click', function() {
+        items.loading(row.id, true);
+      });
+      switcher.addEvent('complete', items.loading.pass([row.id, false], items));
+    },
+    switchers: {
+      active: {
+        /**
+         * @param items Ngn.Items
+         * @param row
+         * @returns {{classOn: string, classOff: string, linkOn: string, linkOff: string, onComplete: onComplete}}
+         */
+        getOptions: function(items, row) {
+          return {
+            classOn: 'activate',
+            classOff: 'deactivate',
+            linkOn: items.getLink() + '?a=ajax_activate&' + items.options.idParam + '=' + row.id,
+            linkOff: items.getLink() + '?a=ajax_deactivate&' + items.options.idParam + '=' + row.id,
+            onComplete: function(enabled) {
+              items.fireEvent('reloadComplete', row.id);
+              enabled ? items.esItems[row.id].removeClass('nonActive') : items.esItems[row.id].addClass('nonActive');
+            }
+          };
+        },
+        initRowEl: function(row) {
+          if (!parseInt(row.active)) row.el.addClass('nonActive');
+        }
+      }
+    }
+  },
+
+  inlineTextEdit: {
+    init: function(items, cls, row) {
+      Ngn.Items.toolActions.inlineTextEdit.initTd(items, cls, row, row.tools[cls].elN + 1);
+    },
+    initTd: function(items, cls, row, n) {
+      var data = Object.values(row.data);
+      var eTd = row.el.getChildren('td')[n];
+      if (!eTd) throw new Ngn.EmptyError('eTd');
+      eTd.set('html', '');
+      eTd.store('eText', new Element('div', {
+        html: data[n - 1]
+      }).inject(eTd));
+      eTd.store('eInput', new Element('input', {
+        value: data[n - 1],
+        styles: {
+          display: 'none',
+          'border': '0px',
+          width: '100px'
+        }
+      }).inject(eTd));
+      var saving = false;
+      var save = function(from) {
+        if (saving) return;
+        saving = true;
+        var r = {};
+        r[items.options.idParam] = row.id;
+        r[row.tools[cls].paramName] = eTd.retrieve('eInput').get('value');
+        if (eTd.retrieve('eText').get('html') != r[row.tools[cls].paramName]) {
+          eTd.retrieve('eText').set('html', r[row.tools[cls].paramName]);
+          new Ngn.Request.JSON({
+            url: items.options.basePath + '?a=' + row.tools[cls].action,
+            onComplete: function() {
+              saving = false;
+              items.reload();
+            }
+          }).post(r);
+        } else {
+          (function() {
+            saving = false;
+          }).delay(100);
+        }
+        Ngn.Items.toolActions.inlineTextEdit.switchInput(eTd, from);
+      };
+      eTd.retrieve('eInput').addEvent('blur', save.pass('blur'));
+      eTd.retrieve('eInput').addEvent('keypress', function(e) {
+        if (e.key != 'enter') return;
+        e.preventDefault();
+        save('enter');
+      });
+      eTd.store('edit', false);
+      items.createToolBtn(cls, row, Ngn.Items.toolActions.inlineTextEdit.switchInput.pass(eTd));
+    },
+    switchInput: function(eTd, from) {
+      if (eTd.retrieve('edit')) {
+        eTd.retrieve('eInput').setStyle('display', 'none');
+        eTd.retrieve('eText').setStyle('display', 'block');
+        eTd.store('edit', false);
+      } else {
+        eTd.retrieve('eInput').setStyle('display', 'block');
+        eTd.retrieve('eInput').focus();
+        eTd.retrieve('eText').setStyle('display', 'none');
+        eTd.store('edit', true);
+      }
+    }
+  }
+
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Html.js|--*/
+Ngn.Html = {};
+
+Ngn.Html.fixEmptyTds = function(el) {
+  var tds = el.getElements('td');
+  for (var i = 0; i < tds.length; i++)
+    if (!tds[i].get('html').trim()) tds[i].set('html', '&nbsp;');
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.SwitcherLink.js|--*/
+Ngn.SwitcherLink = new Class({
+
+  Implements: [Options, Events],
+
+  options: {
+    textSelector: null,
+    classOn: '',
+    classOff: '',
+    linkOn: '',
+    linkOff: '',
+    titleOn: 'Включить',
+    titleOff: 'Выключить',
+    onClick: Function.from(),
+    onComplete: Function.from()
+  },
+
+  initialize: function(el, options) {
+    this.setOptions(options);
+    this.el = $(el) || el;
+    if (this.options.textSelector) this.text = this.el.getElement(this.options.textSelector);
+    if (this.el.hasClass(this.options.classOn)) {
+      Ngn.Element.setTip(this.el, this.options.titleOff);
+      if (this.text) this.text.set('text', this.options.titleOff);
+    } else {
+      Ngn.Element.setTip(this.el, this.options.titleOn);
+      if (this.text) this.text.set('text', this.options.titleOn);
+    }
+    this.setTip(this.el.hasClass(this.options.classOn));
+    this.el.addEvent('click', function(e) {
+      e.preventDefault();
+      this.click();
+    }.bind(this));
+  },
+
+  click: function() {
+    var enabled = this.el.hasClass(this.options.classOn);
+    this.fireEvent('click');
+    new Request({
+      url: enabled ? this.options.linkOff : this.options.linkOn,
+      onComplete: function(data) {
+        this.setTip(!enabled);
+        this.fireEvent('complete', !enabled);
+      }.bind(this)
+    }).get();
+  },
+
+  setTip: function(enabled) {
+    if (enabled) {
+      this.el.removeClass(this.options.classOff);
+      this.el.addClass(this.options.classOn);
+      Ngn.Element.setTip(this.el, this.options.titleOff);
+      if (this.text) this.text.set('text', this.options.titleOff);
+    } else {
+      this.el.removeClass(this.options.classOn);
+      this.el.addClass(this.options.classOff);
+      Ngn.Element.setTip(this.el, this.options.titleOn);
+      if (this.text) this.text.set('text', this.options.titleOn);
+    }
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.EmptyError.js|--*/
+Ngn.EmptyError = new Class({
+  Extends: Error,
+
+  initialize: function(v) {
+    this.message = '"' + v + '" can not be empty';
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.js|--*/
+/**
+ * Компонент для вывода и редактирования табличных данных
+ */
+Ngn.Grid = new Class({
+  Extends: Ngn.Items.Table,
+
+  options: {
+    //data: {
+    //  head: [ 'title1' ],
+    //  body: [ { tools: {}, data: [] } ]
+    //},
+    isSorting: false,
+    tools: {},
+    formatters: {},
+    itemElementSelector: 'tbody .item',
+    checkboxes: false,
+    filterPath: null,
+    id: null,
+    toolActions: {},
+    toolLinks: {},
+    eParent: 'table',
+    fromDialog: false,
+    listAction: null,
+    listAjaxAction: 'json_getItems',
+    valueContainerClass: 'v',
+    basePath: window.location.pathname,
+    resizeble: false,
+    search: false
+  },
+
+  btns: {},
+
+  init: function() {
+    if (!this.options.eParent) throw new Ngn.EmptyError('this.options.eParent');
+    if (this.options.basePath == '/') this.options.basePath = '';
+    if (this.options.basePath && !this.options.id) this.options.id = Ngn.String.hashCode(this.options.basePath);
+    this.eParent = $(this.options.eParent);
+    this.initMenu();
+    console.debug('>>>' + this.options.search);
+    if (this.options.search) new Ngn.Grid.Search(this);
+    this.options.eItems = Elements.from('<table width="100%" cellpadding="0" cellspacing="0" class="items itemsTable' + (this.options.resizeble ? ' resizeble' : '') + '"><thead><tr></tr></thead><tbody></tbody></table>')[0].inject(this.eParent);
+    this.eHeadTr = this.options.eItems.getElement('thead tr');
+    if (this.options.checkboxes) {
+      Elements.from('<th class="tools"><input type="checkbox" id="checkAll" title="Выделить всё" class="tooltip" /></th>')[0].inject(this.eHeadTr);
+    } else {
+      Elements.from('<th></th>')[0].inject(this.eHeadTr);
+    }
+    if (this.options.data) this.initInterface(this.options.data);
+  },
+
+  initMenu: function() {
+    var grid = this, action;
+    this.eMenu = Elements.from('<div class="itemsTableMenu dgray"><div class="clear"></div></div>')[0].inject(this.eParent);
+    if (!this.options.menu) return;
+    for (var i = 0; i < this.options.menu.length; i++) {
+      (function() {
+        var v = grid.options.menu[i];
+        var keys = Object.keys(v.action);
+        if (keys.length && Ngn.Arr.inn('$constructor', keys)) {
+          // класс Ngn.GridBtnAction.*
+          action = new v.action(grid);
+          action.id = v.cls;
+        } else {
+          if (typeof(v.action) == 'function') {
+            // ф-я function(grid) {}
+            action = { action: v.action };
+          } else {
+            action = v.action ? { action: v.action } : null;
+          }
+          if (action) {
+            action.id = v.cls;
+            action.args = grid;
+          }
+        }
+        var cls = v.cls;
+        v.cls = 'btn ' + v.cls;
+        grid.btns[cls] = new Ngn.Btn(Ngn.Btn.btn(v).inject(this.eMenu, 'top'), action, v.options || {});
+      }.bind(this))();
+    }
+  },
+
+  dataLoaded: function(data) {
+    this.options.data = data;
+    this.init();
+    this.initInterface(this.options.data);
+  },
+
+  initThSizes: function() {
+    this.eHeadTr.getElements('th').each(function(el) {
+      el.setStyle('width', el.getSize().x + 'px');
+    });
+  },
+
+  getLink: function(ajax) {
+    var action = ajax ? this.options.listAjaxAction : this.options.listAction;
+    if (!action) if (ajax) throw new Ngn.EmptyError('action');
+    return this.options.basePath + (action ? '/' + action : '') + (this.options.filterPath ? this.options.filterPath.toPathString() : '') + (this.currentPage == 1 ? '' : '/pg' + this.currentPage);
+  },
+
+  reload: function(itemId, skipLoader) {
+    if (itemId && !skipLoader) this.loading(itemId, true); // показываем, что строчка обновляется
+    Ngn.Request.Iface.loading(true);
+    new Ngn.Request.JSON({
+      url: this.getLink(true),
+      onComplete: function(r) {
+        if (!this.options.fromDialog) {
+          if (window.history.pushState) window.history.pushState(null, null, this.getLink(false));
+        }
+        this.initInterface(r, true);
+        this.fireEvent('reloadComplete', r);
+        Ngn.Request.Iface.loading(false);
+        this.rowFlash(itemId);
+      }.bind(this)
+    }).send();
+    return this;
+  },
+
+  rowFlash: function(itemId) {
+    if (!this.esItems[itemId]) return;
+    var fx = new Fx.Tween(this.esItems[itemId], {
+      duration: 200,
+      onComplete: function() {
+        fx.setOptions({duration: 3000});
+        fx.start('background-color', '#FFFFFF');
+      }
+    });
+    fx.start('background-color', '#FFB900');
+  },
+
+  initInterface: function(data, fromAjax) {
+    if (data.head) this.initHead(data.head);
+    if (data.body) this.initBody(data.body);
+    if (data.pagination) this.initPagination(data.pagination, fromAjax);
+    this.initItems();
+    if (this.options.resizeble) {
+      if (!this.options.id) throw new Ngn.EmptyError('this.options.id');
+      this.resizeble = new Ngn.Grid.Resizeble(this);
+      window.addEvent('resize', function() {
+        this.resizeble.resizeLastCol();
+      }.bind(this));
+    }
+  },
+
+  initHead: function(head) {
+    head = Ngn.Object.fromArray(head);
+    this.esTh = [];
+    this.eHeadTr.set('html', '');
+    new Element('th').inject(this.eHeadTr);
+    for (var i in head) {
+      var eTh = new Element('th', {html: head[i]}).inject(this.eHeadTr);
+      this.esTh[i] = eTh;
+    }
+    return this;
+  },
+
+  initBody: function(rows) {
+    if (!rows) throw new Ngn.EmptyError('rows');
+    rows = Ngn.Object.fromArray(rows);
+    var eBody = this.options.eItems.getElement('tbody');
+    eBody.set('html', '');
+    for (var k in rows) {
+      var row = rows[k];
+      if (!row.data) throw new Error('Row ' + k + ' has no data');
+      var eRow = new Element('tr', {
+        'class': 'item' + (row.rowClass ? ' ' + row.rowClass : ''),
+        'id': 'item_' + row.id,
+        'data-id': row.id
+      }).inject(eBody);
+      var eTools = new Element('td', {
+        'class': 'tools',
+        'html': '<table cellpadding="0" cellspacing="0"><tr></tr></table>'
+      }).inject(eRow);
+      eTools = eTools.getElement('tr');
+      row.el = eRow;
+      row.eTools = eTools;
+      if (this.options.checkboxes) {
+        Elements.from('<td><input type="checkbox" name="itemIds[]" value="' + row.id + '"/></td>')[0].inject(eTools);
+      } else {
+        Elements.from('<td></td>')[0].inject(eTools);
+      }
+      if (this.options.isSorting) Elements.from('<td><div class="dragBox"></div></td>')[0].inject(eTools);
+      var n = 0;
+      for (var name in Ngn.Object.fromArray(row.data)) {
+        var prop = {};
+        if (typeOf(row.data[name]) == 'object') {
+          var value = row.data[name][0];
+          prop['class'] = row.data[name][1];
+        } else {
+          value = row.data[name];
+        }
+        if (this.options.formatters[name]) value = this.options.formatters[name]();
+        prop.html = this.replaceHtmlValue(value);
+        new Element('td', prop).
+          addClass('n_' + name).
+          addClass(this.options.valueContainerClass).set('data-n', n).inject(eRow);
+        n++;
+      }
+      var tools = Object.merge(row.tools || {}, this.options.tools);
+      row.tools = Ngn.Object.fromArray(tools);
+      for (var toolName in row.tools) {
+        this.createToolBtn(toolName, row);
+      }
+    }
+    return this;
+  },
+
+  currentPage: 1,
+
+  replaceLink: function(link, ajax) {
+    if (ajax) {
+      return link.replace(new RegExp('/' + this.options.listAjaxAction + '/', 'g'), this.options.listAction ? '/' + this.options.listAction + '/' : '/');
+    } else {
+      return link.replace(new RegExp('/' + this.options.listAction + '/', 'g'), '/' + this.options.listAjaxAction + '/');
+    }
+  },
+
+  initPagination: function(data, fromAjax) {
+    if (this.ePagination) this.ePagination.dispose();
+    this.ePagination = Elements.from('<div class="pNums"><div class="bookmarks">' + data.pNums + '</div></div>')[0].inject(this.eMenu, 'top');
+    new Element('div', {
+      'class': 'total help',
+      title: Ngn.Locale.get('core.totalItemsCount'),
+      html: data.itemsTotal
+    }).inject(this.ePagination);
+    this.ePagination.getElements('a').each(function(el) {
+      if (!fromAjax) return;
+      el.store('href', el.get('href'));
+      el.set('href', this.replaceLink(el.get('href'), fromAjax));
+      el.addEvent('click', function(e) {
+        Ngn.Request.Iface.loading(true);
+        this.currentPage = el.get('href').replace(/.*pg(\d+)/, '$1');
+        new Ngn.Request.JSON({
+          url: el.retrieve('href'),
+          onComplete: function(r) {
+            Ngn.Request.Iface.loading(false);
+            this.initInterface(r, true);
+          }.bind(this)
+        }).send();
+        return false;
+      }.bind(this));
+    }.bind(this));
+  },
+
+  replaceHtmlValue: function(v) {
+    if (typeof(v) != 'string') return v;
+    return v.replace(new RegExp(this.options.listAjaxAction, 'g'), this.options.listAction);
+  },
+
+  createToolBtn: function(toolName, row, action) {
+    var tool = row.tools[toolName];
+    action = action || this.options.toolActions[toolName] || false;
+    var el = new Element('a', {
+      'href': this.options.toolLinks[toolName] ? this.options.toolLinks[toolName](row) : '#',
+      'class': 'iconBtn ' + ((typeOf(tool) == 'object' && tool.cls) ? tool.cls : toolName),
+      'html': '<i></i>',
+      'title': typeOf(tool) == 'object' ? tool.title : tool
+    }).inject(new Element('td').inject(row.eTools));
+    if (typeOf(tool) == 'object' && tool.target) {
+      el.set('target', tool.target);
+    }
+    if (action) {
+      // Только если экшн определён, биндим на элемент клик (new Ngn.Btn)
+      action = action.bind(this);
+      new Ngn.Btn(el, function() {
+        action(row, this);
+      });
+    }
+    return el;
+  },
+
+  idP: function(id) {
+    var p = {};
+    p[this.options.idParam] = id;
+    return p;
+  }
+
+});
+
+Ngn.Grid.defaultDialogOpts = {
+  width: 500,
+  height: 300,
+  reduceHeight: true
+};
+
+Ngn.Grid.menu = {};
+
+Ngn.GridBtnAction = new Class({
+  Extends: Ngn.Btn.Action,
+  initialize: function(grid) {
+    this.grid = grid;
+    this.classAction = true;
+  }
+});
+
+Ngn.GridBtnAction.New = new Class({
+  Extends: Ngn.GridBtnAction,
+  action: function() {
+    new Ngn.Dialog.RequestForm(this.getDialogOptions());
+  },
+  getDialogOptions: function() {
+    return Object.merge({
+      id: 'CHANGE_ME',
+      dialogClass: 'dialog fieldFullWidth',
+      url: this.grid.options.basePath + '/json_new',
+      title: false,
+      onOkClose: function() {
+        this.grid.reload();
+      }.bind(this)
+    }, Ngn.Grid.defaultDialogOpts)
+  }
+});
+
+Ngn.Grid.menu['new'] = {
+  title: 'Создать',
+  cls: 'add',
+  action: Ngn.GridBtnAction.New
+};
+Ngn.Grid.defaultMenu = [Ngn.Grid.menu['new']];
+
+Ngn.Grid.toolActions = {};
+Ngn.Grid.toolActions.edit = function(row, opt) {
+  new Ngn.Dialog.RequestForm(Object.merge({
+    id: 'CHANGE_ME',
+    url: this.options.basePath + '?a=json_edit&id=' + row.id,
+    width: 500,
+    height: 300,
+    title: false,
+    onOkClose: function() {
+      this.reload(row.id);
+    }.bind(this)
+  }, Ngn.Grid.defaultDialogOpts));
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.Search.js|--*/
+Ngn.Grid.Search = new Class({
+
+  initialize: function(grid) {
+    this.grid = grid;
+    this.init();
+  },
+
+  init: function() {
+    var timeoutId = 0;
+    var eSearch = new Element('input', {
+      placeholder: Ngn.Locale.get('Core.search') //
+        + '...'
+    }).inject(this.grid.eMenu.getElement('.clear'), 'before');
+    eSearch.addEvent('keyup', function() {
+      clearTimeout(timeoutId);
+      timeoutId = this.loadSearchResults.delay(1000, this, eSearch.get('value'));
+    }.bind(this));
+  },
+
+  word: null,
+
+  loadSearchResults: function(word) {
+    if (this.word == word) return;
+    this.word = word;
+    Ngn.Request.Iface.loading(true);
+    new Ngn.Request.JSON({
+      url: this.grid.options.basePath + '/json_search?word=' + word,
+      onComplete: function(r) {
+        this.grid.initInterface(r, true);
+        Ngn.Request.Iface.loading(false);
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.Resizeble.js|--*/
+Ngn.Grid.Resizeble = new Class({
+  Implements: [Options, Events],
+
+  firstResizebleColN: 1,
+  defaultColWidth: 50,
+  debug: false,
+  maxColWidth: 350,
+
+  /**
+   * @param Ngn.Grid
+   * @param options
+   */
+  initialize: function(grid, options) {
+    this.setOptions(options);
+    this.grid = grid;
+    if (this.debug) this.addDubugCells();
+    this.initWrappers();
+    this.initHandlers();
+  },
+
+  getTrParsents: function() {
+    return this.grid.eParent.getChildren('table').getChildren()[0];
+  },
+
+  getWrWidth: function(n) {
+    var w = Ngn.Storage.get('gridColWidth' + this.grid.options.id + n);
+    if (w > this.options.maxColWidth) w = this.options.maxColWidth;
+    return w || this.defaultColWidth;
+  },
+
+  getRows: function() {
+    var rows = [];
+    this.getTrParsents().each(function(el) {
+      el.getChildren().each(function(eTr) {
+        if (eTr.hasClass('debug')) return;
+        rows.push(eTr);
+      });
+    });
+    return rows;
+  },
+
+  initWrappers: function() {
+    this.getRows().each(function(eTr) {
+      eTr.getChildren().each(function(eTd, n) {
+        if (n < this.firstResizebleColN) return;
+        var html = eTd.get('html');
+        eTd.set('html', '');
+        if (this.debug) this.debugCells[n].set('html', this.getWrWidth(n));
+        new Element('div', {
+          html: '<div class="cont">' + html + '</div>',
+          'class': 'wr',
+          styles: {
+            width: this.getWrWidth(n) + 'px'
+          }
+        }).inject(eTd);
+      }.bind(this));
+    }.bind(this));
+  },
+
+  initHandlers: function() {
+    this.cols = this.getTrParsents()[0].getChildren()[0].getChildren('th');
+    this.cols.each(function(eTh, n) {
+      if (n < this.firstResizebleColN + 1) return;
+      var eHandler = new Element('div', {
+        'class': 'handler'
+      }).inject(eTh, 'top');
+      var col = new Ngn.Grid.Resizeble.Col(this, n, eHandler);
+      if (n == this.cols.length - 1) this.resizebleLastCol = col;
+    }.bind(this));
+    this.resizeLastCol();
+  },
+
+  resizeLastCol: function() {
+    if (this.resizebleLastCol) this.resizebleLastCol.resizeLast();
+  },
+
+  debugCells: [],
+
+  addDubugCells: function() {
+    var eTbody = this.getTrParsents()[1];
+    var cols = eTbody.getChildren()[0].getChildren();
+    var eTr = new Element('tr', {'class': 'debug'});
+    eTr.inject(eTbody);
+    for (var i = 0; i < cols.length; i++) {
+      this.debugCells[i] = new Element('td').inject(eTr);
+    }
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/grid/Ngn.Grid.Resizeble.Col.js|--*/
+Ngn.Grid.Resizeble.Col = new Class({
+
+  initialize: function(resizeble, colN, eHandler) {
+    this.resizeble = resizeble;
+    if (!this.resizeble.grid.options.id) throw new Error('cat use resizeble on grid without id option');
+    this.colN = colN;
+    this.drag = new Drag(new Element('div'), {
+      handle: eHandler,
+      onStart: function(el, e) {
+        this.startPosition = e.page.x;
+        this.startW = this.getElements(1)[0].getSize().x;
+      }.bind(this),
+      onDrag: function(el, e) {
+        var delta = this.startPosition - e.page.x;
+        var els = this.getElements(1);
+        for (var i = 0; i < els.length; i++) {
+          var w = this.startW - delta;
+          if (!els[i]) throw new Error('why?');
+          els[i].setStyle('width', w + 'px');
+          if (this.resizeble.debug) this.resizeble.debugCells[this.colN - 1].set('html', w);
+        }
+        this.resizeble.resizeLastCol();
+      }.bind(this),
+      onComplete: function() {
+        Ngn.Storage.set('gridColWidth' + this.resizeble.grid.options.id + (this.colN - 1), parseInt(this.getElements(1)[0].getStyle('width')));
+      }.bind(this),
+      snap: 0
+    });
+  },
+
+  getMaxParentWidth: function() {
+    var x1 = window.getSize().x;
+    var x2 = this.resizeble.grid.eParent.getSize().x;
+    return x1 < x2 ? x1 : x2;
+  },
+
+  resizeLast: function() {
+    if (this.colN != this.resizeble.cols.length - 1) throw new Error('U can not use this method on non last col (' + this.colN + '). Total: ' + this.resizeble.cols.length);
+    var els = this.getElements();
+    var display = els[0].getStyle('display');
+    this.setColCellsStyle('display', 'none');
+    var parentWithoutLastColW = this.getMaxParentWidth();
+    var tableW = this.resizeble.grid.eParent.getElement('table').getSize().x;
+    this.setColCellsStyle('display', display);
+    this.setColCellsStyle('width', parentWithoutLastColW - tableW);
+  },
+
+  setColCellsStyle: function(k, v) {
+    var els = this.getElements();
+    for (var i = 0; i < els.length; i++) els[i].setStyle(k, v);
+  },
+
+  getElements: function(offset) {
+    var els = [];
+    offset = offset || 0;
+    this.resizeble.getRows().each(function(eTr) {
+      eTr.getChildren('td,th').each(function(el, n) {
+        if (n == this.colN - offset) {
+          els.push(el.getElement('.wr'));
+        }
+      }.bind(this));
+    }.bind(this));
+    return els;
+  }
+
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Object.js|--*/
+Ngn.Object = {};
+
+Ngn.Object.fromString = function(s, value) {
+  var a = s.split('.');
+  for (var i = 0; i < a.length; i++) {
+    var ss = a.slice(0, i + 1).join('.');
+    eval('var def = ' + ss + ' === undefined');
+    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
+  }
+  if (value) eval(s + ' = value');
+};
+
+Ngn.Object.fromArray = function(arr) {
+  if (typeOf(arr) == 'object') return arr;
+  var r = {};
+  for (var i = 0; i < arr.length; ++i) r[i] = arr[i];
+  return r;
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.RequestForm.js|--*/
+Ngn.Dialog.RequestFormBase = new Class({
+  Extends: Ngn.Dialog,
+
+  options: {
+    okDestroy: false,
+    jsonRequest: true,
+    autoSave: false,
+    getFormData: function() {
+      return Ngn.Frm.toObj(this.form.eForm);
+    },
+    onFormResponse: Function.from(),
+    onFormRequest: Function.from(),
+    onSubmitSuccess: Function.from()
+  },
+
+  initialize: function(options) {
+    options = options || {};
+    options.ok = this.submit.bind(this);
+    if (options.submitUrl == undefined) {
+      if (options.jsonSubmit == undefined) options.jsonSubmit = false;
+      options.submitUrl = options.url;
+    }
+    this.parent(options);
+    this.toggle('ok', false);
+    this.iframeUpload = true;
+    window.addEvent('keypress', function(e) {
+      if (e.key != 'enter' || e.target.get('tag') == 'textarea') return;
+      e.preventDefault();
+      this.submit();
+    }.bind(this));
+  },
+
+  form: null,
+  response: null,
+
+  urlResponse: function(r) {
+    this.parent(r);
+    this.response = r;
+    if (r.submitTitle) this.setOkText(r.submitTitle);
+    if (r.jsOptions) {
+      if (r.jsOptions.onOkClose)
+        this.addEvent('okClose', r.jsOptions.onOkClose);
+    }
+    this.setMessage(r.form, false);
+    this.form = Ngn.Form.factory(this.message.getElement('form'), {
+      ajaxSubmit: true,
+      ajaxSubmitUrl: this.options.submitUrl,
+      disableInit: true
+    });
+    this.form.options.dialog = this; // Важно передавать объект Диалога в объект
+    // Формы после выполнения конструктура, иначе объект
+    // Даилога не будет содержать созданого объекта Формы
+    this.form.init();
+    this.fireEvent('formResponse');
+    this.form.addEvent('submit', function(r) {
+      this.fireEvent('formRequest');
+      this.loading(true);
+    }.bind(this));
+    this.form.addEvent('failed', function(r) {
+      this.urlResponse(r);
+      this.loading(false);
+    }.bind(this));
+    this.form.addEvent('complete', function(r) {
+      this.response = r;
+      this.okClose();
+      this.fireEvent('submitSuccess', r);
+    }.bind(this));
+    this.resizeByCols();
+    if (this.options.autoSave) {
+      new Ngn.Frm.Saver(this.form.eForm, {
+        url: this.options.submitUrl,
+        jsonRequest: true
+      });
+    }
+    this.initEvents();
+    this.formInit();
+    this.initPosition();
+  },
+
+  // abstract
+  initEvents: function() {
+  },
+
+  resizeByCols: function() {
+    var cols = this.form.eForm.getElements('.type_col');
+    if (!cols.length) return;
+    //var maxY = 0;
+    var ys = [];
+    var x = 0;
+    for (var i = 0; i < cols.length; i++) {
+      ys[i] = cols[i].getSize().y;
+      x += cols[i].getSize().x;
+    }
+    //for (var i=0; i<cols.length; i++) cols[i].setStyle('height', ys.max() + 'px');
+    this.dialog.setStyle('width', (x + 12) + 'px');
+  },
+
+  formInit: function() {
+  },
+
+  submit: function() {
+    this._submit();
+  },
+
+  finishClose: function() {
+    this.parent();
+    // если в последнем респонзе есть ссылка не следующую форму
+    if (this.isOkClose && this.response.nextFormUrl) {
+      var opt = {};
+      if (this.response.nextFormOptions) opt = Object.merge(opt, this.response.nextFormOptions);
+      opt.url = this.response.nextFormUrl;
+      new Ngn.Dialog.RequestForm(opt);
+    }
+  }
+
+  // abstract
+  //_submit: {}
+
+});
+
+Ngn.Dialog.Form = new Class({
+  Extends: Ngn.Dialog.RequestFormBase,
+
+  options: {
+    onSubmit: Function.from()
+  },
+
+  _submit: function() {
+    this.fireEvent('submit', this.options.getFormData.bind(this)());
+    this.okClose();
+  }
+
+});
+
+Ngn.Dialog.RequestForm = new Class({
+  Extends: Ngn.Dialog.RequestFormBase,
+
+  options: {
+    autoSave: false,
+    formEvents: false
+    //cacheRequest: false
+  },
+
+  _submit: function() {
+    this.form.submit();
+  },
+
+  initEvents: function() {
+    if (!this.options.formEvents) return;
+    var obj = this;
+    for (var i = 0; i < this.options.formEvents.length; i++) {
+      var evnt = this.options.formEvents[i];
+      this.message.getElement('[name=' + evnt.fieldName + ']').addEvent(evnt.fieldEvent, function() {
+        obj.fireEvent(evnt.formEvent, this.get('value'));
+      });
+    }
+  }
+
+});
+
+Ngn.Dialog.RequestForm.Static = new Class({
+  Extends: Ngn.Dialog.RequestForm,
+
+  // options: {
+  //   staticResponse: {
+  //     title: text
+  //     submitTitle: text
+  //     form: html
+  //   }
+  // }
+
+  initFormResponse: function() {
+    this.urlResponse(Ngn.json.process(this.options.staticResponse));
+  }
+
+});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.Saver.js|--*/
 Ngn.Frm.SaverBase = new Class({
   Implements: [Options],
@@ -15025,4027 +16233,58 @@ Ngn.Frm.Saver = new Class({
   }
   
 });
-/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
-Locale.define("en-US", "Sd", {"layersQuestionMark":"Click any layer and drag to change its position in the layers list"});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.js|--*/
-// @requiresBefore s2/js/locale?key=sd
+/*--|/home/user/ngn-env/ngn/i/js/ngn/users/Ngn.Admin.UsersGrid.js|--*/
+if (!Ngn.Admin) Ngn.Admin = {};
 
-// from common
+Ngn.Url = {};
 
-if (!Ngn.sd) Ngn.sd = {};
-
-Ngn.sd.positionDiff = function(pos1, pos2, offset) {
-  if (!offset) offset = 0;
-  return {
-    x: pos1.x - pos2.x + offset,
-    y: pos1.y - pos2.y + offset
+Ngn.Url.getPath = function(n) {
+  if (n === 0) return './';
+  var p = window.location.pathname.split('/');
+  var s = '';
+  if (!n) n = p.length - 1;
+  for (var i = 1; i <= n; i++) {
+    s += '/' + (p[i] ? p[i] : 0);
+    if (n === i) break;
   }
+  return s;
 };
 
-Ngn.sd.loadedFonts = {};
-Ngn.sd.loadFont = function(font, onLoad) {
-  if (!font) return;
-  if (Ngn.sd.loadedFonts[font]) {
-    onLoad();
-    return;
-  }
-  Asset.javascript((Ngn.sd.baseUrl || '') + '/sd/js/fonts/' + font + '.js', {
-    onLoad: function() {
-      Ngn.sd.loadedFonts[font] = true;
-      onLoad();
-    }
-  });
-};
-
-Ngn.sd.initFullBodyHeight = function() {
-  return;
-  var isFullHeight = null;
-  var fullBodyHeight = function() {
-    if (window.getScrollSize().y > window.getSize().y) {
-      if (isFullHeight === true || isFullHeight === null) document.getElement('body').setStyle('height', '');
-    } else {
-      if (isFullHeight === false || isFullHeight === null) document.getElement('body').setStyle('height', '100%');
-    }
-  };
-  window.addEvent('domready', fullBodyHeight);
-  window.addEvent('resize', fullBodyHeight);
-};
-
-// --
-
-Ngn.sd.setMinHeight = function(parent, offset, min) {
-  if (!offset) offset = 0;
-  if (!min) min = 0;
-  var max = 0;
-  parent.getChildren().each(function(el) {
-    var y = el.getSize().y + parseInt(el.getStyle('top'));
-    if (y > max) max = y + offset;
-  });
-  if (max) {
-    if (max < min) max = min;
-    parent.sdSetStyle('min-height', max);
-  }
-};
-
-Ngn.sd.Font = new Class({
-
-  directChangeFontStyleProps: function() {
-    return [];
-  },
-
-  _updateFont: function(forceDirectChange) {
-    if (!this.data.font) return;
-    if (!this.data.font.fontSize) this.data.font.fontSize = '24px';
-    var s = ['font-size', 'font-family', 'color'], prop;
-    for (var i = 0; i < s.length; i++) this.styleEl().sdSetStyle(s[i], '');
-    for (i in this.data.font) {
-      prop = i.hyphenate();
-      if (forceDirectChange || Ngn.Arr.inn(prop, this.directChangeFontStyleProps())) {
-        this.styleEl().setStyle(prop, this.data.font[i]);
-      }
-      if (Ngn.Arr.inn(prop, s)) this.styleEl().sdSetStyle(prop, this.data.font[i]);
-    }
-    this.updateBtnFontSettings();
-  },
-
-  updateBtnFontSettings: function() {
-    if (!this.btnFontSettings) return;
-    if (this.data.font.color) this.btnFontSettings.el.setStyle('background-color', this.data.font.color); else {
-      if (this.btnFontSettings.el.getStyle('background-color')) {
-        this.btnFontSettings.el.setStyle('background-color', '');
-      }
-    }
-  },
-
-  defaultFontColor: function() {
-    return this.data.font.color || false;
-  },
-
-  linkColor: function() {
-    if (!this.data.font) return false;
-    return this.data.font.linkColor || this.data.font.color || false;
-  },
-
-  linkOverColor: function() {
-    if (!this.data.font) return false;
-    return this.data.font.linkOverColor || false;
-  },
-
-  settingsAction: 'json_blockSettings',
-
-  fontSettingsDialogOptions: function() {
-    return {
-      width: 420
-    };
-  },
-
-  initFont: function() {
-    if (!this.data.font) this.data.font = {};
-    this.initFontBtn();
-    this.updateFont();
-  },
-
-  toggleActive: function(isActive) {
-    if (isActive) {
-      this.el.addClass('active');
-    } else {
-      this.el.removeClass('active');
-    }
-  },
-
-  _settingsAction: function() {
-    if (Ngn.sd.currentEditBlock && Ngn.sd.currentEditBlock.id() == this.id()) return;
-    if (Ngn.sd.openedPropDialog) Ngn.sd.openedPropDialog.close();
-    Ngn.sd.layersBar.setActive(this.id());
-    this.toggleActive(true);
-    if (Ngn.sd.currentEditBlock) {
-      Ngn.sd.currentEditBlock.toggleActive(false);
-    }
-    Ngn.sd.currentEditBlock = this;
-    if (!this.canEdit()) {
-      if (Ngn.sd.openedPropDialog) {
-        console.debug('Ngn.sd.openedPropDialog: close');
-        Ngn.sd.openedPropDialog.close();
-      }
-      return;
-    }
-    Ngn.sd.openedPropDialog = new Ngn.sd.SettingsDialog(Object.merge({
-      onClose: function() {
-        Ngn.sd.currentEditBlock.toggleActive(false);
-        Ngn.sd.currentEditBlock = false;
-        Ngn.sd.openedPropDialog = false;
-      }.bind(this),
-      onOkClose: function() {
-        this._settingsAction();
-      }.bind(this),
-      dialogClass: 'settingsDialog dialog',
-      id: this.finalData().data.type + this.id(),
-      blockId: this.id(),
-      baseZIndex: 210,
-      force: false,
-      url: this.ctrl + '/' + this.settingsAction + '/' + this.id(),
-      onSubmitSuccess: function() {
-        this.reload();
-      }.bind(this),
-      onChangeFont: function(fontFamily) {
-        this.data.font.fontFamily = fontFamily;
-        this._updateFont(true);
-      }.bind(this),
-      onChangeColor: function(color) {
-        this.data.font.color = color;
-        this._updateFont(true);
-      }.bind(this),
-      onChangeSize: function(fontSize) {
-        this.data.font.fontSize = fontSize;
-        this._updateFont(true);
-      }.bind(this)
-      //onChangeShadow: function(shadow) {
-      //  this.data.font.shadow = shadow;
-      //  this._updateFont(true);
-      //}.bind(this)
-    }, this.settingsDialogOptions()));
-  },
-
-  settingsDialogOptions: function() {
-    return {};
-  },
-
-  initFontBtn: function() {
-    if (!this.eBtns) return;
-    this.btnFontSettings = new Ngn.Btn( //
-      Ngn.Btn.btn2('Font Settings', 'font').inject(this.eBtns), //
-      this._settingsAction.bind(this) //
-    );
-  },
-
-  styleEl: function() {
-    return this.el;
-  }
-
-});
-
-Ngn.sd.SettingsDialog = new Class({
-  Extends: Ngn.Dialog.RequestForm,
+Ngn.Admin.UsersGrid = new Class({
+  Extends: Ngn.Grid,
 
   options: {
-    useFx: false
-  },
-
-  formInit: function() {
-    var obj = this;
-    var el = this.message.getElement('[name=fontFamily]');
-    if (el) {
-      el.addEvent('change', function() {
-        obj.fireEvent('changeFont', this.get('value'));
-      });
-      this.message.getElement('[name=fontSize]').addEvent('change', function() {
-        obj.fireEvent('changeSize', this.get('value'));
-      });
-      this.message.getElement('[name=color]').addEvent('change', function() {
-        obj.fireEvent('changeColor', this.get('value'));
-      });
-    }
-  }
-
-});
-
-Ngn.sd.Items = new Class({
-
-  reload: function() {
-    this.loading(true);
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_getItem/' + this.id() + '?ownPageId=' + Ngn.sd.ownPageId,
-      onComplete: function(data) {
-        this.setData(data);
-        this.updateElement();
-        //Ngn.sd.GlobalSlides.init(true);
-        this.loading(false);
-      }.bind(this)
-    }).send();
-  },
-  id: function() {
-    return this.data.id;
-  },
-  setData: function(data) {
-    this.data = data;
-  },
-  loading: function(flag) {
-    Ngn.Request.Iface.loading(flag);
-  },
-  updateElement: function() {
-  }
-
-});
-
-Ngn.sd.ElementMeta = new Class({
-  initElement: function(el) {
-    this.el = el;
-    if (!this.id()) return;
-    if (!this.finalData().data.type) throw new Error('this.finalData().data.type');
-    this.el.addClass('sdEl').store('obj', this).set('data-id', this.id()).set('data-type', this.finalData().data.type).addClass('type_' + this.finalData().data.type).addClass('id_' + this.id());
-  }
-});
-
-Ngn.sd.styles = {};
-
-Ngn.sd.buildStyles = function() {
-  var r = {};
-  for (var selector in Ngn.sd.styles) {
-    var styles = Ngn.sd.styles[selector];
-    if (!r[selector]) r[selector] = [];
-    for (var property in styles) r[selector].push([property.hyphenate(), styles[property]]);
-  }
-  var css = '';
-  for (var selector in r) {
-    css += selector + ' {\n';
-    for (var i = 0; i < r[selector].length; i++) {
-      css += r[selector][i][0] + ': ' + r[selector][i][1] + ';\n';
-    }
-    css += '}\n';
-  }
-  return css;
-};
-
-Ngn.sd.directChangeStyleProperies = '(width|height|left|top|margin|padding)';
-Ngn.sd.directChangeStyleValues = 'rotate';
-
-Element.implement({
-  sdSetStyle: function(property, value, subSelector) {
-    if (property == 'opacity') {
-      this.setOpacity(this, parseFloat(value));
-      return this;
-    }
-    property = (property == 'float' ? floatName : property).camelCase();
-    if (typeOf(value) != 'string') {
-      //var map = (Element.Styles[property] || '@').split(' ');
-      //value = Array.from(value).map(function(val, i) {
-      //  if (!map[i]) return '';
-      //  return (typeOf(val) == 'number') ? map[i].replace('@', Math.round(val)) : val;
-      //}).join(' ');
-    } else if (value == String(Number(value))) {
-      value = Math.round(value);
-    }
-    var selector;
-    var cls = this.get('class');
-    if (cls) cls = cls.replace(/\s*dynamicStyles\s*/, '');
-
-    if (this.hasClass('sdEl')) {
-      if (subSelector) throw new Error('U can not use subSelector on .sdEl');
-      selector = '.' + cls.replace(/(\s+)/g, '.');
-    } else {
-      var eParent = this.getParent('.sdEl');
-      if (eParent) var pCls = this.getParent('.sdEl').get('class').replace(/\s*dynamicStyles\s*/, '');
-      selector = (pCls ? '.' + pCls.replace(/(\s+)/g, '.') : '');
-      if (subSelector) {
-        selector += (cls ? ' .' + cls : '') + ' ' + subSelector;
-      } else {
-        selector += ' ' + (cls ? '.' + cls : this.get('tag'));
-      }
-    }
-    if (!value) return;
-    if (!subSelector && (property.test(new RegExp(Ngn.sd.directChangeStyleProperies, 'i')) || value.test(new RegExp(Ngn.sd.directChangeStyleValues, 'i')))) {
-      if (!this.hasClass('dynamicStyles')) this.addClass('dynamicStyles');
-      this.setStyle(property, value);
-    }
-    Ngn.sd.addStyle(selector, property, value);
-  },
-  sdSetPosition: function(position) {
-    return this.sdSetStyles(this.computePosition(position));
-  },
-  sdSetStyles: function(styles) {
-    for (var style in styles) this.sdSetStyle(style, styles[style]);
-  }
-});
-
-Ngn.sd.addStyle = function(selector, property, value) {
-  if (!Ngn.sd.styles[selector]) Ngn.sd.styles[selector] = {};
-  Ngn.sd.styles[selector][property] = value;
-  Ngn.sd.updateCommonStyle();
-};
-
-Ngn.sd.updateCommonStyle = function() {
-  if (Ngn.sd.commonStyleGenId) clearTimeout(Ngn.sd.commonStyleGenId);
-  Ngn.sd.commonStyleGenId = (function() {
-    if ($('commonStyles')) $('commonStyles').dispose();
-    new Element('style', {
-      id: 'commonStyles',
-      type: 'text/css',
-      html: Ngn.sd.buildStyles()
-    }).inject($('layout'), 'top');
-  }).delay(300);
-};
-
-Ngn.sd.BlockAbstract = new Class({
-  Implements: [Options, Ngn.sd.ElementMeta, Ngn.sd.Items],
-  defaultData: false,
-  finalData: function() {
-    return this.defaultData ? Object.merge(this.defaultData, this._data) : this._data;
-  },
-  setData: function(data) {
-    if (!data) throw new Error('empty data');
-    this._data = this.defaultData ? Object.merge(this.defaultData(), data) : data;
-    this.data = data.data;
-  },
-  id: function() {
-    return this._data.id;
-  },
-  initialize: function(el, data, event, options) {
-    this.setData(data);
-    this.initElement(el);
-    this.addCont(this.el);
-    this.event = event;
-    this.setOptions(options);
-    this.ctrl = '/pageBlock/' + Ngn.sd.bannerId;
-    this.init();
-  },
-  delete: function() {
-    this.el.dispose();
-  },
-  addCont: function(el) {
-    new Element('div', {'class': 'cont'}).inject(el);
-  },
-  updateContainerHeight: function() {
-    Ngn.sd.updateContainerHeight(this.container());
-  },
-  updateFont: function() {
-    this._updateFont();
-  },
-  updateElement: function() {
-    this.updateFont();
-    this.updateContainerHeight();
-    this.el.set('data-id', this.id());
-    this.replaceContent();
-    this.updateContent();
-    this.updateSize();
-    Ngn.sd.interface.bars.layersBar.init();
-    window.fireEvent('resize');
-  },
-  eLastContainer: false,
-  _container: function() {
-    return this.el.getParent();
-  },
-  container: function() {
-    var eContainer = this._container();
-    if (!eContainer && this.eLastContainer) return this.eLastContainer;
-    //if (!eContainer.hasClass('container')) throw new Error('Block has no container');
-    return this.eLastContainer = eContainer;
-  },
-  inject: function(eContainer) {
-    this.setPosition(Ngn.sd.positionDiff(this.el.getPosition(), eContainer.getPosition(), -1));
-    if (!this._container() || this._container() != eContainer) {
-      this.el.inject(eContainer);
-    }
-    return this;
-  },
-  setPosition: function(position) {
-    if (!this.data.position) this.data.position = {};
-    this.data.position = Object.merge(this.data.position, position);
-    this.el.sdSetPosition(this.data.position);
-  },
-  getDataForSave: function(create) {
-    this.data = Object.merge(this.data, {
-      ownPageId: Ngn.sd.ownPageId
-    });
-    this.loading(true);
-    // this._data.data - исходные изменяемые данные
-    // this.data - текущие несохраненные данные
-    if (create) {
-      this._data.data = Object.merge(this._data.data, this.data);
-      var p = {data: this._data};
-      delete p.data.html;
-    } else {
-      var p = {
-        id: this._data.id,
-        content: this._data.content,
-        data: this.data
-      };
-    }
-    return p;
-  },
-  save: function(create) {
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_' + (create ? 'create' : 'update') + '?ownPageId=' + Ngn.sd.ownPageId,
-      onComplete: function(data) {
-        this.setData(data);
-        if (create) {
-          Ngn.sd.blocks[this._data.id] = this;
-          this.initElement(this.el);
-        }
-        this.updateElement();
-        this.creationEvent();
-        this.loading(false);
-        this._settingsAction();
-      }.bind(this)
-    }).post(this.getDataForSave(create));
-  },
-  creationEvent: function() {
-    Ngn.sd.interface.bars.layersBar.init();
-  },
-  replaceContent: function() {
-    if (!this._data.html) return;
-    this.el.getElement('.cont').set('html', this._data.html);
-    this.el.getElement('.cont').getElements('a').addEvent('click', function(e) {
-      e.preventDefault()
-    });
-  }
-});
-
-Ngn.sd.BlockPreview = new Class({
-  Extends: Ngn.sd.BlockAbstract,
-  options: {
-    action: 'create'
-  },
-  init: function() {
-    this.el.addClass('blockPreview');
-    new Ngn.sd.BlockDragNew(this);
-  },
-  updateElement: function() {
-    Ngn.sd.block(Ngn.sd.elBlock().inject(this.container()), this._data);
-    this.el.destroy();
-  }
-});
-
-Ngn.sd.TranslateDragEvents = new Class({
-
-  translateDragEvents: function() {
-    return {
-      onStart: this.onStart.bind(this),
-      onDrag: this.onDrag.bind(this),
-      onComplete: this.onComplete.bind(this)
-    }
-  }
-
-});
-
-Ngn.sd.BlockDraggableProgress = {};
-
-Ngn.sd.BlockDraggable = new Class({
-  Implements: [Ngn.sd.TranslateDragEvents],
-
-  name: 'default',
-
-  initialize: function(block) {
-    this.block = block;
-    this.eHandle = this.getHandleEl();
-    this.init();
-    new Drag(new Element('div'), Object.merge({
-      handle: this.eHandle,
-      snap: 0,
-      stopPropagation: true
-    }, this.translateDragEvents()))
-  },
-
-  init: function() {
-  },
-
-  getHandleEl: function() {
-    return Elements.from('<div class="btn' + (this.name.capitalize()) + ' control"></div>')[0].inject(this.block.el, 'top');
-  },
-
-  onStart: function(el, e) {
-    Ngn.sd.BlockDraggableProgress[this.name] = true;
-  },
-
-  onComplete: function() {
-    delete Ngn.sd.BlockDraggableProgress[this.name];
-    this.block.updateContainerHeight();
-    window.fireEvent(this.name);
-    this.block.save();
-  }
-
-});
-
-Ngn.sd.BlockResize = new Class({
-  Extends: Ngn.sd.BlockDraggable,
-
-  name: 'resize',
-
-  onStart: function(el, e) {
-    this.parent(el, e);
-    this.offset = this.block.el.getPosition();
-  },
-
-  onDrag: function(el, e) {
-    this.block.resize({
-      w: e.event.pageX - this.offset.x,
-      h: e.event.pageY - this.offset.y
-    });
-  }
-
-});
-
-Ngn.sd.BlockRotate = new Class({
-  Extends: Ngn.sd.BlockDraggable,
-
-  name: 'rotate',
-
-  init: function() {
-    this.block.data.rotate = this.block.data.rotate || 0;
-    if (this.block.data.rotate) this.block.rotate(this.block.data.rotate);
-  },
-  onStart: function(el, e) {
-    this.parent(el, e);
-    this.startY = e.event.pageY;
-    this.startRotate = this.block.data.rotate;
-  },
-  onDrag: function(el, e) {
-    this.block.rotate(this.startRotate - (this.startY - e.event.pageY) * 2);
-  }
-
-});
-
-Ngn.sd.blocks = {};
-Ngn.sd.BlockB = new Class({
-  Extends: Ngn.sd.BlockAbstract,
-  Implements: [Ngn.sd.Font],
-  options: {
-    action: 'update'
-  },
-  className: function() {
-    return 'Ngn.sd.BlockB' + Ngn.String.ucfirst(this.data.type);
-  },
-  setData: function(data) {
-    if (data.html === undefined) throw new Error('undefined data.html');
-    this.parent(data);
-  },
-  styleEl: function() {
-    return this.el.getElement('.cont');
-  },
-  delete: function() {
-    this.parent();
-    delete Ngn.sd.blocks[this._data.id];
-    Ngn.sd.interface.bars.layersBar.init();
-    //this.updateContainerHeight();
-  },
-  initPosition: function() {
-    this.el.sdSetPosition(this.data.position);
-  },
-  init: function() {
-    if (this._data.id) Ngn.sd.blocks[this._data.id] = this;
-    this.initPosition();
-    this.updateOrder();
-    this.initControls();
-    this.initFont();
-    this.replaceContent();
-    this.updateContent();
-    this.updateSize();
-    this.el.addEvent('click', function() {
-      this._settingsAction();
-    }.bind(this));
-    // Ngn.sd.setMinHeight(eContainer);
-  }, // предназначено для изменения стилей внутренних элементов из данных блока
-  setToTheTop: function() {
-    var minOrderKey = 1;
-    for (var i in Ngn.sd.blocks) {
-      if (Ngn.sd.blocks[i]._data.orderKey < minOrderKey) {
-        minOrderKey = Ngn.sd.blocks[i]._data.orderKey;
-      }
-    }
-    this.updateOrder(minOrderKey - 1);
-    return this;
-  },
-  updateOrder: function(orderKey) {
-    if (orderKey !== undefined) this._data.orderKey = orderKey;
-    this.el.setStyle('z-index', -this._data.orderKey + 100);
-  },
-  updateContent: function() {
-    Ngn.sd.GlobalSlides.init();
-  },
-  rotate: function(deg) {
-    this._rotate(this.el.getElement('.cont'), deg);
-  },
-  _rotate: function(el, deg) {
-    el.sdSetStyle('transform', 'rotate(' + deg + 'deg)');
-    el.sdSetStyle('-ms-transform', 'rotate(' + deg + 'deg)');
-    el.sdSetStyle('-webkit-transform', 'rotate(' + deg + 'deg)');
-    this.data.rotate = deg;
-  },
-  initCopyCloneBtn: function() {
-    if (this.finalData().data.type == 'image') {
-      this.initCloneBtn();
-    } else {
-      this.initCopyBtn();
-    }
-  },
-  initCopyBtn: function() {
-    /*
-     // temporarily disabled
-     new Ngn.Btn(Ngn.Btn.btn2('Клонировать', 'copy').inject(this.eBtns, 'top'), function() {
-     var data = Object.clone(this._data);
-     data.data.position.x += 50;
-     data.data.position.y += 50;
-     delete data.id;
-     Ngn.sd.block(Ngn.sd.elBlock().inject(this.container()), data).save(true);
-     }.bind(this));
-     */
-  },
-  initCloneBtn: function() {
-    return;
-    new Ngn.Btn(Ngn.Btn.btn2('Клонировать', 'copy').inject(this.eBtns, 'top'), function() {
-      var data = {
-        data: {
-          position: {
-            x: this._data.data.position.x + 20,
-            y: this._data.data.position.y + 20
-          },
-          type: 'clone',
-          refId: this._data.id,
-          size: this._data.data.size
-        },
-        html: this._data.html
-      };
-      Ngn.sd.block(Ngn.sd.elBlock().inject(this.container()), data).save(true);
-    }.bind(this));
-  },
-  initBtnsHide: function() {
-    this.eBtns.setStyle('display', 'none');
-    this.el.addEvent('mouseover', function() {
-      if (Object.values(Ngn.sd.BlockDraggableProgress).length) return;
-      if (Ngn.sd.isPreview()) return;
-      if (Ngn.sd.movingBlock.get()) return;
-      this.eBtns.setStyle('display', 'block');
-    }.bind(this));
-    this.el.addEvent('mouseout', function() {
-      if (Object.values(Ngn.sd.BlockDraggableProgress).length) return;
-      if (Ngn.sd.movingBlock.get()) return;
-      this.eBtns.setStyle('display', 'none');
-    }.bind(this));
-  },
-  deleteAction: function() {
-    new Ngn.Dialog.Confirm({
-      onOkClose: function() {
-        this.loading(true);
-        this._deleteAction();
-      }.bind(this)
-    });
-  },
-  _deleteAction: function() {
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_delete/' + this.id(),
-      onComplete: function() {
-        this.loading(false);
-        this.delete();
-      }.bind(this)
-    }).send();
-  },
-  initDeleteBtn: function() {
-    new Ngn.Btn(Ngn.Btn.btn2('Delete', 'delete').inject(this.eBtns, 'top'), function() {
-      this.deleteAction();
-    }.bind(this));
-  },
-  initBlockScopeBtn: function() {
-    return;
-    Ngn.Btn.flag2(this.global(), {
-      title: 'Блок глобальный. Нажмите, что бы сделать локальным',
-      cls: 'global',
-      url: '/pageBlock/ajax_updateGlobal/' + this._data.id + '/0'
-    }, {
-      title: 'Блок локальный. Нажмите, что бы сделать глобальным',
-      cls: 'local',
-      url: '/pageBlock/ajax_updateGlobal/' + this._data.id + '/1'
-    }).inject(this.eBtns, 'top');
-  },
-  initTextScopeBtn: function() {
-    if (Ngn.sd.getBlockType(this.finalData().data.type).separateContent) {
-      Ngn.Btn.flag2(this.data.separateContent, {
-        title: 'Блок имеет отдельный текст для каждого раздела. Сделать общий текст для всех разделов',
-        cls: 'dynamic',
-        url: '/pageBlock/ajax_updateSeparateContent/' + this._data.id + '/0',
-        confirm: 'Тексты для всех, кроме самого первого раздела будут удалены. Вы уверены?'
-      }, {
-        title: 'Блок имеет общий текст для всех разделов. Сделать отдельный текст для каждого раздела',
-        cls: 'static',
-        url: '/pageBlock/ajax_updateSeparateContent/' + this._data.id + '/1'
-      }).inject(this.eBtns, 'top');
-    }
-  },
-  initEditBtn: function() {
-    if (this.finalData().data.type != 'image') {
-      new Ngn.Btn(Ngn.Btn.btn2('Редактировать', 'edit').inject(this.eBtns, 'top'), this.editAction.bind(this));
-    }
-  },
-  initBtns: function() {
-    this.eBtns = new Element('div', {'class': 'btnSet'}).inject(this.el, 'top');
-    this.initDeleteBtn();
-    this.initEditBtn();
-    this.initCopyCloneBtn();
-    this.initBlockScopeBtn();
-    this.initTextScopeBtn();
-  },
-  global: function() {
-    if (this.data.global !== undefined) return this.data.global;
-    return Ngn.sd.blockContainers[this.data.containerId].data.global;
-  },
-  editAction: function() {
-    //Ngn.sd.previewSwitch(true);
-    var cls = this.editDialogClass();
-    var options = Object.merge(Object.merge({
-      url: this.ctrl + '/json_edit/' + this._data.id + '?ownPageId=' + Ngn.sd.ownPageId,
-      dialogClass: 'settingsDialog dialog',
-      title: 'Edit Content',
-      width: 500,
-      id: this.data.type,
-      savePosition: true, // force: false,
-      onClose: function() {
-        //Ngn.sd.previewSwitch(false);
-      },
-      onSubmitSuccess: function() {
-        this.reload();
-      }.bind(this)
-    }, Ngn.sd.getBlockType(this.data.type).editDialogOptions || {}), this.editDialogOptions());
-    new cls(options);
-  },
-  editDialogClass: function() {
-    return Ngn.Dialog.RequestForm;
-  },
-  editDialogOptions: function() {
-    return {};
-  },
-  initControls: function() {
-    //this.initBtns();
-    //this.initBtnsHide();
-    this.initDrag();
-    new Ngn.sd.BlockResize(this);
-  },
-  initDrag: function() {
-    //this.eDrag = Elements.from('<a class="btn control drag dragBox2" data-move="1" title="Передвинуть блок"></a>')[0].inject(this.eBtns, 'top');
-    this.drag = new Ngn.sd.BlockDrag(this);
-//    return; 
-  },
-  updateSize: function() {
-    if (!this.finalData().data.size) return;
-    this.resizeEl(this.finalData().data.size);
-  },
-  resize: function(size) {
-    this.resizeEl(size);
-    this.data = Object.merge(this.data, {size: size});
-  },
-  resizeEl: function(size) {
-    this.resizeBlockEl(size);
-    this.resizeContentEl(size);
-  },
-  resizeBlockEl: function(size) {
-    this._resizeEl(this.el, size);
-  },
-  resizeContentEl: function(size) {
-    this._resizeEl(this.el.getElement('.cont'), size);
-  },
-  _resizeEl: function(el, size) {
-    if (size.w) el.sdSetStyle('width', size.w + 'px');
-    if (size.h) el.sdSetStyle('height', size.h + 'px');
-  },
-  move: function(d) {
-    var r = {
-      up: ['y', -1],
-      down: ['y', 1],
-      left: ['x', -1],
-      right: ['x', 1]
-    };
-    var p = {};
-    p[r[d][0]] = this.data.position[r[d][0]] + r[d][1];
-    this.setPosition(p);
-    clearTimeout(this.timeoutId);
-    this.timeoutId = this.save.bind(this).delay(1000);
-  },
-  resetData: function() {
-    this.data = this._data.data;
-  },
-  hasAnimation: function() {
-    return false;
-  },
-  framesCount: function() {
-    return 0;
-  },
-  canEdit: function() {
-    return true;
-  }
-});
-
-Ngn.sd.BlockBMenu = new Class({
-  Extends: Ngn.sd.BlockB,
-  init: function() {
-    this.parent();
-  },
-  editDialogOptions: function() {
-    var obj = this;
-    return {
-      width: 250,
-      id: 'menu', //footer: false,
-      onFormResponse: function() {
-        this.form.addEvent('elHDistanceChange', function(value) {
-          obj.data.prop.hDistance = value;
-          obj.updateContent();
-        });
-        this.form.addEvent('elHDistanceChanged', function() {
-          obj.save();
-        });
-        this.form.addEvent('elHPaddingChange', function(value) {
-          obj.data.prop.hPadding = value;
-          obj.updateContent();
-        });
-        this.form.addEvent('elHPaddingChanged', function() {
-          obj.save();
-        });
-        this.form.addEvent('elVPaddingChange', function(value) {
-          obj.data.prop.vPadding = value;
-          obj.updateContent();
-        });
-        this.form.addEvent('elVPaddingChanged', function() {
-          obj.save();
-        });
-        this.form.eForm.getElement('[name=activeBgColor]').addEvent('change', function(color) {
-          obj.data.prop.activeBgColor = color.hex;
-          obj.updateContent();
-          //obj.save();
-        });
-      }
-    };
-  },
-  updateContent: function() {
-    if (!this.data.prop) this.data.prop = {};
-    if (this.data.prop.activeBgColor)
-      this.el.getElement('.cont').getElement('a.sel').sdSetStyle('background-color', this.data.prop.activeBgColor);
-    if (this.data.prop.overBgColor)
-      this.el.getElement('.cont').sdSetStyle('background-color', this.data.prop.overBgColor, 'a:hover');
-    this.el.getElement('.cont').sdSetStyle('margin-right', this.data.prop.hDistance + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-left', this.data.prop.hPadding + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-right', this.data.prop.hPadding + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-top', this.data.prop.vPadding + 'px', 'a');
-    this.el.getElement('.cont').sdSetStyle('padding-bottom', this.data.prop.vPadding + 'px', 'a');
-  },
-  _updateFont: function() {
-    this.parent();
-    this.updateLinkSelectedColor();
-  },
-  updateLinkSelectedColor: function() {
-    if (!this.data.font || !this.data.font.linkSelectedColor) return;
-    this.styleEl().sdSetStyle('color', this.data.font.linkSelectedColor, 'a.sel');
-  }
-});
-
-Ngn.sd.BlockBClone = new Class({
-  Extends: Ngn.sd.BlockB,
-  finalData: function() {
-    return Ngn.sd.blocks[this._data.data.refId]._data;
-  },
-  initCopyCloneBtn: function() {
-  },
-  initResize: function() {
-  },
-  getDataForSave: function(create) {
-    var p = this.parent(create);
-    if (p.data.data && p.data.data.size) delete p.data.data.size;
-    return p;
-  }
-});
-
-// factory
-Ngn.sd.block = function(el, data) {
-  var cls = 'Ngn.sd.BlockB' + Ngn.String.ucfirst(data.data.type);
-  var o = eval(cls);
-  cls = o || Ngn.sd.BlockB;
-  return new cls(el, data);
-};
-
-Ngn.sd.BlockDragAbstract = new Class({
-  initialize: function(block) {
-    this.block = block;
-    this.drag = new Drag.Move(this.block.el, this.getDragOptions());
-    this.startPos = {};
-    this.init();
-  },
-  init: function() {
-  },
-  create: false,
-  getDragOptions: function() {
-    return {
-      onDrop: function(eBlock, eContainer, event) {
-        this.drop(eBlock);
-      }.bind(this)
-    };
-  },
-  drop: function(eBlock) {
-    window.fireEvent('resize');
-    this.block.setPosition({
-      x: eBlock.getStyle('left').toInt(),
-      y: eBlock.getStyle('top').toInt()
-    });
-    this.block.updateContainerHeight();
-    this.block.save(this.create);
-  }
-});
-
-Ngn.sd.BlockDragNew = new Class({
-  Extends: Ngn.sd.BlockDragAbstract,
-  create: true,
-  init: function() {
-    this.drag.start(this.block.event);
-  },
-  cancel: function() {
-    this.block.delete();
-  }
-});
-
-Ngn.sd.blockDraggin = false;
-
-Ngn.sd.BlockDrag = new Class({
-  Extends: Ngn.sd.BlockDragAbstract,
-  initialize: function(block) {
-    this.block = block;
-    if (this.block.eDrag) {
-      this.block.eDrag.addEvent('click', function() {
-        if (this.dragging) return;
-        Ngn.sd.movingBlock.toggle(block);
-      }.bind(this));
-    }
-    this.drag = new Drag.Move(this.block.el, this.getDragOptions());
-    this.startPos = {};
-    this.init();
-  },
-  dragging: false,
-  start: function(eBlock) {
-    this.dragging = true;
-    Ngn.sd.blockDraggin = true;
-    this.startPos = eBlock.getPosition(this.block.container());
-    Ngn.sd.movingBlock.cancel();
-  },
-  drop: function(eBlock, eContainer) {
-    (function() {
-      this.dragging = false;
-      Ngn.sd.blockDraggin = false;
-    }.bind(this)).delay(10);
-    var eCurContainer = this.block.container();
-    this.parent(eBlock, eContainer);
-    if (eCurContainer != eContainer) Ngn.sd.updateContainerHeight(eCurContainer);
-  },
-  cancel: function() {
-    this.dragging = false;
-    this.block.el.sdSetPosition(this.startPos);
-  }
-});
-
-Ngn.sd.elBlock = function() {
-  return new Element('div', {'class': 'block'});
-};
-
-// data: id
-Ngn.sd.ContainerAbstract = new Class({
-  Implements: [Options, Ngn.sd.ElementMeta, Ngn.sd.Font, Ngn.sd.Items],
-  type: null,
-  options: {
-    disableFont: false
-  },
-  finalData: function() {
-    return {data: this.data};
-  },
-  initialize: function(data, options) {
-    this.setOptions(options);
-    this.data = data;
-    this.afterData();
-    this.ctrl = '/' + this.type;
-    this.data.type = this.type;
-    this.initElement(this.getEl());
-    this.el.store('data', data);
-    if (!this.data.position) this.data.position = {
-      x: 0,
-      y: 0
-    };
-    this.setPosition(this.data.position);
-    this.initControls();
-    if (!this.options.disableFont) this.initFont();
-  },
-  afterData: function() {
-  },
-  btns: {},
-  initControls: function() {
-    this.eBtns = new Element('div', {'class': 'btnSet'}).inject(this.el);
-    new Element('div', {
-      'class': 'ctrlTitle',
-      html: this.id() + ':'
-    }).inject(this.eBtns);
-    this.initDrag();
-    this.btns.deleteBg = new Ngn.Btn(Ngn.Btn.btn2('Удалить фон', 'delete').inject(this.eBtns), function() {
-      if (!Ngn.confirm()) return;
-      this.loading(true);
-      new Ngn.Request.JSON({
-        url: this.ctrl + '/json_removeBg/' + this.id(),
-        onComplete: function() {
-          this.loading(false);
-          this.setBg(false);
-        }.bind(this)
-      }).send();
-    }.bind(this));
-    new Ngn.Btn(Ngn.Btn.btn2('Настройки фона', 'bgSettings').inject(this.eBtns), function() {
-      new Ngn.Dialog.RequestForm({
-        dialogClass: 'settingsDialog compactFields dialog',
-        width: 450,
-        url: this.ctrl + '/json_bgSettings/' + this.id(),
-        onSubmitSuccess: function() {
-          this.reload();
-        }.bind(this)
-      });
-    }.bind(this));
-    new Ngn.Btn(Ngn.Btn.btn2('Задать фон', 'image').inject(this.eBtns), null, {
-      fileUpload: {
-        url: this.ctrl + '/json_uploadBg/' + this.id(),
-        onRequest: function() {
-          this.loading(true);
-        }.bind(this),
-        onComplete: function(r) {
-          this.loading(false);
-          this.setBg(r.url + '?' + Math.random(1000));
-        }.bind(this)
-      }
-    });
-    this.setBg(this.data.bg || false);
-  },
-  toggleBtns: function() {
-    this.btns.deleteBg.toggleDisabled(!!this.data.bg);
-  },
-  initDrag: function() {
-    var eDrag = Elements.from('<div class="drag dragBox" title="Передвинуть фон"></div>')[0].inject(this.eBtns);
-    var startCursorPos;
-    new Drag(eDrag, {
-      snap: 0,
-      onStart: function(el, e) {
-        startCursorPos = [e.event.clientX, e.event.clientY];
-      },
-      onDrag: function(el, e) {
-        this.curPosition = {
-          x: this.data.position.x + startCursorPos[0] - e.event.clientX,
-          y: this.data.position.y + startCursorPos[1] - e.event.clientY
-        };
-        this.setPosition(this.curPosition);
-      }.bind(this),
-      onComplete: function(el) {
-        this.data.position = this.curPosition;
-        this.save();
-      }.bind(this)
-    });
-  },
-  setBg: function(url) {
-    if (url) this.data.bg = url; else delete this.data.bg;
-    this.refreshBg();
-  },
-  refreshBg: function() {
-    var s = ['color'];
-    for (var i = 0; i < s.length; i++) this.styleEl().sdSetStyle('background-' + s[i], '');
-    if (this.data.bgSettings) for (var i in this.data.bgSettings) this.styleEl().sdSetStyle('background-' + i, this.data.bgSettings[i]);
-    this.el.sdSetStyle('background-image', this.data.bg ? 'url(' + this.data.bg + '?' + this.data.dateUpdate + ')' : 'none');
-    this.toggleBtns();
-  },
-  save: function(create) {
-    var data = this.data;
-    if (data.bg) delete data.bg;
-    this.loading(true);
-    new Ngn.Request.JSON({
-      url: this.ctrl + '/json_' + (create ? 'create' : 'update'),
-      onComplete: function() {
-        this.loading(false);
-      }.bind(this)
-    }).post({data: data});
-  },
-  updateElement: function() {
-    this.refreshBg();
-    this._updateFont();
-  },
-  updateFont: function() {
-    this._updateFont();
-  },
-  setPosition: function(position) {
-    if (!position.x && !position.y) {
-      this.el.sdSetStyle('background-position', '');
-      return;
-    }
-    this.el.sdSetStyle('background-position', (-position.x) + 'px ' + (-position.y) + 'px');
-  },
-  loading: function(flag) {
-    Ngn.Request.Iface.loading(flag);
-  }
-});
-
-Ngn.sd.BlockContainer = new Class({
-  Extends: Ngn.sd.ContainerAbstract,
-  type: 'blockContainer',
-  getEl: function() {
-    var eParent = $('layout2').getElement('.lCont');
-    var eContainer = new Element('div', {'class': 'container'});
-    if (this.data.wrapper) {
-      if ($(this.data.wrapper)) eParent = $(this.data.wrapper); else {
-        eParent = new Element('div', {
-          id: this.data.wrapper,
-          'class': this.data.wrapper
-        }).inject(eParent);
-        new Element('div', {'class': 'clear clear_' + this.data.wrapper}).inject(eParent);
-      }
-      eContainer.inject(eParent.getElement('.clear_' + this.data.wrapper), 'before');
-    } else {
-      eContainer.inject(eParent);
-    }
-    return eContainer;
-  },
-  initControls: function() {
-  }
-});
-
-Ngn.sd.Layout = new Class({
-  Extends: Ngn.sd.ContainerAbstract,
-  type: 'layout',
-  options: {
-    disableFont: true,
-    cls: false
-  },
-  initControls: function() {
-  },
-  getEl: function() {
-    if (!this.data.parent) throw new Error('parent not defined in ' + this.id() + ' layout');
-    if (!$(this.data.parent)) throw new Error(this.data.parent + ' not found');
-    var el = new Element('div', {
-      id: this.id(),
-      'class': 'layout' + (this.options.cls ? ' ' + this.options.cls : '')
-    }).inject($(this.data.parent));
-    return el;
-  }
-});
-
-Ngn.sd.LayoutContent = new Class({
-  Extends: Ngn.sd.ContainerAbstract,
-  type: 'layoutContent',
-  getEl: function() {
-    return new Element('div', {
-      'class': 'lCont'
-    }).inject($('layout2'));
-  },
-  defaultFontColor: function() {
-    return '#000';
-  },
-  initControls: function() {
-  }
-});
-
-if (!Ngn.sd.blockTypes) Ngn.sd.blockTypes = [];
-
-Ngn.sd.getBlockType = function(type) {
-  for (var i = 0; i < Ngn.sd.blockTypes.length; i++) {
-    if (Ngn.sd.blockTypes[i].data.type == type) return Ngn.sd.blockTypes[i];
-  }
-  for (var i = 0; i < Ngn.sd.blockUserTypes.length; i++) {
-    if (Ngn.sd.blockUserTypes[i].data.type == type) return Ngn.sd.blockUserTypes[i];
-  }
-  return false;
-};
-
-Ngn.sd.exportLayout = function() {
-  var eLayout = $('layout').clone();
-  eLayout.getElements('.btnSet').dispose();
-  eLayout.getElements('.btnResize').dispose();
-  eLayout.getElements('.block.type_font').each(function(eBlock) {
-    eBlock.getElement('.cont').set('html', Ngn.sd.BlockBFont.html[eBlock.get('data-id')]);
-  });
-  eLayout.getElements('.dynamicStyles').removeProperty('style').removeClass('dynamicStyles');
-  // replace dynamic blocks content
-  eLayout.getElements('.block').each(function(eBlock) {
-    // разобраться в этом куске
-    if (!Ngn.sd.blocks[eBlock.get('data-id')]) return;
-    var type = Ngn.sd.blocks[eBlock.get('data-id')].finalData().data.type;
-    if (Ngn.sd.getBlockType(type).dynamic) {
-      var eStyle = eBlock.getElement('style');
-      eStyle.inject(eBlock.getElement('.cont').set('html', '{tplBlock:' + eBlock.get('data-id') + '}'), 'top');
-    }
-  });
-  new Element('style', {
-    type: 'text/css',
-    html: Ngn.sd.buildStyles()
-  }).inject(eLayout, 'top');
-  return eLayout.get('html');
-};
-
-Ngn.sd.ownPageId = 0;
-Ngn.sd.blockUserTypes = [];
-
-Ngn.sd.initUserTypes = function(types) {
-  if (!types.length) return;
-  new Ngn.sd.UserPanel(types);
-  Ngn.sd.blockUserTypes = types;
-};
-
-Ngn.sd.initPageTitle = document.title;
-
-Ngn.getParam = function(val) {
-  var result = "Not found", tmp = [];
-  location.search//.replace ( "?", "" )
-    // this is better, there might be a question mark inside
-    .substr(1).split("&").forEach(function(item) {
-      tmp = item.split("=");
-      if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
-    });
-  return result;
-};
-
-Ngn.sd.loadData = function(ownPageId, onComplete) {
-  onComplete = onComplete || function() {
-  };
-  $('layout1').set('html', '');
-  Ngn.sd.ownPageId = ownPageId;
-  Ngn.Request.Iface.loading(true);
-  Ngn.sd.blockContainers = {};
-  if (Ngn.sd.pagesSet) Ngn.sd.pagesSet.setActive(ownPageId);
-  new Ngn.Request.JSON({
-    url: '/cpanel/' + Ngn.sd.bannerId + '/json_get/?adminKey=' + Ngn.adminKey,
-    onComplete: function(data) {
-      var v, i;
-      document.getElement('head title').set('html', data.pageTitle + ' - ' + Ngn.sd.initPageTitle);
-      if (data.blockUserTypes) Ngn.sd.initUserTypes(data.blockUserTypes);
-      Ngn.sd.eLayoutContent = new Element('div', {
-        'class': 'lCont sdEl'
-      }).inject('layout1');
-      Ngn.sd.blocks = {};
-      for (i = data.items.pageBlock.length - 1; i >= 0; i--) {
-        v = data.items.pageBlock[i];
-        Ngn.sd.blocks[v.id] = Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), v);
-      }
-      Ngn.sd.eContentOverlayBorder = new Element('div', {'class': 'contentOverlayBorder'}).inject(Ngn.sd.eLayoutContent, 'top');
-      new Element('div', {'class': 'contentOverlay contentOverlayLeft'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      new Element('div', {'class': 'contentOverlay contentOverlayTop'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      Ngn.sd.eContentOverlayRight = new Element('div', {'class': 'contentOverlay contentOverlayRight'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      Ngn.sd.eContentOverlayBottom = new Element('div', {'class': 'contentOverlay contentOverlayBottom'}). //
-        inject(Ngn.sd.eLayoutContent, 'top');
-      Ngn.sd.data = data;
-      Ngn.sd.setBannerSize(data.bannerSettings.size);
-      Ngn.sd.updateLayoutContentHeight();
-      Ngn.sd.updateOrderBar(data.items.pageBlock);
-      Ngn.sd.setPageTitle(ownPageId);
-      Ngn.Request.Iface.loading(false);
-      window.fireEvent('resize');
-      onComplete(data);
-    }
-  }).send();
-};
-
-Ngn.sd.PageBlocksShift = new Class({
-  back: function(id) {
-    var ePrev = Ngn.sd.blocks[id].el.getPrevious('.block');
-    if (ePrev) {
-      Ngn.sd.blocks[id].el.inject(ePrev, 'before');
-      this.updateOrder(id);
-    }
-  },
-  forward: function(id) {
-    var eNext = Ngn.sd.blocks[id].el.getNext('.block');
-    if (eNext) {
-      Ngn.sd.blocks[id].el.inject(eNext, 'after');
-      this.updateOrder(id);
-    }
-  },
-  updateOrder: function(id) {
-    var esBlocks = Ngn.sd.blocks[id].el.getParent('.layout').getElements('.block');
-    var ids = [];
-    for (var i = 0; i < esBlocks.length; i++) {
-      ids.push(esBlocks[i].get('data-id'));
-    }
-    new Ngn.Request.JSON({
-      url: '/pageBlock/' + Ngn.sd.bannerId + '/json_updateOrder'
-    }).post({
-        ids: ids
-      });
-  }
-});
-
-Ngn.sd.pages = {};
-
-Ngn.sd.setPageTitle = function(n) {
-  if (Ngn.sd.pages[n]) $('pageTitle').set('html', Ngn.sd.pages[n]);
-};
-
-Ngn.sd.UserPanel = new Class({
-  initialize: function(blockUserTypes) {
-    var eBlocksPanel = new Element('div', {
-      'class': 'dropRightMenu extraBlocks'
-    }).inject(Ngn.sd.ePanel, 'after');
-    new Element('div', {
-      'class': 'tit',
-      html: 'Ещё'
-    }).inject(eBlocksPanel);
-    Ngn.sd.buildBlockBtns(blockUserTypes, eBlocksPanel);
-    new Ngn.HidebleBar.V(eBlocksPanel);
-  }
-});
-
-Ngn.sd.OrderBarItem = new Class({
-
-  initialize: function(id) {
-    this.id = id;
-    this.el = new Element('div', {
-      'class': 'item',
-      html: Ngn.sd.blocks[id]._data.data.type + ' ' + Ngn.sd.blocks[id]._data.id
-    }).inject($('orderBar'));
-    this.el.addEvent('mouseover', function() {
-      Ngn.sd.blocks[id].el.addClass('highlight');
-    });
-    this.el.addEvent('mouseout', function() {
-      Ngn.sd.blocks[id].el.removeClass('highlight');
-    });
-  }
-
-});
-
-Ngn.sd.updateOrderBar = function(orderedBlocks) {
-  $('orderBar').set('html', '');
-  for (var i = 0; i < orderedBlocks.length; i++) {
-    if (Ngn.sd.blocks[orderedBlocks[i].id]) new Ngn.sd.OrderBarItem(orderedBlocks[i].id);
-  }
-};
-
-Ngn.sd.animation = {};
-Ngn.sd.animation.exists = function() {
-  for (var i in Ngn.sd.blocks) {
-    if (Ngn.sd.blocks[i].hasAnimation()) return true;
-  }
-  return false;
-};
-Ngn.sd.setBannerSize = function(size) {
-  Ngn.sd.bannerSize = size;
-  Ngn.sd.eLayoutContent.setStyle('width', size.w + 'px');
-  Ngn.sd.eContentOverlayBottom.setStyle('width', size.w + 'px');
-  Ngn.sd.eContentOverlayBottom.setStyle('top', size.h + 'px');
-  Ngn.sd.eContentOverlayRight.setStyle('left', size.w + 'px');
-  Ngn.sd.eLayoutContent.setStyle('min-height', 'auto');
-  Ngn.sd.eLayoutContent.setStyle('height', size.h + 'px');
-  Ngn.sd.eContentOverlayBorder.setStyle('height', size.h + 'px');
-};
-Ngn.sd.animation.framesCount = function() {
-  var count = 0;
-  for (var i in Ngn.sd.blocks) {
-    if (Ngn.sd.blocks[i].framesCount() > count) {
-      count = Ngn.sd.blocks[i].framesCount();
-    }
-  }
-  return count;
-};
-
-Ngn.sd.sortBySubKey = function(obj, key1, key2) {
-  var r = [];
-  for (var key in obj) r.push(obj[key]);
-  r.sort(function(a, b) {
-    bb = parseInt(b[key1][key2]);
-    aa = parseInt(a[key1][key2]);
-    return aa < bb ? -1 : aa > bb ? 1 : 0;
-  });
-  return r;
-};
-
-Ngn.sd.changeBannerBackground = function(backgroundUrl) {
-  new Ngn.Request.JSON({
-    url: '/cpanel/' + Ngn.sd.bannerId + '/json_createBackgroundBlock?backgroundUrl=' + backgroundUrl,
-    onComplete: function() {
-      Ngn.sd.reinit();
-    }
-  }).send();
-};
-
-Ngn.sd.fbtn = function(title, cls) {
-  var btn = new Element('a', {
-    'class': 'panelBtn ' + cls,
-    html: '<i></i><div>' + title + '</div>'
-  });
-  new Element('div', {'class': 'featureBtnWrapper'}).grab(btn).inject(Ngn.sd.eFeatureBtns);
-  return btn;
-};
-
-Ngn.sd.movingBlock = {
-  get: function() {
-    return this.block;
-  },
-  set: function(block) {
-    this.block = block;
-    block.eDrag.addClass('pushed');
-  },
-  toggle: function(block) {
-    if (this.block) {
-      var enother = this.block != block;
-      this.block.eDrag.removeClass('pushed');
-      this.block = false;
-      if (enother) this.set(block);
-    } else {
-      this.set(block);
-    }
-  },
-  cancel: function() {
-    if (!this.block) return;
-    this.block.eDrag.removeClass('pushed');
-    this.block = false;
-  }
-};
-
-Ngn.sd.minContainerHeight = 100;
-
-
-Ngn.sd.isPreview = function() {
-  return $('layout').hasClass('preview');
-};
-
-Ngn.sd.previewSwitch = function(flag) {
-  flag = typeof(flag) == 'undefined' ? Ngn.sd.isPreview() : !flag;
-  if (flag) {
-    document.getElement('.body').removeClass('preview');
-    if (Ngn.sd.btnPreview) Ngn.sd.btnPreview.togglePushed(false);
-  } else {
-    document.getElement('.body').addClass('preview');
-    if (Ngn.sd.btnPreview) Ngn.sd.btnPreview.togglePushed(true);
-  }
-};
-
-Ngn.sd.updateLayoutContentHeight = function() {
-  return;
-  var y = 0;
-  for (var i in Ngn.sd.blockContainers) y += Ngn.sd.blockContainers[i].el.getSize().y;
-  $('layout').getElement('.lCont').sdSetStyle('min-height', (y + 6) + 'px');
-};
-
-Ngn.sd.itemTpl = function(k, v) {
-  var el = Elements.from(Ngn.tpls[k])[0].getElement('div.item[data-name=' + v + ']');
-  if (!el) throw new Error('Element "' + v + '" not found');
-  return el.get('html');
-};
-
-Ngn.sd.exportPageR = function(n) {
-  console.debug('Загружаю данные');
-  var onLoaded = function(n) {
-    var onComplete;
-    if (Ngn.sd.pages[n + 1]) {
-      onComplete = function() {
-        Ngn.sd.exportPageR(n + 1);
-      }
-    } else {
-      onComplete = function() {
-        new Ngn.Dialog.Link({
-          title: 'Результат',
-          width: 150,
-          link: '/index.html?' + Math.random()
-        });
-      }
-    }
-    console.debug('Экспортирую ' + (n == 1 ? 'индекс' : n));
-    Ngn.sd.exportRequest(n == 1 ? 'index' : 'page' + n, onComplete);
-  };
-  Ngn.sd.loadData(n, onLoaded);
-};
-
-Ngn.sd.interface = {};
-
-Ngn.sd.init = function(bannerId) {
-  Ngn.sd.bannerId = bannerId;
-  Ngn.sd.interface.bars = Ngn.sd.barsClass ? new Ngn.sd.barsClass() : new Ngn.sd.Bars();
-  if (window.location.hash == '#preview') {
-    Ngn.sd.previewSwitch();
-  }
-  //console.debug('callPhantom: afterInit');
-  if (typeof window.callPhantom === 'function') {
-    window.callPhantom({
-      action: 'afterInit'
-    });
-  }
-  window.fireEvent('sdAfterInit', bannerId);
-};
-
-Ngn.sd.reinit = function() {
-  Ngn.sd.init(Ngn.sd.bannerId);
-};
-
-Ngn.sd.updateContainerHeight = function(eContainer) {
-  return;
-  Ngn.sd.setMinHeight(eContainer, 0, Ngn.sd.minContainerHeight);
-  Ngn.sd.updateLayoutContentHeight();
-};
-
-Ngn.sd.initFullBodyHeight();
-
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.GlobalSlides.js|--*/
-Ngn.sd.GlobalSlides = new Class({
-
-  duration: 1500,
-  slideSelector: '.cont div',
-  blocks: [],
-
-  initialize: function(blocks) {
-    this.id = Ngn.String.rand(3);
-    this.blocks = [];
-    for (var i in blocks) {
-      this.add(blocks[i]);
-    }
-    this.startAnimation.delay(100, this); // Make delay to all blocks will be already added
-  },
-
-  add: function(block) {
-    if (!block.hasAnimation()) return;
-    this.blocks.push(block);
-    this.hideSlides(block);
-  },
-
-  hideSlides: function(block) {
-    var slides = block.el.getElements(this.slideSelector);
-    if (slides.length > 1) {
-      for (var i = 1; i < slides.length; i++) {
-        slides[i].setStyle('display', 'none');
-      }
-    }
-  },
-
-  slides: [],
-
-  cacheSlides: function() {
-    var slides = [];
-    for (var i = 0; i < this.blocks.length; i++) {
-      slides.push(this.blocks[i].el.getElements(this.slideSelector));
-    }
-    this.slides = slides;
-  },
-
-  phantomFrameChange: function() {
-    if (typeof window.callPhantom === 'function') {
-      window.callPhantom({
-        action: 'frameChange'
-      });
-    }
-  },
-
-  currentIndex: 0,
-  nextIndex: 0,
-  animationStarted: false,
-  maxSlidesBlockN: 0,
-
-  initMaxSlidesBlockN: function() {
-    var maxSlides = 0;
-    for (var i = 0; i < this.slides.length; i++) {
-      if (this.slides[i].length > maxSlides) {
-        maxSlides = this.slides[i].length;
-        this.maxSlidesBlockN = i;
-      }
-    }
-  },
-
-  nextSlide: function() {
-    //console.debug(this.slides);
-    //console.debug(this.maxSlidesBlockN);
-    if (this.slides[this.maxSlidesBlockN][this.currentIndex + 1]) {
-      this.nextIndex = this.currentIndex + 1;
-    } else {
-      this.nextIndex = 0;
-    }
-    // hide current
-    for (var i = 0; i < this.slides.length; i++) {
-      if (this.slides[i].length > 1) {
-        if (this.slides[i][this.currentIndex]) this.slides[i][this.currentIndex].setStyle('display', 'none');
-        if (this.slides[i][this.nextIndex]) this.slides[i][this.nextIndex].setStyle('display', 'block');
-      }
-    }
-    // show next
-    this.currentIndex = this.nextIndex;
-    this.phantomFrameChange();
-  },
-
-  animationId: null,
-
-  startAnimation: function() {
-    if (this.animationStarted) return;
-    this.animationStarted = true;
-    //this.phantomFrameChange();
-    this.cacheSlides();
-    this.initMaxSlidesBlockN();
-    if (this.slides.length) {
-      this.animationId = this.nextSlide.periodical(this.duration, this);
-    }
-  }
-
-});
-
-Ngn.sd.GlobalSlides.init = function() {
-  if (Ngn.sd.GlobalSlides.timeoutId) {
-    clearTimeout(Ngn.sd.GlobalSlides.timeoutId);
-  }
-  Ngn.sd.GlobalSlides.timeoutId = function() {
-    if (Ngn.sd.GlobalSlides.instance) {
-      clearTimeout(Ngn.sd.GlobalSlides.instance.animationId);
-    }
-    Ngn.sd.GlobalSlides.instance = new Ngn.sd.GlobalSlides(Ngn.sd.blocks);
-  }.delay(1);
-};
-
-Ngn.sd.GlobalSlides.lastFrameChangeTime = 0;
-
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BlockBFont.js|--*/
-Ngn.sd.BlockBFont = new Class({
-  Extends: Ngn.sd.BlockB,
-  settingsDialogOptions: function() {
-    return {
-      width: 350,
-      onChangeFont: function(font) {
-        if (!this.data.font) this.data.font = {};
-        this.data.font.fontFamily = font;
-        this.updateCufon();
-      }.bind(this),
-      onChangeSize: function(size) {
-        if (!this.data.font) this.data.font = {};
-        this.data.font.fontSize = size;
-        this.updateCufon();
-      }.bind(this),
-      onChangeColor: function(color) {
-        if (!this.data.font) this.data.font = {};
-        this.data.font.color = color;
-        this.updateCufon();
-      }.bind(this),
-      onCancelClose: function() {
-        if (this.data.font) {
-          this.resetData();
-          this.updateCufon();
-        } else {
-          this.styleEl().set('html', this.data.html);
-        }
-      }.bind(this)
-    };
-  },
-  directChangeFontStyleProps: function() {
-    return ['font-size', 'font-family', 'color'];
-  },
-  updateFont: function() {
-  },
-  updateCufon: function() {
-    this._updateFont();
-    Ngn.sd.BlockBFont.html[this.id()] = this.data.html;
-    this.loadFont(function() {
-      Cufon.set('fontFamily', this.data.font.fontFamily); // Так-то куфон подхватывает шрифт из стилей, но где-то в другом месте (в диалоге, например) он может быть определен через set(). Так что нужно переопределять и тут
-      var cufonProps = {};
-      if (this.data.font.shadow) {
-        cufonProps = {
-          textShadow: '1px 1px rgba(0, 0, 0, 0.8)'
-        };
-      }
-      Cufon.replace(this.styleEl(), cufonProps);
-      Ngn.Request.Iface.loading(false);
-      this.phantomCufonLoaded();
-    }.bind(this));
-  },
-  phantomCufonLoaded: function() {
-    //console.debug('callPhantom: cufonLoaded');
-    if (typeof window.callPhantom === 'function') {
-      window.callPhantom({
-        action: 'cufonLoaded'
-      });
-    }
-  },
-  loadFont: function(onLoad) {
-    if (!this.data.font || !this.data.font.fontFamily) return;
-    Ngn.Request.Iface.loading(true);
-    Ngn.sd.loadFont(this.data.font.fontFamily, onLoad);
-  },
-  replaceContent: function() {
-    this.parent();
-    this.updateCufon();
-  },
-  initControls: function() {
-    this.parent();
-    new Ngn.sd.BlockRotate(this);
-  },
-  framesCount: function() {
-    return 2;
-  }
-});
-
-Ngn.sd.BlockBFont.html = {};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.HidebleBar.js|--*/
-Ngn.hidebleBarIds = [];
-Ngn.HidebleBar = new Class({
-
-  modes: ['up', 'down'],
-  slideMode: 'vertical',
-
-  initialize: function(eBar, mode) {
-    this.mode = mode || this.modes[0];
-    this.id = Ngn.hidebleBarIds.length + 1;
-    Ngn.hidebleBarIds.push(this.id);
-    this.eBar = document.id(eBar);
-    this.initBarPosition = this.eBar.getPosition();
-    this.eBar.addClass('hidebleBar ' + this.slideMode);
-    this.eHandlerHide = new Element('div', {'class': 'hidebleBarHandler'}).addClass(this.slideMode).addClass('hide').addClass(this.mode);
-    this.eHandlerShow = new Element('div', {'class': 'hidebleBarHandler'}).addClass(this.slideMode).addClass('show');
-    var handleShowExtraClass = this.eBar.get('class').replace(/\s*dropRightMenu\s*/, '') || false;
-    if (handleShowExtraClass) this.eHandlerShow.addClass(handleShowExtraClass);
-    Ngn.HidebleBar.addHover(this.eHandlerHide, 'hover');
-    Ngn.HidebleBar.addHover(this.eHandlerShow, 'hover');
-    this.eHandlerHide.inject(this.eBar);
-    this.eHandlerShow.inject(document.getElement('body'));
-    this.positionHandlerShow();
-    this.init();
-    window.addEvent('resize', this.position.bind(this));
-    //var fxHide = new Fx.Slide(this.eBar, {
-    //  mode: this.slideMode,
-    //  duration: 100,
-    //  onComplete: function() {
-    //    this.hide();
-    //    Ngn.Storage.set('hidebleBar' + this.id, false);
-    //  }.bind(this)
-    //});
-    //var state = Ngn.Storage.bget('hidebleBar' + this.id);
-    //console.debug(state);
-    //if (!state) {
-    //  (function() {
-    //    fxHide.hide();
-    //    this.hide();
-    //  }).delay(1, this);
-    //} else {
-    //  //this.eHandlerShow.setStyle('visibility', 'hidden');
-    //}
-    var fxShow = new Fx.Slide(this.eBar, {
-      mode: this.slideMode,
-      duration: 100
-      //onComplete: function() {
-      //  window.fireEvent('resize');
-      //  Ngn.Storage.set('hidebleBar' + this.id, true);
-      //  this.eHandlerShow.setStyle('visibility', 'hidden');
-      //}.bind(this)
-    });
-    fxShow.show();
-    //fxShow.slideOut();
-    //this.eHandlerHide.addEvent('click', function() {
-    //  fxHide.slideOut();
-    //});
-    //this.eHandlerShow.addEvent('click', function() {
-    //  fxShow.slideIn();
-    //}.bind(this));
-  },
-
-  hide: function() {
-    this.eHandlerShow.setStyle('visibility', 'visible');
-    window.fireEvent('resize');
-  },
-
-  position: function() {
-    this.positionHandlerShow();
-  },
-
-  styleProp: 'top',
-  positionProp: 'y',
-
-  positionHandlerShow: function() {
-    if (this.mode == this.modes[1]) {
-      this.eHandlerShow.setStyle(this.styleProp, window.getSize()[this.positionProp] - this.eHandlerShow.getSize()[this.positionProp]);
-    } else {
-      this.eHandlerShow.setStyle(this.styleProp, this.initBarPosition[this.positionProp] + 'px');
-    }
-  },
-
-  init: function() {
-    this.eHandlerShow.addClass(this.mode == this.modes[1] ? this.modes[0] : this.modes[1]);
-    if (this.mode == this.modes[0]) this.eHandlerHide.setStyle(this.styleProp, this.eBar.getSize()[this.positionProp] - this.eHandlerHide.getSize()[this.positionProp]);
-  }
-
-});
-
-
-Ngn.HidebleBar.H = new Class({
-  Extends: Ngn.HidebleBar,
-
-  init: function() {
-    this.parent();
-    Ngn.setToCenterHor(this.eHandlerHide, this.eBar);
-    Ngn.setToCenterHor(this.eHandlerShow, this.eBar);
-  },
-
-  position: function() {
-    this.parent();
-    Ngn.setToCenterHor(this.eHandlerHide);
-    Ngn.setToCenterHor(this.eHandlerShow);
-  }
-
-});
-
-Ngn.HidebleBar.V = new Class({
-  Extends: Ngn.HidebleBar,
-
-  modes: ['left', 'right'],
-  slideMode: 'horizontal',
-  styleProp: 'left',
-  positionProp: 'x'
-
-});
-
-Ngn.HidebleBar.addHover = function(el, hoverClass) {
-  el.addEvent('mouseover', function() {
-    this.addClass(hoverClass);
-  });
-  el.addEvent('mouseout', function() {
-    this.removeClass(hoverClass);
-  });
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Link.js|--*/
-Ngn.Dialog.Link = new Class({
-  Extends: Ngn.Dialog.Msg,
-
-  options: {
-    width: 120,
-    title: '&nbsp;',
-    footer: false,
-    linkTitle: 'Открыть',
-    bindBuildMessageFunction: true
-    //link: ''
-  },
-
-  buildMessage: function() {
-    return Elements.from('<h2 style="text-align: center"><a href="' + this.options.link + '" target="_blank">' + this.options.linkTitle + '</a></h2>')[0];
-  }
-
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.Bars.js|--*/
-Ngn.sd.Bars = new Class({
-  layersBar: null,
-  initialize: function() {
-    var pg = window.location.hash.match(/#pg(\d+)/);
-    Ngn.sd.ePanel = new Element('div', {'class': 'cont'}).inject($('panel'));
-    new Element('a', {
-      'class': 'logo',
-      href: '/', //target: '_blank',
-      title: '...'
-    }).inject(Ngn.sd.ePanel);
-    Ngn.sd.eFeatureBtns = new Element('div', {
-      'class': 'featureBtns'
-    }).inject(Ngn.sd.ePanel);
-    //new Element('div', {'class': 'clear'}).inject(Ngn.sd.ePanel);
-    new Element('div', {
-      'class': 'tit'
-    }).inject(Ngn.sd.ePanel);
-    Ngn.sd.eLayers = new Element('div', {'class': 'cont'}).inject($('layers'));
-    Ngn.sd.loadData(pg ? pg[1] : 1, function(data) {
-      this.layersBar = this.getLayersBar();
-
-      //
-    }.bind(this));
-    this.bindKeys();
-    window.fireEvent('sdPanelComplete');
-  },
-  getLayersBar: function() {
-    return new Ngn.sd.LayersBar();
-  },
-  bindKeys: function() {
-    var moveMap = {
-      119: 'up',
-      87: 'up',
-      1094: 'up',
-      1062: 'up',
-      1092: 'left',
-      1060: 'left',
-      97: 'left',
-      65: 'left',
-      1099: 'down',
-      1067: 'down',
-      83: 'down',
-      115: 'down',
-      100: 'right',
-      68: 'right',
-      1074: 'right',
-      1042: 'right'
-    };
-    var shiftMap = {
-      'q': 'back',
-      'Q': 'back',
-      'й': 'back',
-      'Й': 'back',
-      'e': 'forward',
-      'E': 'forward',
-      'у': 'forward',
-      'У': 'forward'
-    };
-    document.addEvent('keypress', function(e) {
-      if (e.shift && (e.key == 'p' || e.key == 'з')) Ngn.sd.previewSwitch(); // p
-      else if (moveMap[e.code]) {
-        var movingBlock = Ngn.sd.movingBlock.get();
-        if (movingBlock) movingBlock.move(moveMap[e.code]);
-      } else if (shiftMap[e.key]) {
-        var movingBlock = Ngn.sd.movingBlock.get();
-        if (movingBlock) {
-          (new Ngn.sd.PageBlocksShift)[shiftMap[e.key]](movingBlock._data.id);
-        }
-      }
-    });
-  }
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.LayersBar.js|--*/
-Ngn.sd.LayersBar = new Class({
-  initialize: function() {
-    this.init();
-    Ngn.sd.layersBar = this;
-  },
-  items: {},
-  init: function() {
-    Ngn.sd.eLayers.set('html', '');
-    var eTitle = new Element('div', {
-      html: Locale.get('Sd.layers'),
-      'class': 'lTitle'
-    }).inject(Ngn.sd.eLayers);
-    this.eLayers = new Element('div', {
-      'class': 'layers'
-    }).inject(Ngn.sd.eLayers);
-    new Tips(new Element('span', {
-      html: '?',
-      title: Locale.get('Sd.layersQuestionMark'),
-      'class': 'questionMark'
-    }).inject(eTitle));
-    Ngn.sd.sortBySubKey(Ngn.sd.blocks, '_data', 'orderKey').each(function(item) {
-      this.items[item._data.id] = new Ngn.sd.LayersBar.Item(this, item);
-    }.bind(this));
-    if (this.currentActiveId) {
-      this.setActive(this.currentActiveId);
-    }
-    new Sortables(this.eLayers, {
-      onStart: function(eMovingLayer) {
-        eMovingLayer.addClass('drag');
-      },
-      onComplete: function(eMovingLayer) {
-        eMovingLayer.removeClass('drag');
-        var ePrevLayer;
-        var id = eMovingLayer.get('data-id');
-        ePrevLayer = eMovingLayer.getPrevious();
-        if (ePrevLayer) {
-          Ngn.sd.blocks[id].el.inject( //
-            Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'before');
-        } else {
-          ePrevLayer = eMovingLayer.getNext();
-          if (ePrevLayer) {
-            Ngn.sd.blocks[id].el.inject( //
-              Ngn.sd.blocks[ePrevLayer.get('data-id')].el, 'after');
-          }
-        }
-        // request
-        var ids = this.serialize(0, function(element) {
-          return element.get('data-id');
-        });
-        for (var i = 0; i < ids.length; i++) {
-          Ngn.sd.blocks[ids[i]].updateOrder(i);
-        }
-        new Ngn.Request({
-          url: '/pageBlock/' + Ngn.sd.bannerId + '/json_updateOrder'
-        }).post({
-            ids: ids
-          });
-      }
-    });
-  },
-  getTitle: function(item) {
-    if (item.data.subType == 'image') {
-      return '<span class="ico 1">' + item._data.html + '</span>' + Ngn.String.ucfirst(item.data.type);
-    } else if (item.data.type == 'text') {
-      return '<span class="ico 2">' + '<img src="/sd/img/font.png"></span>' + //
-      '<span class="text">' + (item._data.html ? item._data.html : 'empty') + '</span>'
-    } else {
-      return '<span class="ico"></span>unsupported';
-    }
-  },
-  canEdit: function(item) {
-    return Ngn.sd.blocks[item._data.id].canEdit();
-  },
-  setActive: function(blockId) {
-    if (this.currentActiveId && blockId != this.currentActiveId) {
-      this.items[this.currentActiveId].setActive(false);
-    }
-    this.items[blockId].setActive(true);
-    this.currentActiveId = blockId;
-  }
-});
-
-Ngn.sd.LayersBar.Item = new Class({
-  initialize: function(layersBar, item) {
-    this.eItem = new Element('div', {
-      'class': 'item ' + 'item_' + (item.data.subType || item.data.type),
-      'data-id': item._data.id,
-      'data-type': item.data.type,
-      events: {
-        click: function() {
-          Ngn.sd.blocks[item._data.id]._settingsAction(Ngn.sd.blocks[item._data.id]);
-        }.bind(this)
-      }
-    });
-    new Element('div', {
-      'class': 'title',
-      html: layersBar.getTitle(item)
-    }).inject(this.eItem);
-    var eBtns = new Element('div', {
-      'class': 'btns'
-    }).inject(this.eItem);
-    if (layersBar.canEdit(item)) {
-      new Ngn.Btn( //
-        Ngn.Btn.btn2('Edit', 'edit').inject(eBtns), //
-        Ngn.sd.blocks[item._data.id]._settingsAction.bind(Ngn.sd.blocks[item._data.id]) //
-      );
-    } else {
-      new Element('a', {
-        'class': 'smIcons dummy'
-      }).inject(eBtns);
-    }
-    new Ngn.Btn( //
-      Ngn.Btn.btn2('Delete', 'delete').inject(eBtns), //
-      Ngn.sd.blocks[item._data.id].deleteAction.bind(Ngn.sd.blocks[item._data.id]) //
-    );
-    this.eItem.inject(layersBar.eLayers);
-  },
-  setActive: function(isActive) {
-    if (isActive) {
-      this.eItem.addClass('active');
-    } else {
-      this.eItem.removeClass('active');
-    }
-  }
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/plugins/new.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn(Ngn.Locale.get('Sd.newBanner'), 'add'), function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/newBanner',
-      width: 200,
-      onSubmitSuccess: function(r) {
-        window.location = '/cpanel/' + r.id;
-      }
-    });
-  });
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedText.js|--*/
-Ngn.sd.blockTypes.push({
-  title: 'Text',
-  data: {
-    type: 'animatedText',
-    subType: 'text'
-  }
-});
-
-Ngn.sd.BlockBAnimatedText = new Class({
-  Extends: Ngn.sd.BlockBFont,
-  hasAnimation: function() {
-    return this.data.font.text && this.data.font.text.length > 1;
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add text', 'text'), function() {
-    var data = Ngn.sd.getBlockType('animatedText');
-    data.data.position = {
-      x: 0,
-      y: 0
-    };
-    Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), {
-      data: data.data,
-      html: ''
-    }).setToTheTop().save(true);
-  });
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/animatedImage.js|--*/
-Ngn.sd.blockTypes.push({
-  title: 'Image',
-  data: {
-    type: 'animatedImage'
-  }
-});
-
-Ngn.sd.BlockBAnimatedImage = new Class({
-  Extends: Ngn.sd.BlockB,
-  resizeContentEl: function(size) {
-    this.el.getElements('img').each(function(el) {
-      this._resizeEl(el, size);
-    }.bind(this));
-    this.parent(size);
-  },
-  hasAnimation: function() {
-    return this.data.images && this.data.images.length > 1;
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add image', 'image'), function() {
-    var data = Ngn.sd.getBlockType('animatedImage');
-    data.data.position = {
-      x: 0,
-      y: 0
-    };
-    Ngn.sd.block(Ngn.sd.elBlock().inject(Ngn.sd.eLayoutContent), {
-      data: data.data,
-      html: ''
-    }).setToTheTop().save(true);
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BlockBImage.js|--*/
-Ngn.sd.BlockBImage = new Class({
-  Extends: Ngn.sd.BlockB,
-  replaceContent: function() {
-    this.parent();
-    var eImg = this.el.getElement('img');
-    eImg.set('src', eImg.get('src') /*+ '?' + Math.random(1000)*/);
-  },
-  initControls: function() {
-    this.parent();
-    new Ngn.sd.BlockRotate(this);
-  },
-  resizeContentEl: function(size) {
-    this._resizeEl(this.el.getElement('img'), size);
-    this.parent(size);
-  },
-  initFont: function() {
-  }
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/background.js|--*/
-Ngn.sd.BlockBBackground = new Class({
-  Extends: Ngn.sd.BlockBImage,
-  initPosition: function() {
-    this.el.setStyles({
-      top: '-1px',
-      left: '-1px'
-    });
-  },
-  canEdit: function() {
-    return false;
-  }
-});
-
-Ngn.sd.BackgroundInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'background',
-    title: 'Insert background',
-    okText: 'Insert',
-    dialogClass: 'dialog-images',
-    onRequest: function() {
-      this.initImages();
-    },
-    ok: function() {
-      Ngn.sd.changeBannerBackground(Ngn.sd.selectedBackgroundUrl);
-    }.bind(this)
-  },
-  initialize: function(options) {
-    var w = Ngn.sd.data.bannerSettings.size.w.toInt();
-    if (w < 200) {
-      w = w * 3;
-    } else if (w < 400) {
-      w = w * 2;
-    }
-    var h = Ngn.sd.data.bannerSettings.size.h.toInt();
-    if (h < 200) {
-      //h = h * 2;
-    } else if (h < 400) {
-      //h = h * 2;
-    }
-    this.options.width = w + 56;
-    this.options.height = h + 30;
-    this.options.url = '/cpanel/' + Ngn.sd.bannerId + '/ajax_backgroundSelect';
-    this.parent(options);
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    Ngn.sd.selectedBackgroundUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Add background', 'background'), function() {
-    new Ngn.sd.BackgroundInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.ImageInsertDialog.js|--*/
-Ngn.sd.ImageInsertDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    id: 'image',
-    title: 'Insert image',
-    okText: 'Insert',
-    width: 400,
-    height: 300,
-    //url: 'ajax_select',
-    //createUrl: 'ajax_select',
-    dialogClass: 'dialog-images',
-    createImageJsonAction: 'createImageBlock',
-    onRequest: function() {
-      this.initImages();
-    }
-  },
-  initialize: function(opts) {
-    if (!opts) opts = {};
-    opts = Object.merge(opts, {
-      ok: this.okAction.bind(this)
-    });
-    this.parent(opts);
-  },
-  okAction: function() {
-    this.insertImage(this.selectedUrl);
-  },
-  createImageUrl: function(url) {
-    return '/cpanel/' + Ngn.sd.bannerId + '/json_' + this.createImageJsonAction + '?url=' + url
-  },
-  insertImage: function(url) {
-    new Ngn.Request.JSON({
-      url: this.createImageUrl(url),
-      onComplete: function() {
-        Ngn.sd.reinit();
-      }
-    }).send();
-  },
-  removeClass: function() {
-    this.images.each(function(el) {
-      el.removeClass('selected');
-    });
-  },
-  initImages: function() {
-    this.images = this.message.getElements('img');
-    this.select(this.images[0]);
-    this.images.each(function(el) {
-      el.addEvent('click', function() {
-        this.select(el);
-      }.bind(this));
-    }.bind(this));
-  },
-  select: function(el) {
-    this.removeClass();
-    this.selectedUrl = el.get('src');
-    el.addClass('selected');
-  }
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/button.js|--*/
-Ngn.sd.BlockBButton = new Class({
-  Extends: Ngn.sd.BlockBImage,
-  canEdit: function() {
-    return false;
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  Ngn.sd.ButtonInsertDialog = new Class({
-    Extends: Ngn.sd.ImageInsertDialog,
-    options: {
-      id: 'button',
-      title: 'Insert button',
-      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_buttonSelect'
-    },
-    createImageUrl: function(url) {
-      return '/cpanel/' + Ngn.sd.bannerId + '/json_createButtonBlock?url=' + url
-    }
-  });
-  new Ngn.Btn(Ngn.sd.fbtn('Add button', 'button'), function() {
-    new Ngn.sd.ButtonInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/clipart.js|--*/
-Ngn.sd.BlockBClipart = new Class({
-  Extends: Ngn.sd.BlockBImage,
-  canEdit: function() {
-    return false;
-  }
-});
-
-window.addEvent('sdPanelComplete', function() {
-  Ngn.sd.ClipartInsertDialog = new Class({
-    Extends: Ngn.sd.ImageInsertDialog,
-    options: {
-      id: 'clipart',
-      title: 'Insert clipart',
-      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_clipartSelect'
-    },
-    createImageUrl: function(url) {
-      return '/cpanel/' + Ngn.sd.bannerId + '/json_createClipartBlock?url=' + url
-    }
-  });
-  new Ngn.Btn(Ngn.sd.fbtn('Add clipart', 'clipart'), function() {
-    new Ngn.sd.ClipartInsertDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/fromTemplate.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  Ngn.sd.CreateFromTemplateDialog = new Class({
-    Extends: Ngn.sd.ImageInsertDialog,
-    options: {
-      id: 'template',
-      title: 'Create from template',
-      okText: 'Create',
-      width: 400,
-      height: 300,
-      url: '/cpanel/' + Ngn.sd.bannerId + '/ajax_templateSelect'
-    },
-    insertImage: function(url) {
-      new Ngn.Request.JSON({
-        url: '/createFromTemplate/' + url.replace(/.*\/(\d+)\..*/, '$1'),
-        onComplete: function(bannerId) {
-          window.location = '/cpanel/' + bannerId;
-        }
-      }).send();
-    }
-  });
-  new Ngn.Btn(Ngn.sd.fbtn('Create from template', 'template'), function() {
-    new Ngn.sd.CreateFromTemplateDialog();
-  });
-});
-/*--|/home/user/ngn-env/bc/sd/js/plugins/settings.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Settings', 'settings'), function() {
-    new Ngn.Dialog.RequestForm({
-      url: '/cpanel/' + Ngn.sd.bannerId + '/json_settings',
-      width: 250,
-      onSubmitSuccess: function(r) {
-        Ngn.sd.setBannerSize(r);
-      }
-    });
-  });
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/renderTrial.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Render', 'render'), function() {
-    Ngn.sd.TrialRender();
-  });
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.TrialRender.js|--*/
-Ngn.sd.TrialRender = function() {
-  if (Ngn.sd.isTrialUser) {
-    Ngn.Request.Iface.loading(true);
-    new Ngn.Request.JSON({
-      url: '/json_trialDialog',
-      onComplete: function(r) {
-        Ngn.Request.Iface.loading(false);
-        new Ngn.Dialog.Msg({
+    isSorting: false,
+    id: 'users',
+    resizeble: true,
+    basePath: Ngn.Url.getPath(2),
+    search: true,
+    menu: [{
+      title: Ngn.Locale.get('Core.add'),
+      cls: 'add',
+      action: function(grid) {
+        new Ngn.Dialog.RequestForm({
+          url: grid.options.basePath + '?a=json_new',
           width: 300,
-          okText: 'Render',
-          message: r.text,
-          ok: r.cnt > 0,
-          onOkClose: function(r) {
-            Ngn.sd.Render();
-          }
+          id: 'user',
+          onOkClose: function() {
+            grid.reload();
+          }.bind(this)
         });
       }
-    }).send();
-  } else {
-    Ngn.sd.Render();
-  }
-};
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.Render.js|--*/
-Ngn.sd.Render = function() {
-  new Ngn.Dialog.HtmlPage({
-    url: url = '/render/' + Ngn.sd.bannerId,
-    title: 'Render',
-    width: Ngn.sd.bannerSize.w.toInt() + 30
-  });
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.HtmlPage.js|--*/
-Ngn.Dialog.HtmlPage = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    noPadding: false,
-    footer: false,
-    reduceHeight: true
-  }
-
-});
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/download.js|--*/
-window.addEvent('sdPanelComplete', function() {
-  new Ngn.Btn(Ngn.sd.fbtn('Download', 'download'), function() {
-    new Ngn.Dialog.Confirm({
-      okText: 'Download',
-      message: '<p>You have 9 renders left as part of your Trial account. Are you sure you want to render?</p><p><a href="/trialExpiration">Upgrade your account here</a></p>',
-      onOkClose: function() {
-        var dialog = new Ngn.Dialog.Loader({
-          title: 'Rendering...',
-          width: 200
+    }],
+    toolActions: {
+      edit: function(row) {
+        new Ngn.Dialog.RequestForm({
+          url: '/admin/users/json_edit?id=' + row.id,
+          width: 300,
+          id: 'user',
+          onOkClose: function() {
+            this.reload();
+          }.bind(this)
         });
-        new Ngn.Request({
-          url: '/download/' + Ngn.sd.bannerId,
-          onComplete: function(bannerUrl) {
-            dialog.close();
-            window.location = bannerUrl;
-          }
-        }).send();
-      }
-    });
-  });
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Loader.js|--*/
-Ngn.Dialog.Loader = new Class({
-  Extends: Ngn.Dialog,
-
-  options: {
-    bindBuildMessageFunction: true,
-    ok: false,
-    hasFaviconTimer: true // при редиректе, после включения DialogLoader'а FaviconTimer необходимо отключить
-  },
-
-  initialize: function(options) {
-    this.parent(options);
-  },
-
-  start: function() {
-    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.start();
-  },
-
-  stop: function() {
-    if (this.options.hasFaviconTimer) Ngn.FaviconTimer.stop();
-  },
-
-  close: function() {
-    this.stop();
-    this.parent();
-  },
-
-  buildMessage: function() {
-    return '<div class="dialog-progress"></div>';
-  }
-
-});
-
-Ngn.Dialog.Loader.Simple = new Class({
-  Extends: Ngn.Dialog.Loader,
-
-  options: {
-    //cancel: false,
-    titleClose: false,
-    footer: false,
-    messageBoxClass: 'dummy',
-    titleBarClass: 'dialog-loader-title',
-    titleTextClass: 'dummy',
-    messageAreaClass: 'dummy',
-    bindBuildMessageFunction: true
-  }
-
-});
-
-Ngn.Dialog.Loader.Advanced = new Class({
-  Extends: Ngn.Dialog.Loader,
-
-  options: {
-    messageAreaClass: 'dialog-message dialog-message-loader',
-    onContinue: Function.from(),
-    noPadding: false
-  },
-
-  init: function() {
-    this.eProgress = this.message.getElement('.dialog-progress');
-    this.stop();
-  },
-
-  buildMessage: function() {
-    return '<div class="message-text"></div><div class="dialog-progress"></div>';
-  },
-
-  start: function() {
-    this.eProgress.removeClass('stopped');
-    this.parent();
-  },
-
-  stop: function() {
-    this.eProgress.addClass('stopped');
-    this.parent();
-  }
-
-});
-
-Ngn.Dialog.Loader.Request = new Class({
-  Extends: Ngn.Dialog.Loader.Simple,
-
-  options: {
-    loaderUrl: null,
-    onLoaderComplete: Function.from(),
-    titleClose: false,
-    footer: false
-  },
-
-  initialize: function(options) {
-    this.parent(options);
-    new Request({
-      url: this.options.loaderUrl,
-      onComplete: function(r) {
-        this.okClose();
-        this.fireEvent('loaderComplete', r);
-      }.bind(this)
-    }).send();
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.faviconTimer.js|--*/
-Ngn.FaviconTimer = {
-  
-  start: function() {
-    Ngn.Favicon.animate([
-      '/i/img/icons/l/loader1.ico',
-      '/i/img/icons/l/loader2.ico',
-      '/i/img/icons/l/loader3.ico',
-      '/i/img/icons/l/loader4.ico'
-    ]);
-  },
-  
-  stop: function() {
-    Ngn.Favicon.stop();
-  }
-  
-};
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.favicon.js|--*/
-// Favicon.js - Change favicon dynamically [http://ajaxify.com/run/favicon].
-// Copyright (c) 2006 Michael Mahemoff. Only works in Firefox and Opera.
-// Background and MIT License notice at end of file, see the homepage for more.
-
-// USAGE:
-// * favicon.change("/icon/active.ico");  (Optional 2nd arg is new title.)
-// * favicon.animate(new Array("icon1.ico", "icon2.ico", ...));
-//     Tip: Use "" as the last element to make an empty icon between cycles.
-//     To stop the animation, call change() and pass in the new arg.
-//     (Optional 2nd arg is animation pause in millis, overwrites the default.)
-// * favicon.defaultPause = 5000;
-
-Ngn.Favicon = {
-
-  // -- "PUBLIC" ----------------------------------------------------------------
-
-  defaultPause: 1000,
-  initIconUrl: '/favicon.ico',
-
-  change: function(iconURL, optionalDocTitle) {
-    clearTimeout(this.loopTimer);
-    if (optionalDocTitle) {
-      document.title = optionalDocTitle;
-    }
-    this.replaceLink(iconURL);
-  },
-
-  animate: function(iconSequence, optionalDelay) {
-    var links = this.getAllLinks();
-    if (links.length && links[0].href) this.initIconUrl = links[0].href;
-    // --------------------------------------------------
-    this.preloadIcons(iconSequence);
-    this.iconSequence = iconSequence;
-    this.sequencePause = (optionalDelay) ? optionalDelay : this.defaultPause;
-    Ngn.Favicon.index = 0;
-    Ngn.Favicon.change(iconSequence[0]);
-    this.loopTimer = setInterval(function() {
-      Ngn.Favicon.index = (Ngn.Favicon.index + 1) % Ngn.Favicon.iconSequence.length;
-      Ngn.Favicon.replaceLink(Ngn.Favicon.iconSequence[Ngn.Favicon.index], false);
-    }, Ngn.Favicon.sequencePause);
-  },
-
-  stop: function() {
-    clearTimeout(this.loopTimer);
-    this.removeIconLinksIfExists();
-    if (this.initIconUrl) {
-      this.replaceLink(this.initIconUrl);
-    }
-  },
-
-  // -- "PRIVATE" ---------------------------------------------------------------
-
-  loopTimer: null,
-
-  preloadIcons: function(iconSequence) {
-    var dummyImageForPreloading = document.createElement("img");
-    for (var i = 0; i < iconSequence.length; i++) {
-      dummyImageForPreloading.src = iconSequence[i];
-    }
-  },
-
-  replaceLink: function(iconURL) {
-    var link = document.createElement("link");
-    link.type = "image/x-icon";
-    link.rel = "shortcut icon";
-    link.href = iconURL;
-    this.removeIconLinksIfExists();
-    this.docHead.appendChild(link);
-  },
-
-  removeIconLinksIfExists: function() {
-    var links = this.getAllLinks();
-    for (var i = 0; i < links.length; i++) {
-      this.docHead.removeChild(links[i]);
-    }
-  },
-
-  getAllLinks: function() {
-    var r = [];
-    var esLink = this.docHead.getElementsByTagName("link");
-    var n = 0;
-    for (var i = 0; i < esLink.length; i++) {
-      if (esLink[i].type == "image/x-icon"/* && esLink[i].rel == "shortcut icon"*/) {
-        r[n] = esLink[i];
       }
     }
-    return r;
-  },
-
-  docHead: document.getElementsByTagName("head")[0]
-}
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorBars.js|--*/
-Ngn.sd.BcreatorBars = new Class({
-  Extends: Ngn.sd.Bars,
-  getLayersBar: function() {
-    return new Ngn.sd.BcreatorLayersBar;
-  }
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.BcreatorLayersBar.js|--*/
-Ngn.sd.BcreatorLayersBar = new Class({
-  Extends: Ngn.sd.LayersBar,
-  getTitle: function(item) {
-    if (item.data.type == 'animatedText') {
-
-      return '<span class="ico">' + '<img src="/sd/img/font.png"></span>' + //
-      '<span class="text">' + (item.data.font.text && item.data.font.text[0] ? item.data.font.text[0] : 'empty') + '</span>';
-    }
-    else if (item.data.type == 'animatedImage') {
-      return '<span class="ico">' + //
-      (item.data.images && item.data.images[0] ? ('<img src="' + item.data.images[0] + '">') : '') + //
-      '</span>Image';
-    }
-    return this.parent(item);
-  }
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.BannersBar.js|--*/
-Ngn.sd.BannersBar = new Class({
-
-  initialize: function() {
-    this.opened = Ngn.Storage.get('sd.BannersBar.opened');
-    this.eWrapper = new Element('div', {
-      'class': 'bannerBarWrapper'
-    }).inject(document.getElement('.body'));
-    this.eBar = new Element('div', {
-      'class': 'bannerBar'
-    }).inject(this.eWrapper);
-    this.eCont = new Element('div', {
-      'class': 'bannerBarCont'
-    }).inject(this.eBar);
-    this.eContInner = new Element('div', {
-      'class': 'bannerBarContInner'
-    }).inject(this.eCont);
-    var eHandler = new Element('div', {
-      'class': 'handler'
-    }).inject(this.eBar);
-    if (this.opened) {
-      this.show();
-    } else {
-      this.hide();
-    }
-    //
-    eHandler.addEvent('click', this.toggle.bind(this));
-    //
-    new Ngn.Request.JSON({
-      url: '/allBanners',
-      onComplete: function(r) {
-        var eSelected = null;
-        for (var i = 0; i < r.banners.length; i++) {
-          var el = new Element('a', {
-            'class': 'item',
-            href: r.banners[i].editLink,
-            html: r.banners[i].downloadLink ? '<img src="' + r.banners[i].directLink + '">' : '<div>need to render</div>'
-          }).inject(this.eContInner);
-          if (Ngn.sd.bannerId == r.banners[i].id) {
-            el.addClass('selected');
-            eSelected = el;
-          }
-        }
-        if (eSelected && eSelected.getPosition().x > this.eCont.getSize().x) {
-          new Fx.Scroll(this.eCont).toElement(eSelected);
-        }
-      }.bind(this)
-    }).send();
-  },
-
-  show: function() {
-    this.eCont.setStyle('display', 'block');
-    this.eWrapper.removeClass('hiddn');
-    this.opened = true;
-    Ngn.Storage.set('sd.BannersBar.opened', true);
-  },
-
-  hide: function() {
-    this.eCont.setStyle('display', 'none');
-    //this.eWrapper.setStyle('bottom', '-10px');
-    this.eWrapper.addClass('hiddn');
-    this.opened = false;
-    Ngn.Storage.set('sd.BannersBar.opened', false);
-  },
-
-  toggle: function() {
-    if (this.opened) {
-      this.hide();
-    } else {
-      this.show();
-    }
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.js|--*/
-// @requiresBefore s2/js/locale?key=core
-/**
- *
- * <div id="mainElement">
- *   <div class="rowElement">
- *     <input type="" name="k[0]" value="gg" size="40" id="k[0]i" />
- *     <input type="" name="v[0]" value="gggg" size="40" id="v[0]i" />
- *     <div class="drag"></div>
- *     <a href="#" class="smIcons delete bordered"><i></i></a>
- *     <div class="clear"><!-- --></div>
- *   </div>
- *   <div class="element">
- *     ...
- *   </div>
- *   <a href="#" class="add">Add</a>
- * </div>
- *
- */
-Ngn.FieldSet = new Class({
-  Implements: [Options, Events],
-
-  options: {
-    fields: [],
-    data: [],
-    rowElementSelector: 'div[class~=rowElement]',
-    elementContainerSelector: '.element',
-    cleanOnCloneSelector: '.type_image .iconsSet',
-    addRowBtnSelector: 'a[class~=add]',
-    deleteBtnSelector: 'a[class~=delete]',
-    dragBoxSelector: 'div[class=dragBox]',
-    removeExceptFirstRow: 'p.label',
-    moveElementToRowStyles: ['border-bottom', 'padding-left'],
-    addTitle: Locale.get('Core.add'),
-    cleanupTitle: Locale.get('Core.clean'),
-    deleteTitle: Locale.get('Core.delete'),
-    addRowNumber: false
-  },
-
-  changed: false,
-  eSampleRow: null,
-  buttons: [], // array of Ngn.Btn objects
-
-
-  initialize: function(eParent, options) {
-    this.eParent = eParent;
-    this.setOptions(options);
-    this.eContainer = this.getContainer();
-    this.eAddRow = this.eContainer.getElement(this.options.addRowBtnSelector);
-    if (!this.eAddRow) {
-      var eBottomBtns = new Element('div', {'class': 'bottomBtns'}).inject(this.eContainer, 'bottom');
-      this.eAddRow = Ngn.Btn.btn1(this.options.addTitle, 'btn add dgray').inject(eBottomBtns);
-      Elements.from('<div class="heightFix"></div>')[0].inject(this.eContainer, 'bottom');
-    }
-    this.buttons.push(new Ngn.Btn(this.eAddRow, function(btn) {
-      this.buttons.push(btn);
-      this.addRow();
-    }.bind(this)));
-    this.initRows();
-    //this.initSorting();
-    this.checkDeleteButtons();
-  },
-
-  toggleDisabled: function(flag) {
-    for (var i = 0; i < this.buttons.length; i++) {
-      this.buttons[i].toggleDisabled(flag);
-    }
-  },
-
-  getContainer: function() {
-    var eContainer = Elements.from('<div class="fieldSet"></div>')[0];
-    if (!this.options.data) this.options.data = [false];
-    var n = this.options.data.length;
-    var eRowProto = Elements.from('<div class="rowElement"><div class="drag"></div><div class="clear"><!-- --></div></div>')[0];
-    for (var j = 0; j < n; j++) {
-      var eRow = eRowProto.clone();
-      eRow.store('n', j + 1);
-      for (var i = 0; i < this.options.fields.length; i++) {
-        var el = new Element('div', {'class': 'element'});
-        new Element('input', {
-          name: this.options.fields[i].name + '[' + j + ']',
-          value: this.options.data[j] ? this.options.data[j].name : ''
-        }).inject(el);
-        el.inject(eRow, 'top');
-      }
-      eRow.inject(eContainer);
-    }
-    return eContainer.inject(this.eParent);
-  },
-
-  /*
-   inputsEmpty: function(container) {
-   var elements = container.getElements('input')
-   for (var i = 0; i < elements.length; i++) {
-   if (elements[i].get('value')) return false;
-   }
-   return true;
-   },
-   */
-
-  initRows: function() {
-    if (!this.options.rowElementSelector) {
-      this.eContainer.getElements('input').each(function(eInput) {
-        var eRowDiv = new Element('div', {'class': 'genRow'})
-        eRowDiv.inject(eInput, 'after');
-        eInput.inject(eRowDiv);
-      });
-      this.options.rowElementSelector = 'div[class=genRow]';
-    }
-    // Переносим стили элементов в стили контейнеров элементов, а у элементов их удаляем
-    this.esRows = this.eContainer.getElements(this.options.rowElementSelector);
-    for (var i = 0; i < this.esRows.length; i++) {
-      new Element('div', {'class': 'rowBtns smIcons'}).inject(this.esRows[i]); // контейнер для кнопок
-    }
-    this.eSampleRow = this.esRows[0].clone();
-    this.eSampleRow.getElements(this.options.cleanOnCloneSelector).dispose();
-    if (!this.esRows[0].getElement('input[type=file]')) {
-      this.createCleanupButton(this.esRows[0]);
-    }
-    this.removeTrash(this.eSampleRow);
-    for (var i = 0; i < this.esRows.length; i++) {
-      if (this.options.addRowNumber) this.addRowNumber(this.esRows[i]);
-      this.moveStyles(this.esRows[i]);
-    }
-    if (this.esRows.length > 0) {
-      for (var i = 1; i < this.esRows.length; i++) {
-        this.removeTrash(this.esRows[i]);
-        this.createDeleteButton(this.esRows[i], i);
-      }
-    }
-  },
-
-  firstIndex: function(name) {
-    return name.replace(/[^[]+\[(\d)+\].*/, '$1').toInt();
-  },
-
-  addRowNumber: function(eRow) {
-    var index = this.firstIndex(eRow.getElement(Ngn.Frm.selector).get('name'));
-    new Element('span', {
-      html: index + ' — ',
-      'class': 'rowNumber'
-    }).inject(eRow.getElement('.field-wrapper'), 'top');
-  },
-
-  moveStyles: function(eRow) {
-    //var style;
-    //esEls = eRow.getElements(this.options.elementContainerSelector);
-    //for (var j = 0; j < this.options.moveElementToRowStyles.length; j++) {
-    //  style = this.options.moveElementToRowStyles[j];
-    //  eRow.setStyles(esEls[0].getStyles(style));
-    //  for (var k = 0; k < esEls.length; k++)
-    //    esEls[k].setStyle(style, '0');
-    //}
-  },
-
-  checkDeleteButtons: function() {
-    return;
-    // Удаляем кнопку "Удалить", если элемент 1 в списке и значения полей пустые
-    if (this.eRows.length == 1) {
-      var eRow = this.eContainer.getElement(this.options.rowElementSelector);
-    }
-  },
-
-  removeTrash: function(eRow) {
-    eRow.getElements(this.options.removeExceptFirstRow).each(function(el) {
-      el.dispose();
-    });
-  },
-
-  createRowButton: function(eRow, btn, action, options) {
-    var els = eRow.getElements(this.options.elementContainerSelector);
-    var fieldSet = this;
-    var eRowBtns = eRow.getElement('.rowBtns');
-    this.buttons.push(new Ngn.Btn(// Вставляем кнопку после последнего элемента формы в этой строке
-      // Ngn.addTips(Ngn.Btn.btn(btn)).inject(els[els.length - 1], 'after'), function() {
-      // Ngn.Btn.btn(btn).inject(els[els.length - 1], 'after'), function() {
-      Ngn.Btn.btn(btn).inject(eRowBtns), function() {
-        fieldSet.fireEvent(btn.cls);
-        action.bind(this)();
-      }, options || {}));
-  },
-
-  createDeleteButton: function(eRow, index) {
-    var fieldSet = this;
-    this.createRowButton(eRow, {
-      caption: this.options.deleteTitle,
-      cls: 'delete'
-    }, function() {
-      eRow.dispose();
-      fieldSet.regenInputNames();
-      fieldSet.buttons.erase(this);
-    });
-  },
-
-  createCleanupButton: function(eRow) {
-    this.createRowButton(eRow, {
-      caption: this.options.cleanupTitle,
-      cls: 'cleanup'
-    }, function() {
-      eRow.getElements(Ngn.Frm.selector).set('value', '');
-    });
-  },
-
-  addRow: function() {
-    var eLastRow = this.eContainer.getLast(this.options.rowElementSelector);
-    var eNewRow = this.eSampleRow.clone();
-    var lastRowN = this.getN(eLastRow);
-    var nextRowN = this.getNextN(eLastRow);
-    var eLabel;
-    var lastRowElements = eLastRow.getElements(Ngn.Frm.selector);
-    eNewRow.getElements('.element').each(function(eElement, i) {
-      eElement.set('class', eElement.get('class').replace(new RegExp('(.*)-0-(.*)'), '$1-' + nextRowN + '-$2'));
-    });
-    eNewRow.getElements(Ngn.Frm.selector).each(function(eInput, i) {
-      Ngn.Frm.emptify(eInput);
-      if (eInput.get('value')) eInput.set('value', '');
-      if (eInput.get('checked')) eInput.set('checked', false);
-      eInput.set('name', this.getInputName(eInput, nextRowN));
-      eLabel = eInput.getNext('label');
-      this.initInput(eInput);
-    }.bind(this));
-    eNewRow.inject(eLastRow, 'after');
-    this.createDeleteButton(eNewRow);
-    this.fireEvent('addRow');
-    if (this.options.addRowNumber) this.addRowNumber(eNewRow, nextRowN);
-    this.moveStyles(eNewRow);
-    this.afterAddRow(eNewRow);
-    // this.initSorting();
-  },
-
-  initInput: function(eInput) {
-  },
-  afterAddRow: function(eNewRow) {
-  },
-
-  getNextN: function(eRow) {
-    return this.getN(eRow, 1);
-  },
-
-  getN: function(eRow, plus) {
-    plus = plus || 0;
-    var els = eRow.getElements(Ngn.Frm.selector);
-    var name;
-    for (var i = 0; i < els.length; i++) {
-      name = els[i].get('name');
-      if (name) break;
-    }
-    return this.firstIndex(name) + plus;
-  },
-
-  getInputName: function(eInput, n) {
-    var name = eInput.get('name');
-    if (!name) return;
-    return name.replace(/([a-z0-9]+)\[([0-9]+)\](.*)/i, '$1[' + n + ']$3');
-  },
-
-  regenInputNames: function() {
-    this.eContainer.getElements(this.options.rowElementSelector).each(function(eRow, n) {
-      eRow.getElements(Ngn.Frm.selector).each(function(eInput) {
-        eInput.set('name', this.getInputName(eInput, n));
-      }.bind(this));
-    }.bind(this));
-  },
-
-  initSorting: function() {
-    var ST = new Sortables(this.eContainer, {
-      handle: this.options.dragBoxSelector
-    });
-    ST.addEvent('start', function(el, clone) {
-      el.addClass('move');
-    });
-    ST.addEvent('complete', function(el, clone) {
-      el.removeClass('move');
-    }.bind(this));
-    this.eContainer.getElements(this.options.dragBoxSelector).each(function(el) {
-      el.addEvent('mouseover', function() {
-        el.addClass('over');
-      });
-      el.addEvent('mouseout', function() {
-        el.removeClass('over');
-      });
-    });
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.FieldSet.Html.js|--*/
-Ngn.FieldSet.Html = new Class({
-  Extends: Ngn.FieldSet,
-
-  getContainer: function() {
-    return this.eContainerInit;
-  },
-
-  initialize: function(container, options) {
-    this.eContainerInit = $(container);
-    this.parent(this.eContainerInit.getParent(), options);
-  }
-
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Frm.FieldSet.js|--*/
-Ngn.Frm.fieldSets = [];
-
-Ngn.Frm.FieldSet = new Class({
-  Extends: Ngn.FieldSet.Html,
-  form: null, // Ngn.Form
-
-  initialize: function(form, container, options) {
-    this.form = form;
-    Ngn.Frm.fieldSets.include(this);
-    this.parent(container, options);
-    this.initVirtualElement(this.eContainer);
-  },
-
-  initInput: function(eInput) {
-    this.form.initActiveEl(eInput);
-  },
-
-  afterAddRow: function(eNewRow) {
-    this.form.addElements(eNewRow);
-  }
-
-});
-
-Ngn.Frm.FieldSet.implement(Ngn.Frm.virtualElement);
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/plugins/Ngn.sd.FieldSetAnimatedText.js|--*/
-Ngn.sd.FieldSetAnimatedText = new Class({
-  Extends: Ngn.Frm.FieldSet,
-
-  initRows: function() {
-    this.parent();
-    new Tips(new Element('span', {
-      html: '?',
-      title: 'Click to add animated text',
-      'class': 'questionMark'
-    }).inject(this.eAddRow, 'after'));
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.Color.js|--*/
-Ngn.Form.El.Color = new Class({
-  Extends: Ngn.Form.El,
-
-  init: function() {
-    var el = this.eRow;
-    var eColor = el.getElement('div.color');
-    var eInput = el.getElement('input').addClass('hexInput');
-    eInput.addEvent('change', function() {
-      eColor.setStyle('background-color', eInput.value);
-    });
-    new Ngn.Rainbow(eInput, {
-      eParent: eInput.getParent(),
-      eColor: eColor,
-      id: 'rainbow_' + eInput.get('name'),
-      //styles: { // и так работает
-      //  'z-index': this.options.dialog.dialog.getStyle('z-index').toInt() + 1
-      //},
-      imgPath: '/i/img/rainbow/small/',
-      wheel: true,
-      startColor: eInput.value ? new Color(eInput.value).rgb : [255, 255, 255],
-      onChange: function(color) {
-        eColor.setStyle('background-color', color.hex);
-        eInput.value = color.hex;
-        eInput.fireEvent('change', color);
-      },
-      onComplete: function(color) {
-        eColor.setStyle('background-color', color.hex);
-        eInput.value = color.hex;
-        eInput.fireEvent('change', color);
-      }
-    });
-  }
-
-});
-/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.Rainbow.js|--*/
-Ngn.Rainbows = [];
-
-Ngn.Rainbow = new Class({
-  options: {
-    id: 'rainbow',
-    styles: {},
-    prefix: 'moor-',
-    imgPath: 'images/',
-    startColor: [255, 0, 0],
-    wheel: false,
-    onComplete: Function.from(),
-    onChange: Function.from(),
-    eParent: null,
-    eColor: null
-  },
-
-  initialize: function(el, options) {
-    this.element = $(el);
-    if (!this.element) return;
-    this.setOptions(options);
-    if (!this.options.eParent) this.options.eParent = document.body;
-    this.sliderPos = 0;
-    this.pickerPos = {x: 0, y: 0};
-    this.backupColor = this.options.startColor;
-    this.currentColor = this.options.startColor;
-    this.sets = {
-      rgb: [],
-      hsb: [],
-      hex: []
-    };
-    this.pickerClick = this.sliderClick = false;
-    if (!this.layout) this.doLayout();
-    this.OverlayEvents();
-    this.sliderEvents();
-    this.backupEvent();
-    if (this.options.wheel) this.wheelEvents();
-    this.element.addEvent('click', function(e) {
-      this.closeAll().toggle(e);
-    }.bind(this));
-    if (this.options.eColor) {
-      this.options.eColor.addEvent('click', function(e) {
-        this.closeAll().toggle(e);
-      }.bind(this));
-    }
-    this.layout.overlay.setStyle('background-color', this.options.startColor.rgbToHex());
-    //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
-    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
-    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
-
-    this.manualSet(this.options.startColor);
-
-    this.pickerPos.x = this.snippet('curPos').l + this.snippet('curSize', 'int').w;
-    this.pickerPos.y = this.snippet('curPos').t + this.snippet('curSize', 'int').h;
-    this.sliderPos = this.snippet('arrPos') - this.snippet('arrSize', 'int');
-
-    if (window.khtml) this.hide();
-  },
-
-  toggle: function() {
-    this[this.visible ? 'hide' : 'show']();
-  },
-
-  show: function() {
-    this.rePosition();
-    (function() {
-      this.layout.setStyle('display', 'block');
-    }).delay(100, this);
-    this.visible = true;
-  },
-
-  hide: function() {
-    this.layout.setStyles({'display': 'none'});
-    this.visible = false;
-  },
-
-  closeAll: function() {
-    Ngn.Rainbows.each(function(obj) {
-      obj.hide();
-    });
-
-    return this;
-  },
-
-  manualSet: function(color, type) {
-    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
-    var rgb, hsb, hex;
-
-    if (type == 'rgb') {
-      rgb = color;
-      hsb = color.rgbToHsb();
-      hex = color.rgbToHex();
-    } else if (type == 'hsb') {
-      hsb = color;
-      rgb = color.hsbToRgb();
-      hex = rgb.rgbToHex();
-    } else {
-      hex = color;
-      rgb = color.hexToRgb(true);
-      hsb = rgb.rgbToHsb();
-    }
-
-    this.setRainbow(rgb);
-    this.autoSet(hsb);
-  },
-
-  autoSet: function(hsb) {
-    var curH = this.snippet('curSize', 'int').h;
-    var curW = this.snippet('curSize', 'int').w;
-    var oveH = this.layout.overlay.height;
-    var oveW = this.layout.overlay.width;
-    var sliH = this.layout.slider.height;
-    var arwH = this.snippet('arrSize', 'int');
-    var hue;
-
-    var posx = Math.round(((oveW * hsb[1]) / 100) - curW);
-    var posy = Math.round(-((oveH * hsb[2]) / 100) + oveH - curH);
-
-    var c = Math.round(((sliH * hsb[0]) / 360));
-    c = (c == 360) ? 0 : c;
-    var position = sliH - c + this.snippet('slider') - arwH;
-    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
-
-    this.layout.cursor.setStyles({'top': posy, 'left': posx});
-    this.layout.arrows.setStyle('top', position);
-    this.layout.overlay.setStyle('background-color', hue);
-    this.sliderPos = this.snippet('arrPos') - arwH;
-    this.pickerPos.x = this.snippet('curPos').l + curW;
-    this.pickerPos.y = this.snippet('curPos').t + curH;
-  },
-
-  setRainbow: function(color, type) {
-    if (!type || (type != 'hsb' && type != 'hex')) type = 'rgb';
-    var rgb, hsb, hex;
-
-    if (type == 'rgb') {
-      rgb = color;
-      hsb = color.rgbToHsb();
-      hex = color.rgbToHex();
-    } else if (type == 'hsb') {
-      hsb = color;
-      rgb = color.hsbToRgb();
-      hex = rgb.rgbToHex();
-    } else {
-      hex = color;
-      rgb = color.hexToRgb();
-      hsb = rgb.rgbToHsb();
-    }
-    this.sets = {
-      rgb: rgb,
-      hsb: hsb,
-      hex: hex
-    };
-    if (this.pickerPos.x == null) this.autoSet(hsb);
-    this.RedInput.value = rgb[0];
-    this.GreenInput.value = rgb[1];
-    this.BlueInput.value = rgb[2];
-    this.HueInput.value = hsb[0];
-    this.SatuInput.value = hsb[1];
-    this.BrighInput.value = hsb[2];
-    //this.hexInput.value = hex;
-    this.currentColor = rgb;
-    //this.chooseColor.setStyle('background-color', rgb.rgbToHex());
-  },
-
-  parseColors: function(x, y, z) {
-    var s = Math.round((x * 100) / this.layout.overlay.width);
-    var b = 100 - Math.round((y * 100) / this.layout.overlay.height);
-    var h = 360 - Math.round((z * 360) / this.layout.slider.height) + this.snippet('slider') - this.snippet('arrSize', 'int');
-    h -= this.snippet('arrSize', 'int');
-    h = (h >= 360) ? 0 : (h < 0) ? 0 : h;
-    s = (s > 100) ? 100 : (s < 0) ? 0 : s;
-    b = (b > 100) ? 100 : (b < 0) ? 0 : b;
-
-    return [h, s, b];
-  },
-
-  OverlayEvents: function() {
-    var lim, curH, curW, inputs;
-    curH = this.snippet('curSize', 'int').h;
-    curW = this.snippet('curSize', 'int').w;
-    //inputs = Array.from(this.arrRGB).concat(this.arrHSB, this.hexInput);
-    document.addEvent('click', function() {
-      this.hide(this.layout);
-    }.bind(this));
-    /*
-    inputs.each(function(el) {
-      el.addEvent('keydown', this.eventKeydown.bindWithEvent(this, el));
-      el.addEvent('keyup', this.eventKeyup.bindWithEvent(this, el));
-    }, this);
-    */
-    [this.element, this.layout].each(function(el) {
-      el.addEvents({
-        'click': function(e) {
-          e.preventDefault();
-        },
-        'keyup': function(e) {
-          if (e.key == 'esc' && this.visible) this.hide(this.layout);
-        }.bind(this)
-      }, this);
-    }, this);
-    lim = {
-      //x: [0 - curW, this.layout.overlay.width - curW],
-      //y: [0 - curH, this.layout.overlay.height - curH]
-      x: [0 - curW, 80 - curW],
-      y: [0 - curH, 80 - curH]
-    };
-    this.layout.addEvent('click', function(e) {
-      e.stop();
-    });
-    this.layout.drag = new Drag(this.layout.cursor, {
-      limit: lim,
-      onBeforeStart: this.overlayDrag.bind(this),
-      onStart: this.overlayDrag.bind(this),
-      onDrag: this.overlayDrag.bind(this),
-      snap: 0
-    });
-
-    this.layout.overlay2.addEvent('mousedown', function(e) {
-      this.layout.cursor.setStyles({
-        'top': e.page.y - this.layout.overlay.getTop() - curH,
-        'left': e.page.x - this.layout.overlay.getLeft() - curW
-      });
-      this.layout.drag.start(e);
-    }.bind(this));
-
-    /*
-     this.layout.overlay2.addEvent('dblclick', function(){
-     this.ok();
-     }.bind(this));
-     this.okButton.addEvent('click', function() {
-     this.ok();
-     }.bind(this));
-     */
-
-
-    this.transp.addEvent('click', function() {
-      this.hide();
-      this.fireEvent('onComplete', ['transparent', this]);
-    }.bind(this));
-  },
-
-  ok: function() {
-    if (this.currentColor == this.options.startColor) {
-      this.hide();
-      this.fireEvent('onComplete', [this.sets, this]);
-    } else {
-      this.backupColor = this.currentColor;
-      //this.layout.backup.setStyle('background-color', this.backupColor.rgbToHex());
-      this.hide();
-      this.fireEvent('onComplete', [this.sets, this]);
-    }
-  },
-
-  overlayDrag: function() {
-    var curH = this.snippet('curSize', 'int').h;
-    var curW = this.snippet('curSize', 'int').w;
-    this.pickerPos.x = this.snippet('curPos').l + curW;
-    this.pickerPos.y = this.snippet('curPos').t + curH;
-    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
-    this.fireEvent('onChange', [this.sets, this]);
-  },
-
-  sliderEvents: function() {
-    var arwH = this.snippet('arrSize', 'int'), lim;
-    lim = [0 + this.snippet('slider') - arwH, this.layout.slider.height - arwH + this.snippet('slider')];
-    this.layout.sliderDrag = new Drag(this.layout.arrows, {
-      limit: {y: lim},
-      modifiers: {x: false},
-      onBeforeStart: this.sliderDrag.bind(this),
-      onStart: this.sliderDrag.bind(this),
-      onDrag: this.sliderDrag.bind(this),
-      snap: 0
-    });
-
-    this.layout.slider.addEvent('mousedown', function(e) {
-      this.layout.arrows.setStyle('top', e.page.y - this.layout.slider.getTop() + this.snippet('slider') - arwH);
-      this.layout.sliderDrag.start(e);
-    }.bind(this));
-  },
-
-  sliderDrag: function() {
-    var arwH = this.snippet('arrSize', 'int'), hue;
-
-    this.sliderPos = this.snippet('arrPos') - arwH;
-    this.setRainbow(this.parseColors(this.pickerPos.x, this.pickerPos.y, this.sliderPos), 'hsb');
-    hue = [this.sets.hsb[0], 100, 100].hsbToRgb().rgbToHex();
-    this.layout.overlay.setStyle('background-color', hue);
-    this.fireEvent('onChange', [this.sets, this]);
-  },
-
-  backupEvent: function() {
-    /*
-    this.layout.backup.addEvent('click', function() {
-      this.manualSet(this.backupColor);
-      this.fireEvent('onChange', [this.sets, this]);
-    }.bind(this));
-    */
-  },
-
-  wheelEvents: function() {
-    var arrColors = Object.append(Array.from(this.arrRGB), this.arrHSB);
-    arrColors.each(function(el) {
-      el.addEvents({
-        'mousewheel': function() {
-          this.eventKeys(el);
-        }.bind(this),
-        'keydown': function() {
-          this.eventKeys(el);
-        }.bind(this)
-      });
-    }, this);
-
-    [this.layout.arrows, this.layout.slider].each(function(el) {
-      el.addEvents({
-        'mousewheel': function() {
-          this.eventKeys([this.arrHSB[0], 'slider']);
-        }.bind(this),
-        'keydown': function() {
-          this.eventKeys([this.arrHSB[0], 'slider']);
-        }.bind(this)
-      });
-    }, this);
-  },
-
-  eventKeys: function(e, el, id) {
-    var wheel, type;
-    id = (!id) ? el.id : this.arrHSB[0];
-
-    if (e.type == 'keydown') {
-      if (e.key == 'up') wheel = 1; else if (e.key == 'down') wheel = -1; else return;
-    } else if (e.type == Element.Events.mousewheel.base) wheel = (e.wheel > 0) ? 1 : -1;
-
-    if (this.arrRGB.contains(el)) type = 'rgb'; else if (this.arrHSB.contains(el)) type = 'hsb'; else type = 'hsb';
-
-    if (type == 'rgb') {
-      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
-      var value = (el.value.toInt() || 0) + wheel;
-      value = (value > 255) ? 255 : (value < 0) ? 0 : value;
-
-      switch (el.className) {
-        case prefix + 'rInput':
-          pass = [value, rgb[1], rgb[2]];
-          break;
-        case prefix + 'gInput':
-          pass = [rgb[0], value, rgb[2]];
-          break;
-        case prefix + 'bInput':
-          pass = [rgb[0], rgb[1], value];
-          break;
-        default :
-          pass = rgb;
-      }
-      this.manualSet(pass);
-      this.fireEvent('onChange', [this.sets, this]);
-    } else {
-      var rgb = this.sets.rgb, hsb = this.sets.hsb, prefix = this.options.prefix, pass;
-      var value = (el.value.toInt() || 0) + wheel;
-
-      if (el.className.test(/(HueInput)/)) value = (value > 359) ? 0 : (value < 0) ? 0 : value; else value = (value > 100) ? 100 : (value < 0) ? 0 : value;
-
-      switch (el.className) {
-        case prefix + 'HueInput':
-          pass = [value, hsb[1], hsb[2]];
-          break;
-        case prefix + 'SatuInput':
-          pass = [hsb[0], value, hsb[2]];
-          break;
-        case prefix + 'BrighInput':
-          pass = [hsb[0], hsb[1], value];
-          break;
-        default :
-          pass = hsb;
-      }
-
-      this.manualSet(pass, 'hsb');
-      this.fireEvent('onChange', [this.sets, this]);
-    }
-    e.stop();
-  },
-
-  eventKeydown: function(e, el) {
-    var n = e.code, k = e.key;
-    if ((!el.className.test(/hexInput/) && !(n >= 48 && n <= 57)) && (k != 'backspace' && k != 'tab' && k != 'delete' && k != 'left' && k != 'right'))
-      e.stop();
-  },
-
-  eventKeyup: function(e, el) {
-    var n = e.code, k = e.key, pass, prefix, chr = el.value.charAt(0);
-    if (el.value == null) return;
-    if (el.className.test(/hexInput/)) {
-      if (chr != "#" && el.value.length != 6) return;
-      if (chr == '#' && el.value.length != 7) return;
-    } else {
-      if (!(n >= 48 && n <= 57) && (!['backspace', 'tab', 'delete', 'left', 'right'].contains(k)) && el.value.length > 3) return;
-    }
-
-    prefix = this.options.prefix;
-
-    if (el.className.test(/(rInput|gInput|bInput)/)) {
-      if (el.value < 0 || el.value > 255) return;
-      switch (el.className) {
-        case prefix + 'rInput':
-          pass = [el.value, this.sets.rgb[1], this.sets.rgb[2]];
-          break;
-        case prefix + 'gInput':
-          pass = [this.sets.rgb[0], el.value, this.sets.rgb[2]];
-          break;
-        case prefix + 'bInput':
-          pass = [this.sets.rgb[0], this.sets.rgb[1], el.value];
-          break;
-        default :
-          pass = this.sets.rgb;
-      }
-      this.manualSet(pass);
-      this.fireEvent('onChange', [this.sets, this]);
-    } else if (!el.className.test(/hexInput/)) {
-      if (el.className.test(/HueInput/) && el.value < 0 || el.value > 360) return; else if (el.className.test(/HueInput/) && el.value == 360) el.value = 0; else if (el.className.test(/(SatuInput|BrighInput)/) && el.value < 0 || el.value > 100) return;
-      switch (el.className) {
-        case prefix + 'HueInput':
-          pass = [el.value, this.sets.hsb[1], this.sets.hsb[2]];
-          break;
-        case prefix + 'SatuInput':
-          pass = [this.sets.hsb[0], el.value, this.sets.hsb[2]];
-          break;
-        case prefix + 'BrighInput':
-          pass = [this.sets.hsb[0], this.sets.hsb[1], el.value];
-          break;
-        default :
-          pass = this.sets.hsb;
-      }
-      this.manualSet(pass, 'hsb');
-      this.fireEvent('onChange', [this.sets, this]);
-    } else {
-      pass = el.value.hexToRgb(true);
-      if (isNaN(pass[0]) || isNaN(pass[1]) || isNaN(pass[2])) return;
-      if (pass != null) {
-        this.manualSet(pass);
-        this.fireEvent('onChange', [this.sets, this]);
-      }
-    }
-  },
-
-  doLayout: function() {
-    var id = this.options.id, prefix = this.options.prefix;
-    var idPrefix = id + ' .' + prefix;
-
-    this.layout = new Element('div', {
-      'styles': Object.merge({ 'display': 'block', 'position': 'absolute', zIndex: 10}, this.options.styles),
-      'id': id
-    }).inject(this.options.eParent);
-
-    Ngn.Rainbows.push(this);
-
-    var box = new Element('div', {
-      'styles': {'position': 'relative'},
-      'class': prefix + 'box'
-    }).inject(this.layout);
-
-    var div = new Element('div', {
-      'styles': {'position': 'absolute', 'overflow': 'hidden'},
-      'class': prefix + 'overlayBox'
-    }).inject(box);
-
-    var ar = new Element('div', {
-      'styles': {
-        'position': 'absolute'
-        //,'zIndex': 1
-      },
-      'class': prefix + 'arrows'
-    }).inject(box);
-    ar.width = ar.getStyle('width').toInt();
-    ar.height = ar.getStyle('height').toInt();
-
-    var ov = new Element('img', {
-      'styles': {
-        'background-color': '#fff',
-        'position': 'relative'
-        //,'zIndex': 2
-      },
-      'src': this.options.imgPath + 'moor_woverlay.png',
-      'class': prefix + 'overlay'
-    }).inject(div);
-
-    var ov2 = new Element('img', {
-      'styles': {'position': 'absolute', 'top': 0, 'left': 0/*, 'zIndex': 2*/},
-      'src': this.options.imgPath + 'moor_boverlay.png',
-      'class': prefix + 'overlay'
-    }).inject(div);
-
-    if (window.ie6) {
-      div.setStyle('overflow', '');
-      var src = ov.src;
-      ov.src = this.options.imgPath + 'blank.gif';
-      ov.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
-      src = ov2.src;
-      ov2.src = this.options.imgPath + 'blank.gif';
-      ov2.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "', sizingMethod='scale')";
-    }
-    ov.width = ov2.width = div.getStyle('width').toInt();
-    ov.height = ov2.height = div.getStyle('height').toInt();
-
-    var cr = new Element('div', {
-      'styles': {'overflow': 'hidden', 'position': 'absolute'/*, 'zIndex': 2*/},
-      'class': prefix + 'cursor'
-    }).inject(div);
-    cr.width = cr.getStyle('width').toInt();
-    cr.height = cr.getStyle('height').toInt();
-
-    var sl = new Element('img', {
-      'styles': {'position': 'absolute'/*, 'z-index': 2, marginLeft: '1px'*/},
-      'src': this.options.imgPath + 'moor_slider.png',
-      'class': prefix + 'slider'
-    }).inject(box);
-    this.layout.slider = document.getElement('#' + idPrefix + 'slider');
-    sl.width = sl.getStyle('width').toInt();
-    sl.height = sl.getStyle('height').toInt();
-
-    new Element('div', {
-      'styles': {'position': 'absolute'},
-      'class': prefix + 'colorBox'
-    }).inject(box);
-
-    /*
-     new Element('div', {
-      'styles': {
-      //'zIndex': 2,
-      'position': 'absolute'
-      },
-      'class': prefix + 'chooseColor'
-    }).inject(box);
-
-    this.layout.backup = new Element('div', {
-      'styles': {
-        //'zIndex': 2,
-        'position': 'absolute', 'cursor': 'pointer'},
-      'class': prefix + 'currentColor'
-    }).inject(box);
-    */
-
-    var R = new Element('label').inject(box).setStyle('position', 'absolute');
-    var G = R.clone().inject(box).addClass(prefix + 'gLabel').appendText('G: ');
-    var B = R.clone().inject(box).addClass(prefix + 'bLabel').appendText('B: ');
-    R.appendText('R: ').addClass(prefix + 'rLabel');
-
-    var inputR = new Element('input');
-    var inputG = inputR.clone().inject(G).addClass(prefix + 'gInput');
-    var inputB = inputR.clone().inject(B).addClass(prefix + 'bInput');
-    inputR.inject(R).addClass(prefix + 'rInput');
-
-    var HU = new Element('label').inject(box).setStyle('position', 'absolute');
-    var SA = HU.clone().inject(box).addClass(prefix + 'SatuLabel').appendText('S: ');
-    var BR = HU.clone().inject(box).addClass(prefix + 'BrighLabel').appendText('B: ');
-    HU.appendText('H: ').addClass(prefix + 'HueLabel');
-
-    var inputHU = new Element('input');
-    var inputSA = inputHU.clone().inject(SA).addClass(prefix + 'SatuInput');
-    var inputBR = inputHU.clone().inject(BR).addClass(prefix + 'BrighInput');
-    inputHU.inject(HU).addClass(prefix + 'HueInput');
-    SA.appendText(' %');
-    BR.appendText(' %');
-    new Element('span', {'styles': {'position': 'absolute'}, 'class': prefix + 'ballino'}).set('html', " &deg;").inject(HU, 'after');
-
-    //var hex = new Element('label').inject(box).setStyle('position', 'absolute').addClass(prefix + 'hexLabel').appendText('#hex: ').adopt(new Element('input').addClass(prefix + 'hexInput'));
-
-    /*
-    var ok = new Element('input', {
-      'styles': {'position': 'absolute'},
-      'type': 'button',
-      'value': 'OK',
-      'class': prefix + 'okButton'
-    }).inject(box);
-    */
-
-    var transp = new Element('a', {'style': {'position': 'absolute'}, 'href': '#', 'class': prefix + 'transp'}).inject(box);
-
-    this.rePosition();
-
-    var overlays = $$('#' + idPrefix + 'overlay');
-    this.layout.overlay = overlays[0];
-
-    this.layout.overlay2 = overlays[1];
-    this.layout.cursor = document.getElement('#' + idPrefix + 'cursor');
-    this.layout.arrows = document.getElement('#' + idPrefix + 'arrows');
-    this.chooseColor = document.getElement('#' + idPrefix + 'chooseColor');
-    //this.layout.backup = document.getElement('#' + idPrefix + 'currentColor');
-    this.RedInput = document.getElement('#' + idPrefix + 'rInput');
-    this.GreenInput = document.getElement('#' + idPrefix + 'gInput');
-    this.BlueInput = document.getElement('#' + idPrefix + 'bInput');
-    this.HueInput = document.getElement('#' + idPrefix + 'HueInput');
-    this.SatuInput = document.getElement('#' + idPrefix + 'SatuInput');
-    this.BrighInput = document.getElement('#' + idPrefix + 'BrighInput');
-    //this.hexInput = document.getElement('#' + idPrefix + 'hexInput');
-
-    this.arrRGB = [this.RedInput, this.GreenInput, this.BlueInput];
-    this.arrHSB = [this.HueInput, this.SatuInput, this.BrighInput];
-    //this.okButton = document.getElement('#' + idPrefix + 'okButton');
-    this.transp = box.getElement('.' + prefix + 'transp');
-
-    if (!window.khtml) this.hide();
-  },
-  rePosition: function() {
-    return;
-    var coords = this.element.getCoordinates();
-    this.layout.setStyles({
-      'left': coords.left,
-      'top': coords.top + coords.height + 1
-    });
-  },
-
-  snippet: function(mode, type) {
-    var size;
-    type = (type) ? type : 'none';
-    switch (mode) {
-      case 'arrPos':
-        var t = this.layout.arrows.getStyle('top').toInt();
-        size = t;
-        break;
-      case 'arrSize':
-        var h = this.layout.arrows.height;
-        h = (type == 'int') ? (h / 2).toInt() : h;
-        size = h;
-        break;
-      case 'curPos':
-        var l = this.layout.cursor.getStyle('left').toInt();
-        var t = this.layout.cursor.getStyle('top').toInt();
-        size = {'l': l, 't': t};
-        break;
-      case 'slider':
-        var t = this.layout.slider.getStyle('marginTop').toInt();
-        size = t;
-        break;
-      default :
-        var h = this.layout.cursor.height;
-        var w = this.layout.cursor.width;
-        h = (type == 'int') ? (h / 2).toInt() : h;
-        w = (type == 'int') ? (w / 2).toInt() : w;
-        size = {w: w, h: h};
-    }
-    ;
-    return size;
-  }
-});
-
-Ngn.Rainbow.implement(new Options);
-Ngn.Rainbow.implement(new Events);
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.DialogSelect.js|--*/
-Ngn.Form.El.DialogSelect = new Class({
-  Extends: Ngn.Form.El,
-  options: {
-    selectTitle: Locale.get('Core.change'),
-    selectClass: ''
-  },
-  baseName: 'defualt',
-  getInitField: function() {
-    return this.eRow.getElement('input') || this.eRow.getElement('select');
-  },
-  getSelectDialogEl: function() {
-    return new Element('a', {
-      'class': 'pseudoLink dgray' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
-      html: this.options.selectTitle
-    }).inject(this.eInitField, 'after');
-  },
-  makeHiddenField: function() {
-    this.eInput = new Element('input', { type: 'hidden', name: this.eInitField.get('name') }).inject(this.eInitField, 'after');
-  },
-  init: function() {
-    this.eInitField = this.getInitField();
-    this.value = this.eInitField.get('value');
-    this.makeHiddenField();
-    this.eSelectDialog = this.getSelectDialogEl();
-    new Element('div', {'class': 'rightFading'}).inject(this.eSelectDialog);
-    this.eInitField.dispose();
-    this.initControlDefault();
-    this.setValue(this.value);
-  },
-  setValue: function(value) {
-    this.setVisibleValue(value);
-    this._setValue(value);
-  },
-  setVisibleValue: function(value) {
-    this.eSelectDialog.set('html', value || 'not defined');
-  },
-  _setValue: function(value) {
-    if (!value) return;
-    this.value = value;
-    this.eInput.set('value', value);
-  },
-  initControl: function() {
-    this.eSelectDialog.addEvent('click', function() {
-      var cls = this.getDialogClass();
-      if (!cls) throw new Error('class not found');
-      new cls(Object.merge({
-        value: this.value
-      }, this.getDialogOptions()));
-    }.bind(this));
-  },
-  initControlDefault: function() {
-    this.initControl();
-  },
-  getDialogClass: function() {
-    throw new Error('Create abstract method getDialogClass()');
-  },
-  getDialogOptions: function() {
-    return {
-      onChangeValue: function(value) {
-        this.setValue(value);
-        if (this.form && this.form.options.dialog) {
-          this.form.options.dialog.fireEvent('change' + this.baseName.capitalize(), value);
-        }
-      }.bind(this)
-    };
-  }
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.Form.El.DialogSelect.Sd.js|--*/
-Ngn.Form.El.DialogSelect.Sd = new Class({
-  Extends: Ngn.Form.El.DialogSelect,
-
-  getSelectDialogEl: function() {
-    var eSelectDialog = new Element('div', {
-      'class': 'dialogSelect' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
-      title: this.options.selectTitle
-    }).inject(this.eInitField, 'after');
-    new Element('div', {'class': 'rightFading'}).inject(eSelectDialog);
-    return eSelectDialog;
-  }
-
-});
-
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.Form.El.FontFamilyCufon.js|--*/
-Ngn.Form.El.FontFamilyCufon = new Class({
-  Extends: Ngn.Form.El.DialogSelect.Sd,
-  baseName: 'font',
-  options: {
-    selectClass: 'font'
-  },
-  init: function() {
-    this.parent();
-    this.value ? Ngn.sd.loadFont(this.value, this.initControl.bind(this)) : this.initControl();
-  },
-  initControlDefault: function() {
-  },
-  setValue: function(font) {
-    this.parent(font);
-    Cufon.set('fontFamily', font).replace(this.eSelectDialog);
-  },
-  getDialogClass: function() {
-    return Ngn.sd.FontSelectDialog;
-  }
-});
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.ElSelectDialog.js|--*/
-Ngn.ElSelectDialog = new Class({
-  Extends: Ngn.Dialog,
-  options: {
-    dialogClass: 'dialog selectDialog',
-    noPadding: false
-  },
-  okClose: function() {
-    //this.formEl.setVisibleValue(this.getValue());
-    this.fireEvent('changeValue', this.getValue());
-    this.parent();
-  },
-  getValue: function() {
-    throw new Error('Abstract');
-  }
-});
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.SelectDialog.js|--*/
-Ngn.sd.SelectDialog = new Class({
-  Extends: Ngn.ElSelectDialog,
-  options: {
-    footer: false,
-    width: 580,
-    height: 300,
-    savePosition: true,
-    closeOnSelect: true,
-    onChangeFont: function() {
-    }
-  },
-  setOptions: function(opts) {
-    this.parent(Object.merge(opts || {}, {id: this.name + 'Select'}));
-  },
-  eSelected: null,
-  init: function() {
-    var obj = this;
-    this.message.getElements('div.item').each(function(el) {
-      if (obj.options.value && el.get('data-name') == obj.options.value) {
-        obj._select(el);
-      }
-      el.addEvent('click', function() {
-        obj.select(this);
-      });
-    });
-    if (obj.eSelected) (function() {
-      new Fx.Scroll(obj.message).toElement(obj.eSelected)
-    }).delay(500);
-  },
-  _select: function(el) {
-    if (this.eSelected) this.eSelected.removeClass('selected');
-    this.eSelected = el.addClass('selected');
-    this.fireEvent('changeValue', el.get('data-name'));
-  },
-  select: function(el) {
-    this._select(el);
-    if (this.options.closeOnSelect) this.close();
-  }
-});
-
-/*--|/home/user/ngn-env/ngn/more/scripts/js/common/tpl.php| (with request data)--*/
-Ngn.toObj('Ngn.tpls.fontSelect', '<div class="selectItems">\n    <div class="item" data-name="Aero_Matics_Stencil_Regular">\n    Aero_Matics_Stencil_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Ancient_Kyiv">\n    Ancient_Kyiv    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Archive">\n    Archive    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Attentica_4f_Ultralight">\n    Attentica_4f_Ultralight    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Avdira">\n    Avdira    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azamat">\n    Azamat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans">\n    Azoft_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold">\n    Azoft_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Bold_Italic">\n    Azoft_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Azoft_Sans_Italic">\n    Azoft_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bad_Script">\n    Bad_Script    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bardelin">\n    Bardelin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Barkentina">\n    Barkentina    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender">\n    Bender    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black">\n    Bender_Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Black_Italic">\n    Bender_Black_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold">\n    Bender_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Bold_Italic">\n    Bender_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Italic">\n    Bender_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light">\n    Bender_Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bender_Light_Italic">\n    Bender_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boblic">\n    Boblic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bombarda">\n    Bombarda    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Boom_Boom">\n    Boom_Boom    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Bradobrei">\n    Bradobrei    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella">\n    Brava_Novella    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brava_Novella_Italic">\n    Brava_Novella_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Brush">\n    Brush    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Regular">\n    Corki_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Rounded">\n    Corki_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan">\n    Corki_Tuscan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Corki_Tuscan_Rounded">\n    Corki_Tuscan_Rounded    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Danger">\n    Danger    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Days">\n    Days    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decolz">\n    Decolz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Decree_Art_Two">\n    Decree_Art_Two    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Derby">\n    Derby    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Deuz_Ex">\n    Deuz_Ex    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Don_Quixote">\n    Don_Quixote    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans">\n    Droid_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Droid_Sans_Bold">\n    Droid_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="FatC">\n    FatC    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Font_Awesome">\n    Font_Awesome    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Free_Font_Pro">\n    Free_Font_Pro    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat">\n    Fregat    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold">\n    Fregat_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Bold_Italic">\n    Fregat_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Fregat_Italic">\n    Fregat_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Glidesketch">\n    Glidesketch    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Gogol">\n    Gogol    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web">\n    Graublau_Web    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Graublau_Web_Bold">\n    Graublau_Web_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Medium">\n    Hagin_Caps_Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hagin_Caps_Thin">\n    Hagin_Caps_Thin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo">\n    Hattori_Hanzo    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Hattori_Hanzo_Italic">\n    Hattori_Hanzo_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Helgoland">\n    Helgoland    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Intruder">\n    Intruder    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold">\n    Iwona_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Bold_Italic">\n    Iwona_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold">\n    Iwona_Condensed_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Bold_Italic">\n    Iwona_Condensed_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Italic">\n    Iwona_Condensed_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Heavy_Regular">\n    Iwona_Condensed_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Italic">\n    Iwona_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Italic">\n    Iwona_Condensed_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Light_Regular">\n    Iwona_Condensed_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Medium_Regular">\n    Iwona_Condensed_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condensed_Regular">\n    Iwona_Condensed_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Condesed_Medium_Italic">\n    Iwona_Condesed_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Italic">\n    Iwona_Heavy_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Heavy_Regular">\n    Iwona_Heavy_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Italic">\n    Iwona_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Italic">\n    Iwona_Light_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Light_Regular">\n    Iwona_Light_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Italic">\n    Iwona_Medium_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Medium_Regular">\n    Iwona_Medium_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Iwona_Regular">\n    Iwona_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="John_Daniels">\n    John_Daniels    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Juan">\n    Juan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Bold_RU">\n    Kelson_Sans_Bold_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Light_RU">\n    Kelson_Sans_Light_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kelson_Sans_Regular_RU">\n    Kelson_Sans_Regular_RU    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Bold">\n    Kotyhoroshko_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Kotyhoroshko_Regular">\n    Kotyhoroshko_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lloyd">\n    Lloyd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lobster">\n    Lobster    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Audrey_BG">\n    Lovely_Audrey_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Grace_BG">\n    Lovely_Grace_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lovely_Sofia_BG">\n    Lovely_Sofia_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed">\n    Lytiga_Pro_Condensed    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Condensed_Italic">\n    Lytiga_Pro_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended">\n    Lytiga_Pro_Extended    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Extended_Italic">\n    Lytiga_Pro_Extended_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Italic">\n    Lytiga_Pro_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Lytiga_Pro_Regular">\n    Lytiga_Pro_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="MS_Reshetka">\n    MS_Reshetka    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Bold">\n    Marta_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Italic">\n    Marta_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Marta_Regular">\n    Marta_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs">\n    Mikodacs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Mikodacs_PCS">\n    Mikodacs_PCS    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Multima_Bold">\n    Multima_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Museo_Sans_500">\n    Museo_Sans_500    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Neonic">\n    Neonic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nikodecs">\n    Nikodecs    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG">\n    Nioki_BG    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Bold">\n    Nioki_BG_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Nioki_BG_Italic">\n    Nioki_BG_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Now_Grotesk">\n    Now_Grotesk    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Bold">\n    Old_Standard_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Italic">\n    Old_Standard_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Old_Standard_Regular">\n    Old_Standard_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Oranienbaum">\n    Oranienbaum    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus">\n    Orpheus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Bold">\n    Orpheus_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Orpheus_Italic">\n    Orpheus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold">\n    Palemonas_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Bold_Italic">\n    Palemonas_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Italic">\n    Palemonas_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Palemonas_Regular">\n    Palemonas_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama">\n    Perforama    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Perforama_Italic">\n    Perforama_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pharmadin">\n    Pharmadin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Philosopher">\n    Philosopher    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Bold">\n    Pixar_One_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Display">\n    Pixar_One_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_One_Regular">\n    Pixar_One_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Bold">\n    Pixar_Two_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Display">\n    Pixar_Two_Display    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Pixar_Two_Regular">\n    Pixar_Two_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans">\n    Resavska_BG_Sans    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold">\n    Resavska_BG_Sans_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Bold_Italic">\n    Resavska_BG_Sans_Bold_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Resavska_BG_Sans_Italic">\n    Resavska_BG_Sans_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Retropecan">\n    Retropecan    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Black">\n    SkolaSans-Black    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BlackItalic">\n    SkolaSans-BlackItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Bold">\n    SkolaSans-Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-BoldItalic">\n    SkolaSans-BoldItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Light">\n    SkolaSans-Light    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-LightItalic">\n    SkolaSans-LightItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Medium">\n    SkolaSans-Medium    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-MediumItalic">\n    SkolaSans-MediumItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-Regular">\n    SkolaSans-Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="SkolaSans-RegularItalic">\n    SkolaSans-RegularItalic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Skoropys_XVII">\n    Skoropys_XVII    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sports_World_Regular">\n    Sports_World_Regular    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Stiff_Staff">\n    Stiff_Staff    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Sumkin">\n    Sumkin    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus">\n    Supremus    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Condensed_Italic">\n    Supremus_Condensed_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Supremus_Italic">\n    Supremus_Italic    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Tot_Shrift_Bold">\n    Tot_Shrift_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Underdog">\n    Underdog    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Venus_Rising">\n    Venus_Rising    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Zion_Train_Pro_Stencil_Bold">\n    Zion_Train_Pro_Stencil_Bold    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="Znikomit_No25">\n    Znikomit_No25    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arial">\n    arial    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbd">\n    arialbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="arialbi">\n    arialbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="ariali">\n    ariali    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgia">\n    georgia    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiab">\n    georgiab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiai">\n    georgiai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="georgiaz">\n    georgiaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="impact">\n    impact    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahoma">\n    tahoma    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="tahomabd">\n    tahomabd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="times">\n    times    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbd">\n    timesbd    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesbi">\n    timesbi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="timesi">\n    timesi    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdana">\n    verdana    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanab">\n    verdanab    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanai">\n    verdanai    <div class="font">AaCcDd</div>\n  </div>\n    <div class="item" data-name="verdanaz">\n    verdanaz    <div class="font">AaCcDd</div>\n  </div>\n    <div class="clear"></div>\n  <script>\n  </script>\n</div>');
-/*--|/home/user/ngn-env/bc/sd/js/Ngn.sd.FontSelectDialog.js|--*/
-// @requiresBefore s2/js/common/tpl?name=fontSelect&controller=/font/ajax_browse
-Ngn.sd.FontSelectDialog = new Class({
-  Extends: Ngn.sd.SelectDialog,
-  name: 'font',
-  options: {
-    width: 600,
-    message: Ngn.tpls.fontSelect,
-    title: 'Choose Font...',
-    value: 'Arial'
-  },
-  init: function() {
-    this.parent();
-    this.message.addClass('hLoader');
-    var els = this.message.getElements('div.item');
-    var loaded = 0;
-    els.each(function(el) {
-      Ngn.sd.loadFont(el.get('data-name'), function() {
-        loaded++;
-        Cufon.set('fontFamily', el.get('data-name')).replace(el.getElement('.font'));
-        if (loaded == els.length) this.message.removeClass('hLoader');
-      }.bind(this));
-    }.bind(this));
-  }
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.Frm.FieldSetBcreatorImages.js|--*/
-Ngn.Frm.FieldSetBcreatorImages = new Class({
-  Extends: Ngn.Frm.FieldSet,
-
-  createDeleteButton: function(eRow, index) {
-    var fieldSet = this;
-    this.createRowButton(eRow, {
-      caption: this.options.deleteTitle,
-      cls: 'delete'
-    }, function() {
-      if (!confirm('Are you sure?')) return;
-      Ngn.Request.Iface.loading(true);
-      new Ngn.Request.JSON({
-        url: fieldSet.options.deleteImageUrl.replace('{n}', index),
-        onSuccess: function() {
-          Ngn.Request.Iface.loading(false);
-          eRow.dispose();
-          fieldSet.regenInputNames();
-          fieldSet.buttons.erase(this);
-          Ngn.sd.blocks[Ngn.sd.openedPropDialog.options.blockId].reload();
-        }
-      }).send();
-    });
-  }
-
-});
-
-/*--|/home/user/ngn-env/projects/bcreator/m/js/bc/Ngn.sd.FieldSetAnimatedImages.js|--*/
-Ngn.sd.FieldSetAnimatedImages = new Class({
-  Extends: Ngn.Frm.FieldSetBcreatorImages,
-
-  initRows: function() {
-    this.parent();
-    new Tips(new Element('span', {
-      html: '?',
-      title: 'Click to add animated image',
-      'class': 'questionMark'
-    }).inject(this.eAddRow, 'after'));
   }
 
 });
