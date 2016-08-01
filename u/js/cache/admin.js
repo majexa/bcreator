@@ -15694,22 +15694,32 @@ Ngn.Grid = new Class({
 
   createToolBtn: function(toolName, row, action) {
     var tool = row.tools[toolName];
-    action = action || this.options.toolActions[toolName] || false;
+
+    if (tool.type) {
+      Ngn.Items.toolActions[tool.type].init(this, toolName, row);
+      return;
+    }
+
     var el = new Element('a', {
       'href': this.options.toolLinks[toolName] ? this.options.toolLinks[toolName](row) : '#',
       'class': 'iconBtn ' + ((typeOf(tool) == 'object' && tool.cls) ? tool.cls : toolName),
       'html': '<i></i>',
       'title': typeOf(tool) == 'object' ? tool.title : tool
     }).inject(new Element('td').inject(row.eTools));
-    if (typeOf(tool) == 'object' && tool.target) {
-      el.set('target', tool.target);
+
+    if (typeOf(tool) == 'object') {
+      if (tool.target) el.set('target', tool.target);
     }
+
+    if (toolName == 'active') console.trace('not correct');
+
+    action = action || this.options.toolActions[toolName] || false;
     if (action) {
       // Только если экшн определён, биндим на элемент клик (new Ngn.Btn)
       action = action.bind(this);
       new Ngn.Btn(el, function() {
         action(row, this);
-      });
+      });8
     }
     return el;
   },
