@@ -2,6 +2,8 @@
 
 class BcreatorRender extends BcRender {
 
+  const DEFAULT_TRIAL_RENDER_LIMIT = 10;
+
   function render() {
     $path = parent::render();
     $userId = Auth::get('id');

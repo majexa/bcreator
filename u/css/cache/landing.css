@@ -26,6 +26,9 @@ height: 1px;
 select {
 max-width: 300px;
 }
+.help {
+cursor: help;
+}
 .pseudoLink {
 text-decoration: none;
 cursor: pointer;

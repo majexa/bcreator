@@ -7,7 +7,7 @@ class BcreatorInvoiceManager implements \Engine\IPN\IInvoiceManager {
       'userId'          => $userId,
       'referenceNumber' => $recieptId,
       'amount'          => $amount,
-      'taxDate'         => Date::db(),
+      'dateCreate'      => Date::db(),
       'dueDate'         => Date::db(time() + 60 * 60 * 24 * 7),
       'comments'        => json_encode($paymentDetails)
     ];

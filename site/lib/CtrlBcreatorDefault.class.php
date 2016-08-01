@@ -30,7 +30,12 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
   }
 
   function action_json_trialDialog() {
-    $leftCount = 10 - db()->selectCell("SELECT cnt FROM renderCounts WHERE userId=?d", //
+    if ($rendersLimit = db()->selectCell('SELECT rLimit FROM renderLimits WHERE userId=?d', Auth::get('id'))) {
+    } else {
+      $rendersLimit = BcreatorRender::DEFAULT_TRIAL_RENDER_LIMIT;
+    }
+    $leftCount = $rendersLimit - //
+      db()->selectCell("SELECT cnt FROM renderCounts WHERE userId=?d", //
         Misc::checkEmpty(Auth::get('id')));
     $this->json['cnt'] = $leftCount;
     $this->json['text'] = '<p>You have '.($leftCount ? $leftCount.' renders left' : 'no renders'). //
