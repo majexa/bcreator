@@ -4,6 +4,7 @@ class CtrlAdminUsersBcreator extends CtrlAdminUsers {
 
   protected function getHead() {
     $head = parent::getHead();
+    $head[] = 'Type';
     $head[] = 'Render limits';
     $head[] = 'Renders count';
     $head[] = 'Last invoice due date';
@@ -21,12 +22,15 @@ class CtrlAdminUsersBcreator extends CtrlAdminUsers {
     foreach (db()->select('SELECT UNIX_TIMESTAMP(dueDate) AS dueDate, amount, userId FROM invoice WHERE userId IN (?a) GROUP BY userId ORDER BY dueDate DESC', array_keys($items)) as $v) {
       $items[$v['userId']]['invoiceDueDate'] = $v['dueDate'];
       $items[$v['userId']]['invoiceAmount'] = $v['amount'];
+      $items[$v['userId']]['isTrial'] = $v['dueDate'] < time();
     }
+    foreach ($items as &$v) if (!isset($v['isTrial'])) $v['isTrial'] = true;
     return $items;
   }
 
   protected function getData($item) {
     $data = parent::getData($item);
+    $data[] = $item['isTrial'] ? 'trial' : 'normal';
     $data[] = isset($item['limit']) ? $item['limit'] : [BcreatorRender::DEFAULT_TRIAL_RENDER_LIMIT, 'gray'];
     $data[] = isset($item['rendersCount']) ? $item['rendersCount'] : '-';
     $data[] = isset($item['invoiceDueDate']) ? '<a href="/admin/invoices/'.$item['id'].'" class="dgray">'.date('d.m.Y', $item['invoiceDueDate']).'</a>' : '-';
