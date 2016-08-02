@@ -51,9 +51,11 @@ class InvoiceForm extends Form {
     $data['userId'] = $this->userId;
     $data['comments']['action'] = $data['invoiceAction'];
     $data['comments']['reason'] = $data['reason'];
+    $data['referenceNumber'] = '';
     unset($data['reason']);
     unset($data['invoiceAction']);
     $data['comments'] = json_encode($data['comments']);
+    $data['dueDate'] = Date::db(time() + 60 * 60 * 24 * 30);
     db()->insert('invoice', $data, Db::modeUpdateOnDuplicateKey);
   }
 
