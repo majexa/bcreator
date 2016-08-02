@@ -26,7 +26,7 @@ class CtrlAdminInvoices extends CtrlAdmin {
   }
 
   protected function getHead() {
-    return ['Amount', 'Created', 'Comments'];
+    return ['Amount', 'Created', 'Due date', 'Comments'];
   }
 
   protected function renderComments($comments) {
@@ -42,7 +42,8 @@ class CtrlAdminInvoices extends CtrlAdmin {
   protected function getData($item) {
     return [
       $item['amount'],
-      date('d.m.Y H:i', ($item['dateCreate_tStamp'])),
+      $item['dateCreate'],
+      $item['dueDate'],
       $this->renderComments($item['comments'])
     ];
   }
