@@ -16,6 +16,10 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
     Sflm::frontend('js')->addPath('m/js/bc/plugins/download.js');
   }
 
+  protected function editPageTitle() {
+    return $this->banner['title'].' ['.str_replace(' ', '', $this->banner['size']).']';
+  }
+
   const TEMPLATE_USER_ID = 2;
 
   function action_ajax_buttonSelect() {
