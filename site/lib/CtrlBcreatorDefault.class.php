@@ -40,7 +40,7 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
     $this->json['cnt'] = $leftCount;
     $this->json['text'] = '<p>You have '.($leftCount ? $leftCount.' renders left' : 'no renders'). //
       ' as part of your Trial account. Are you sure you want to render?</p>'. //
-      '<p><a href="/trialExpiration">Upgrade your account here</a></p>';
+      '<p><a href="/ipn/trialExpiration">Upgrade your account here</a></p>';
   }
 
 }
