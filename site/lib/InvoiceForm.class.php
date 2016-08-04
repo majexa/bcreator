@@ -46,8 +46,12 @@ class InvoiceForm extends Form {
   }
 
   protected function _update(array $data) {
-    $data['dateCreate'] = $data['dateUpdate'] = Date::db();
-    if ($this->id) $data['id'] = $this->id;
+    $data['dateUpdate'] = Date::db();
+    if ($this->id) {
+      $data['id'] = $this->id;
+    } else {
+      $data['dateCreate'] = $data['dateUpdate'];
+    }
     $data['userId'] = $this->userId;
     $data['comments']['action'] = $data['invoiceAction'];
     $data['comments']['reason'] = $data['reason'];

@@ -71,7 +71,7 @@ class CtrlAdminInvoices extends CtrlAdmin {
   }
 
   function action_json_getItems() {
-    $this->json['grid'] = $this->getGrid();
+    $this->json = $this->getGrid();
   }
 
   function action_json_edit() {
