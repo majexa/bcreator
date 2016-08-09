@@ -32,14 +32,14 @@ Ngn.sd.BackgroundInsertDialog = new Class({
     } else if (w < 400) {
       w = w * 2;
     }
-    var h = Ngn.sd.data.bannerSettings.size.h.toInt();
-    if (h < 200) {
-      //h = h * 2;
-    } else if (h < 400) {
-      //h = h * 2;
-    }
+    //var h = Ngn.sd.data.bannerSettings.size.h.toInt();
+    //if (h < 200) {
+    //  //h = h * 2;
+    //} else if (h < 400) {
+    //  //h = h * 2;
+    //}
     this.options.width = w + 56;
-    this.options.height = h + 30;
+    this.options.height = 400;
     this.options.url = '/cpanel/' + Ngn.sd.bannerId + '/ajax_backgroundSelect';
     this.parent(options);
   },

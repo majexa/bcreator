@@ -10263,6 +10263,66 @@ Swiff.remote = function(obj, fn){
 
 })();
 
+/*--|/home/user/ngn-env/ngn/more/scripts/js/common/Ngn.php|--*/
+// -- Dynamic Core --
+
+Ngn.projectKey = 'bcreator';
+Ngn.isDebug = true;
+Ngn.fileSizeMax = 104857600;
+Ngn.siteTitle = 'Banner Creator';
+Ngn.sflmFrontend = 'landing';
+
+Locale.define('en-US', 'Dummy', 'dummy', 'dummy');
+Locale.use('en-US');
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Locale.js|--*/
+Ngn.Locale = {
+  get: function(key) {
+    return Locale.get(key) || Ngn.String.ucfirst(String(key).replace(/\w+\.(.+)/g, '$1').replace(/[A-Z]/g, function(match){
+      return (' ' + match.charAt(0).toLowerCase());
+    }));
+  }
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.String.js|--*/
+Ngn.String = {};
+Ngn.String.rand = function(len) {
+  var allchars = 'abcdefghijknmpqrstuvwxyzABCDEFGHIJKLNMPQRSTUVWXYZ'.split('');
+  var string = '';
+  for (var i = 0; i < len; i++) {
+    string += allchars[Ngn.Number.randomInt(0, allchars.length - 1)];
+  }
+  return string;
+};
+
+Ngn.String.ucfirst = function(str) {
+  var f = str.charAt(0).toUpperCase();
+  return f + str.substr(1, str.length - 1);
+};
+
+Ngn.String.hashCode = function(str) {
+  var hash = 0, i, chr, len;
+  if (str.length == 0) return hash;
+  for (i = 0, len = str.length; i < len; i++) {
+    chr = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return hash;
+};
+
+Ngn.String.trim = function(s) {
+  return s.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+};
+
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Number.js|--*/
+Ngn.Number = {};
+Ngn.Number.randomInt = function(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
+Locale.define("en-US", "Form", []);
 /*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.js|--*/
 /**
  * Класс `Ngn.Form` в паре с серверным PHP классом `Form` образует свзяку для работы с HTML-формами
@@ -10844,6 +10904,8 @@ Ngn.getReadableFileSizeString = function(fileSizeInBytes) {
   return Math.max(fileSizeInBytes, 0.1).toFixed(0) + byteUnits[i];
 };
 
+// @requiresBefore s2/js/locale?key=form
+
 Form.Validator.addAllThese([['should-be-changed', {
   errorMsg: 'значение этого поля должно быть изменено',
   test: function(element) {
@@ -10928,7 +10990,7 @@ Form.Validator.addAllThese([['should-be-changed', {
     return element.get('value') == 'complete' ? true : false;
   }
 }], ['validate-upload-required', {
-  errorMsg: 'Файл не выбран',
+  errorMsg: Ngn.Locale.get('Form.fileNotChosen'),
   test: function(element) {
     return element.get('value') ? true : false;
   }
@@ -12904,44 +12966,6 @@ Ngn.Request.settings = function(name, callback) {
   });
 };
 
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.String.js|--*/
-Ngn.String = {};
-Ngn.String.rand = function(len) {
-  var allchars = 'abcdefghijknmpqrstuvwxyzABCDEFGHIJKLNMPQRSTUVWXYZ'.split('');
-  var string = '';
-  for (var i = 0; i < len; i++) {
-    string += allchars[Ngn.Number.randomInt(0, allchars.length - 1)];
-  }
-  return string;
-};
-
-Ngn.String.ucfirst = function(str) {
-  var f = str.charAt(0).toUpperCase();
-  return f + str.substr(1, str.length - 1);
-};
-
-Ngn.String.hashCode = function(str) {
-  var hash = 0, i, chr, len;
-  if (str.length == 0) return hash;
-  for (i = 0, len = str.length; i < len; i++) {
-    chr = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0; // Convert to 32bit integer
-  }
-  return hash;
-};
-
-Ngn.String.trim = function(s) {
-  return s.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
-};
-
-
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Number.js|--*/
-Ngn.Number = {};
-Ngn.Number.randomInt = function(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-};
-
 /*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Arr.js|--*/
 Ngn.Arr = {};
 Ngn.Arr.inn = function(needle, haystack, strict) {  // Checks if a value exists in an array
@@ -13318,7 +13342,10 @@ Ngn.RequiredOptions = new Class({
 
 });
 
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
+Locale.define("en-US", "Core", {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","cancel":"Cancel","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading","at":"at"});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.js|--*/
+// @requiresBefore s2/js/locale?key=core
 Ngn.Dialog = new Class({
   Implements: [Ngn.RequiredOptions, Events],
   options: {
@@ -13327,7 +13354,7 @@ Ngn.Dialog = new Class({
     buttons: null, // Набор дополнительные кнопок в подвале. Формат объекта: {name: 'Name', text: 'Button text', class_name: 'CSS class', action: function() {}, tabindex: 1}
     cancel: null,
     cancelClass: 'cancel',
-    cancelText: 'Cancel',
+    cancelText: Ngn.Locale.get('Core.cancel'),
     cancelDestroy: true,
     callback: null,
     center: true,
@@ -13398,7 +13425,6 @@ Ngn.Dialog = new Class({
 
   initialize: function(options) {
     this.setOptions(options);
-    this.options.cancelText = Locale.get('Core.cancel');
     // new Image().src = '/i/img/dialog/cross-pushed.png'; // preloading of hover cross
     if (this.options.id == 'dlg') {
       this.options.id = 'dlg' + Ngn.String.rand(5);
@@ -14204,8 +14230,6 @@ Ngn.Dialog.Msg = new Class({
 
 });
 
-/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
-Locale.define("en-US", "Core", {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","cancel":"Cancel","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading"});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.js|--*/
 // @requiresBefore s2/js/locale?key=core
 Ngn.Dialog.Confirm = new Class({
@@ -14232,14 +14256,6 @@ Ngn.Dialog.Confirm = new Class({
 
 });
 
-/*--|/home/user/ngn-env/ngn/i/js/ngn/core/Ngn.Locale.js|--*/
-Ngn.Locale = {
-  get: function(key) {
-    return Locale.get(key) || Ngn.String.ucfirst(String(key).replace(/\w+\.(.+)/g, '$1').replace(/[A-Z]/g, function(match){
-      return (' ' + match.charAt(0).toLowerCase());
-    }));
-  }
-};
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.Confirm.Mem.js|--*/
 Ngn.Dialog.Confirm.Mem = new Class({
   Extends: Ngn.Dialog.Confirm,
