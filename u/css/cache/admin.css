@@ -4454,3 +4454,8 @@ background-color: #FFF9DF;
 float: left;
 }
 /*--[File '/home/user/ngn-env/projects/bcreator/m/css/common/admin.css' does not exists]--*/
+
+/*--|/home/user/ngn-env/ngn/i/css/formEl/dateRange.css|--*/
+.dateRangeDialog .dialog-message .btn {
+margin-top: 10px;
+}

@@ -438,128 +438,6 @@ String.extend('uniqueID', function(){
 /*
 ---
 
-name: Object
-
-description: Object generic methods
-
-license: MIT-style license.
-
-requires: Type
-
-provides: [Object, Hash]
-
-...
-*/
-
-(function(){
-
-Object.extend({
-
-	subset: function(object, keys){
-		var results = {};
-		for (var i = 0, l = keys.length; i < l; i++){
-			var k = keys[i];
-			if (k in object) results[k] = object[k];
-		}
-		return results;
-	},
-
-	map: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			results[key] = fn.call(bind, object[key], key, object);
-		}
-		return results;
-	},
-
-	filter: function(object, fn, bind){
-		var results = {};
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i], value = object[key];
-			if (fn.call(bind, value, key, object)) results[key] = value;
-		}
-		return results;
-	},
-
-	every: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (!fn.call(bind, object[key], key)) return false;
-		}
-		return true;
-	},
-
-	some: function(object, fn, bind){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (fn.call(bind, object[key], key)) return true;
-		}
-		return false;
-	},
-
-	values: function(object){
-		var values = [];
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var k = keys[i];
-			values.push(object[k]);
-		}
-		return values;
-	},
-
-	getLength: function(object){
-		return Object.keys(object).length;
-	},
-
-	keyOf: function(object, value){
-		var keys = Object.keys(object);
-		for (var i = 0; i < keys.length; i++){
-			var key = keys[i];
-			if (object[key] === value) return key;
-		}
-		return null;
-	},
-
-	contains: function(object, value){
-		return Object.keyOf(object, value) != null;
-	},
-
-	toQueryString: function(object, base){
-		var queryString = [];
-
-		Object.each(object, function(value, key){
-			if (base) key = base + '[' + key + ']';
-			var result;
-			switch (typeOf(value)){
-				case 'object': result = Object.toQueryString(value, key); break;
-				case 'array':
-					var qs = {};
-					value.each(function(val, i){
-						qs[i] = val;
-					});
-					result = Object.toQueryString(qs, key);
-					break;
-				default: result = key + '=' + encodeURIComponent(value);
-			}
-			if (value != null) queryString.push(result);
-		});
-
-		return queryString.join('&');
-	}
-
-});
-
-})();
-
-
-/*
----
-
 name: Array
 
 description: Contains Array Prototypes like each, contains, and erase.
@@ -731,6 +609,214 @@ Array.implement({
 /*
 ---
 
+name: String
+
+description: Contains String Prototypes like camelCase, capitalize, test, and toInt.
+
+license: MIT-style license.
+
+requires: [Type, Array]
+
+provides: String
+
+...
+*/
+
+String.implement({
+
+	//<!ES6>
+	contains: function(string, index){
+		return (index ? String(this).slice(index) : String(this)).indexOf(string) > -1;
+	},
+	//</!ES6>
+
+	test: function(regex, params){
+		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
+	},
+
+	trim: function(){
+		return String(this).replace(/^\s+|\s+$/g, '');
+	},
+
+	clean: function(){
+		return String(this).replace(/\s+/g, ' ').trim();
+	},
+
+	camelCase: function(){
+		return String(this).replace(/-\D/g, function(match){
+			return match.charAt(1).toUpperCase();
+		});
+	},
+
+	hyphenate: function(){
+		return String(this).replace(/[A-Z]/g, function(match){
+			return ('-' + match.charAt(0).toLowerCase());
+		});
+	},
+
+	capitalize: function(){
+		return String(this).replace(/\b[a-z]/g, function(match){
+			return match.toUpperCase();
+		});
+	},
+
+	escapeRegExp: function(){
+		return String(this).replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
+	},
+
+	toInt: function(base){
+		return parseInt(this, base || 10);
+	},
+
+	toFloat: function(){
+		return parseFloat(this);
+	},
+
+	hexToRgb: function(array){
+		var hex = String(this).match(/^#?(\w{1,2})(\w{1,2})(\w{1,2})$/);
+		return (hex) ? hex.slice(1).hexToRgb(array) : null;
+	},
+
+	rgbToHex: function(array){
+		var rgb = String(this).match(/\d{1,3}/g);
+		return (rgb) ? rgb.rgbToHex(array) : null;
+	},
+
+	substitute: function(object, regexp){
+		return String(this).replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
+			if (match.charAt(0) == '\\') return match.slice(1);
+			return (object[name] != null) ? object[name] : '';
+		});
+	}
+
+});
+
+
+/*
+---
+
+name: Object
+
+description: Object generic methods
+
+license: MIT-style license.
+
+requires: Type
+
+provides: [Object, Hash]
+
+...
+*/
+
+(function(){
+
+Object.extend({
+
+	subset: function(object, keys){
+		var results = {};
+		for (var i = 0, l = keys.length; i < l; i++){
+			var k = keys[i];
+			if (k in object) results[k] = object[k];
+		}
+		return results;
+	},
+
+	map: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			results[key] = fn.call(bind, object[key], key, object);
+		}
+		return results;
+	},
+
+	filter: function(object, fn, bind){
+		var results = {};
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i], value = object[key];
+			if (fn.call(bind, value, key, object)) results[key] = value;
+		}
+		return results;
+	},
+
+	every: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (!fn.call(bind, object[key], key)) return false;
+		}
+		return true;
+	},
+
+	some: function(object, fn, bind){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (fn.call(bind, object[key], key)) return true;
+		}
+		return false;
+	},
+
+	values: function(object){
+		var values = [];
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var k = keys[i];
+			values.push(object[k]);
+		}
+		return values;
+	},
+
+	getLength: function(object){
+		return Object.keys(object).length;
+	},
+
+	keyOf: function(object, value){
+		var keys = Object.keys(object);
+		for (var i = 0; i < keys.length; i++){
+			var key = keys[i];
+			if (object[key] === value) return key;
+		}
+		return null;
+	},
+
+	contains: function(object, value){
+		return Object.keyOf(object, value) != null;
+	},
+
+	toQueryString: function(object, base){
+		var queryString = [];
+
+		Object.each(object, function(value, key){
+			if (base) key = base + '[' + key + ']';
+			var result;
+			switch (typeOf(value)){
+				case 'object': result = Object.toQueryString(value, key); break;
+				case 'array':
+					var qs = {};
+					value.each(function(val, i){
+						qs[i] = val;
+					});
+					result = Object.toQueryString(qs, key);
+					break;
+				default: result = key + '=' + encodeURIComponent(value);
+			}
+			if (value != null) queryString.push(result);
+		});
+
+		return queryString.join('&');
+	}
+
+});
+
+})();
+
+
+/*
+---
+
 name: Function
 
 description: Contains Function Prototypes like create, bind, pass, and delay.
@@ -863,92 +949,6 @@ math.each(function(name){
 Number.implement(methods);
 
 })(['abs', 'acos', 'asin', 'atan', 'atan2', 'ceil', 'cos', 'exp', 'floor', 'log', 'max', 'min', 'pow', 'sin', 'sqrt', 'tan']);
-/*
----
-
-name: String
-
-description: Contains String Prototypes like camelCase, capitalize, test, and toInt.
-
-license: MIT-style license.
-
-requires: [Type, Array]
-
-provides: String
-
-...
-*/
-
-String.implement({
-
-	//<!ES6>
-	contains: function(string, index){
-		return (index ? String(this).slice(index) : String(this)).indexOf(string) > -1;
-	},
-	//</!ES6>
-
-	test: function(regex, params){
-		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
-	},
-
-	trim: function(){
-		return String(this).replace(/^\s+|\s+$/g, '');
-	},
-
-	clean: function(){
-		return String(this).replace(/\s+/g, ' ').trim();
-	},
-
-	camelCase: function(){
-		return String(this).replace(/-\D/g, function(match){
-			return match.charAt(1).toUpperCase();
-		});
-	},
-
-	hyphenate: function(){
-		return String(this).replace(/[A-Z]/g, function(match){
-			return ('-' + match.charAt(0).toLowerCase());
-		});
-	},
-
-	capitalize: function(){
-		return String(this).replace(/\b[a-z]/g, function(match){
-			return match.toUpperCase();
-		});
-	},
-
-	escapeRegExp: function(){
-		return String(this).replace(/([-.*+?^${}()|[\]\/\\])/g, '\\$1');
-	},
-
-	toInt: function(base){
-		return parseInt(this, base || 10);
-	},
-
-	toFloat: function(){
-		return parseFloat(this);
-	},
-
-	hexToRgb: function(array){
-		var hex = String(this).match(/^#?(\w{1,2})(\w{1,2})(\w{1,2})$/);
-		return (hex) ? hex.slice(1).hexToRgb(array) : null;
-	},
-
-	rgbToHex: function(array){
-		var rgb = String(this).match(/\d{1,3}/g);
-		return (rgb) ? rgb.rgbToHex(array) : null;
-	},
-
-	substitute: function(object, regexp){
-		return String(this).replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
-			if (match.charAt(0) == '\\') return match.slice(1);
-			return (object[name] != null) ? object[name] : '';
-		});
-	}
-
-});
-
-
 /*
 ---
 
@@ -3475,6 +3475,323 @@ if (document.createElement('div').getAttributeNode('id')) Element.Properties.id 
 /*
 ---
 
+name: Event
+
+description: Contains the Event Type, to make the event object cross-browser.
+
+license: MIT-style license.
+
+requires: [Window, Document, Array, Function, String, Object]
+
+provides: Event
+
+...
+*/
+
+(function(){
+
+var _keys = {};
+var normalizeWheelSpeed = function(event){
+	var normalized;
+	if (event.wheelDelta){
+		normalized = event.wheelDelta % 120 == 0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
+	} else {
+		var rawAmount = event.deltaY || event.detail || 0;
+		normalized = -(rawAmount % 3 == 0 ? rawAmount / 3 : rawAmount * 10);
+	}
+	return normalized;
+};
+
+var DOMEvent = this.DOMEvent = new Type('DOMEvent', function(event, win){
+	if (!win) win = window;
+	event = event || win.event;
+	if (event.$extended) return event;
+	this.event = event;
+	this.$extended = true;
+	this.shift = event.shiftKey;
+	this.control = event.ctrlKey;
+	this.alt = event.altKey;
+	this.meta = event.metaKey;
+	var type = this.type = event.type;
+	var target = event.target || event.srcElement;
+	while (target && target.nodeType == 3) target = target.parentNode;
+	this.target = document.id(target);
+
+	if (type.indexOf('key') == 0){
+		var code = this.code = (event.which || event.keyCode);
+		if (!this.shift || type != 'keypress') this.key = _keys[code];
+		if (type == 'keydown' || type == 'keyup'){
+			if (code > 111 && code < 124) this.key = 'f' + (code - 111);
+			else if (code > 95 && code < 106) this.key = code - 96;
+		}
+		if (this.key == null) this.key = String.fromCharCode(code).toLowerCase();
+	} else if (type == 'click' || type == 'dblclick' || type == 'contextmenu' || type == 'wheel' || type == 'DOMMouseScroll' || type.indexOf('mouse') == 0){
+		var doc = win.document;
+		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
+		this.page = {
+			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
+			y: (event.pageY != null) ? event.pageY : event.clientY + doc.scrollTop
+		};
+		this.client = {
+			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
+			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
+		};
+		if (type == 'DOMMouseScroll' || type == 'wheel' || type == 'mousewheel') this.wheel = normalizeWheelSpeed(event);
+		this.rightClick = (event.which == 3 || event.button == 2);
+		if (type == 'mouseover' || type == 'mouseout' || type == 'mouseenter' || type == 'mouseleave'){
+			var overTarget = type == 'mouseover' || type == 'mouseenter';
+			var related = event.relatedTarget || event[(overTarget ? 'from' : 'to') + 'Element'];
+			while (related && related.nodeType == 3) related = related.parentNode;
+			this.relatedTarget = document.id(related);
+		}
+	} else if (type.indexOf('touch') == 0 || type.indexOf('gesture') == 0){
+		this.rotation = event.rotation;
+		this.scale = event.scale;
+		this.targetTouches = event.targetTouches;
+		this.changedTouches = event.changedTouches;
+		var touches = this.touches = event.touches;
+		if (touches && touches[0]){
+			var touch = touches[0];
+			this.page = {x: touch.pageX, y: touch.pageY};
+			this.client = {x: touch.clientX, y: touch.clientY};
+		}
+	}
+
+	if (!this.client) this.client = {};
+	if (!this.page) this.page = {};
+});
+
+DOMEvent.implement({
+
+	stop: function(){
+		return this.preventDefault().stopPropagation();
+	},
+
+	stopPropagation: function(){
+		if (this.event.stopPropagation) this.event.stopPropagation();
+		else this.event.cancelBubble = true;
+		return this;
+	},
+
+	preventDefault: function(){
+		if (this.event.preventDefault) this.event.preventDefault();
+		else this.event.returnValue = false;
+		return this;
+	}
+
+});
+
+DOMEvent.defineKey = function(code, key){
+	_keys[code] = key;
+	return this;
+};
+
+DOMEvent.defineKeys = DOMEvent.defineKey.overloadSetter(true);
+
+DOMEvent.defineKeys({
+	'38': 'up', '40': 'down', '37': 'left', '39': 'right',
+	'27': 'esc', '32': 'space', '8': 'backspace', '9': 'tab',
+	'46': 'delete', '13': 'enter'
+});
+
+})();
+
+
+
+
+/*
+---
+
+name: Element.Event
+
+description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events, if necessary.
+
+license: MIT-style license.
+
+requires: [Element, Event]
+
+provides: Element.Event
+
+...
+*/
+
+(function(){
+
+Element.Properties.events = {set: function(events){
+	this.addEvents(events);
+}};
+
+[Element, Window, Document].invoke('implement', {
+
+	addEvent: function(type, fn){
+		var events = this.retrieve('events', {});
+		if (!events[type]) events[type] = {keys: [], values: []};
+		if (events[type].keys.contains(fn)) return this;
+		events[type].keys.push(fn);
+		var realType = type,
+			custom = Element.Events[type],
+			condition = fn,
+			self = this;
+		if (custom){
+			if (custom.onAdd) custom.onAdd.call(this, fn, type);
+			if (custom.condition){
+				condition = function(event){
+					if (custom.condition.call(this, event, type)) return fn.call(this, event);
+					return true;
+				};
+			}
+			if (custom.base) realType = Function.convert(custom.base).call(this, type);
+		}
+		var defn = function(){
+			return fn.call(self);
+		};
+		var nativeEvent = Element.NativeEvents[realType];
+		if (nativeEvent){
+			if (nativeEvent == 2){
+				defn = function(event){
+					event = new DOMEvent(event, self.getWindow());
+					if (condition.call(self, event) === false) event.stop();
+				};
+			}
+			this.addListener(realType, defn, arguments[2]);
+		}
+		events[type].values.push(defn);
+		return this;
+	},
+
+	removeEvent: function(type, fn){
+		var events = this.retrieve('events');
+		if (!events || !events[type]) return this;
+		var list = events[type];
+		var index = list.keys.indexOf(fn);
+		if (index == -1) return this;
+		var value = list.values[index];
+		delete list.keys[index];
+		delete list.values[index];
+		var custom = Element.Events[type];
+		if (custom){
+			if (custom.onRemove) custom.onRemove.call(this, fn, type);
+			if (custom.base) type = Function.convert(custom.base).call(this, type);
+		}
+		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
+	},
+
+	addEvents: function(events){
+		for (var event in events) this.addEvent(event, events[event]);
+		return this;
+	},
+
+	removeEvents: function(events){
+		var type;
+		if (typeOf(events) == 'object'){
+			for (type in events) this.removeEvent(type, events[type]);
+			return this;
+		}
+		var attached = this.retrieve('events');
+		if (!attached) return this;
+		if (!events){
+			for (type in attached) this.removeEvents(type);
+			this.eliminate('events');
+		} else if (attached[events]){
+			attached[events].keys.each(function(fn){
+				this.removeEvent(events, fn);
+			}, this);
+			delete attached[events];
+		}
+		return this;
+	},
+
+	fireEvent: function(type, args, delay){
+		var events = this.retrieve('events');
+		if (!events || !events[type]) return this;
+		args = Array.convert(args);
+
+		events[type].keys.each(function(fn){
+			if (delay) fn.delay(delay, this, args);
+			else fn.apply(this, args);
+		}, this);
+		return this;
+	},
+
+	cloneEvents: function(from, type){
+		from = document.id(from);
+		var events = from.retrieve('events');
+		if (!events) return this;
+		if (!type){
+			for (var eventType in events) this.cloneEvents(from, eventType);
+		} else if (events[type]){
+			events[type].keys.each(function(fn){
+				this.addEvent(type, fn);
+			}, this);
+		}
+		return this;
+	}
+
+});
+
+Element.NativeEvents = {
+	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
+	wheel: 2, mousewheel: 2, DOMMouseScroll: 2, //mouse wheel
+	mouseover: 2, mouseout: 2, mousemove: 2, selectstart: 2, selectend: 2, //mouse movement
+	keydown: 2, keypress: 2, keyup: 2, //keyboard
+	orientationchange: 2, // mobile
+	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
+	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
+	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
+	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
+	hashchange: 1, popstate: 2, pageshow: 2, pagehide: 2, // history
+	error: 1, abort: 1, scroll: 1, message: 2 //misc
+};
+
+Element.Events = {
+	mousewheel: {
+		base: 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll'
+	}
+};
+
+var check = function(event){
+	var related = event.relatedTarget;
+	if (related == null) return true;
+	if (!related) return false;
+	return (related != this && related.prefix != 'xul' && typeOf(this) != 'document' && !this.contains(related));
+};
+
+if ('onmouseenter' in document.documentElement){
+	Element.NativeEvents.mouseenter = Element.NativeEvents.mouseleave = 2;
+	Element.MouseenterCheck = check;
+} else {
+	Element.Events.mouseenter = {
+		base: 'mouseover',
+		condition: check
+	};
+
+	Element.Events.mouseleave = {
+		base: 'mouseout',
+		condition: check
+	};
+}
+
+/*<ltIE9>*/
+if (!window.addEventListener){
+	Element.NativeEvents.propertychange = 2;
+	Element.Events.change = {
+		base: function(){
+			var type = this.type;
+			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change';
+		},
+		condition: function(event){
+			return event.type != 'propertychange' || event.event.propertyName == 'checked';
+		}
+	};
+}
+/*</ltIE9>*/
+
+
+
+})();
+/*
+---
+
 name: Class
 
 description: Contains the Class Function for easily creating, extending, and implementing reusable Classes.
@@ -3928,616 +4245,6 @@ if (typeof process !== 'undefined' && typeof process.nextTick === 'function'){
 		setTimeout(fn, 0);
 	};
 }
-
-})();
-/*
----
-
-name: Request
-
-description: Powerful all purpose Request Class. Uses XMLHTTPRequest.
-
-license: MIT-style license.
-
-requires: [Object, Element, Chain, Events, Options, Class.Thenable, Browser]
-
-provides: Request
-
-...
-*/
-
-(function(){
-
-var empty = function(){},
-	progressSupport = ('onprogress' in new Browser.Request);
-
-var Request = this.Request = new Class({
-
-	Implements: [Chain, Events, Options, Class.Thenable],
-
-	options: {/*
-		onRequest: function(){},
-		onLoadstart: function(event, xhr){},
-		onProgress: function(event, xhr){},
-		onComplete: function(){},
-		onCancel: function(){},
-		onSuccess: function(responseText, responseXML){},
-		onFailure: function(xhr){},
-		onException: function(headerName, value){},
-		onTimeout: function(){},
-		user: '',
-		password: '',
-		withCredentials: false,*/
-		url: '',
-		data: '',
-		headers: {
-			'X-Requested-With': 'XMLHttpRequest',
-			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
-		},
-		async: true,
-		format: false,
-		method: 'post',
-		link: 'ignore',
-		isSuccess: null,
-		emulation: true,
-		urlEncoded: true,
-		encoding: 'utf-8',
-		evalScripts: false,
-		evalResponse: false,
-		timeout: 0,
-		noCache: false
-	},
-
-	initialize: function(options){
-		this.xhr = new Browser.Request();
-		this.setOptions(options);
-		this.headers = this.options.headers;
-	},
-
-	onStateChange: function(){
-		var xhr = this.xhr;
-		if (xhr.readyState != 4 || !this.running) return;
-		this.running = false;
-		this.status = 0;
-		Function.attempt(function(){
-			var status = xhr.status;
-			this.status = (status == 1223) ? 204 : status;
-		}.bind(this));
-		xhr.onreadystatechange = empty;
-		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
-		if (this.timer){
-			clearTimeout(this.timer);
-			delete this.timer;
-		}
-
-		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
-		if (this.options.isSuccess.call(this, this.status))
-			this.success(this.response.text, this.response.xml);
-		else
-			this.failure();
-	},
-
-	isSuccess: function(){
-		var status = this.status;
-		return (status >= 200 && status < 300);
-	},
-
-	isRunning: function(){
-		return !!this.running;
-	},
-
-	processScripts: function(text){
-		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return Browser.exec(text);
-		return text.stripScripts(this.options.evalScripts);
-	},
-
-	success: function(text, xml){
-		this.onSuccess(this.processScripts(text), xml);
-		this.resolve({text: text, xml: xml});
-	},
-
-	onSuccess: function(){
-		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
-	},
-
-	failure: function(){
-		this.onFailure();
-		this.reject({reason: 'failure', xhr: this.xhr});
-	},
-
-	onFailure: function(){
-		this.fireEvent('complete').fireEvent('failure', this.xhr);
-	},
-
-	loadstart: function(event){
-		this.fireEvent('loadstart', [event, this.xhr]);
-	},
-
-	progress: function(event){
-		this.fireEvent('progress', [event, this.xhr]);
-	},
-
-	timeout: function(){
-		this.fireEvent('timeout', this.xhr);
-		this.reject({reason: 'timeout', xhr: this.xhr});
-	},
-
-	setHeader: function(name, value){
-		this.headers[name] = value;
-		return this;
-	},
-
-	getHeader: function(name){
-		return Function.attempt(function(){
-			return this.xhr.getResponseHeader(name);
-		}.bind(this));
-	},
-
-	check: function(){
-		if (!this.running) return true;
-		switch (this.options.link){
-			case 'cancel': this.cancel(); return true;
-			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
-		}
-		return false;
-	},
-
-	send: function(options){
-		if (!this.check(options)) return this;
-
-		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
-		this.running = true;
-
-		var type = typeOf(options);
-		if (type == 'string' || type == 'element') options = {data: options};
-
-		var old = this.options;
-		options = Object.append({data: old.data, url: old.url, method: old.method}, options);
-		var data = options.data, url = String(options.url), method = options.method.toLowerCase();
-
-		switch (typeOf(data)){
-			case 'element': data = document.id(data).toQueryString(); break;
-			case 'object': case 'hash': data = Object.toQueryString(data);
-		}
-
-		if (this.options.format){
-			var format = 'format=' + this.options.format;
-			data = (data) ? format + '&' + data : format;
-		}
-
-		if (this.options.emulation && !['get', 'post'].contains(method)){
-			var _method = '_method=' + method;
-			data = (data) ? _method + '&' + data : _method;
-			method = 'post';
-		}
-
-		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
-			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
-			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
-		}
-
-		if (!url) url = document.location.pathname;
-
-		var trimPosition = url.lastIndexOf('/');
-		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
-
-		if (this.options.noCache)
-			url += (url.indexOf('?') > -1 ? '&' : '?') + String.uniqueID();
-
-		if (data && (method == 'get' || method == 'delete')){
-			url += (url.indexOf('?') > -1 ? '&' : '?') + data;
-			data = null;
-		}
-
-		var xhr = this.xhr;
-		if (progressSupport){
-			xhr.onloadstart = this.loadstart.bind(this);
-			xhr.onprogress = this.progress.bind(this);
-		}
-
-		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
-		if ((this.options.withCredentials) && 'withCredentials' in xhr) xhr.withCredentials = true;
-
-		xhr.onreadystatechange = this.onStateChange.bind(this);
-
-		Object.each(this.headers, function(value, key){
-			try {
-				xhr.setRequestHeader(key, value);
-			} catch (e){
-				this.fireEvent('exception', [key, value]);
-				this.reject({reason: 'exception', xhr: xhr, exception: e});
-			}
-		}, this);
-
-		if (this.getThenableState() !== 'pending'){
-			this.resetThenable({reason: 'send'});
-		}
-		this.fireEvent('request');
-		xhr.send(data);
-		if (!this.options.async) this.onStateChange();
-		else if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
-		return this;
-	},
-
-	cancel: function(){
-		if (!this.running) return this;
-		this.running = false;
-		var xhr = this.xhr;
-		xhr.abort();
-		if (this.timer){
-			clearTimeout(this.timer);
-			delete this.timer;
-		}
-		xhr.onreadystatechange = empty;
-		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
-		this.xhr = new Browser.Request();
-		this.fireEvent('cancel');
-		this.reject({reason: 'cancel', xhr: xhr});
-		return this;
-	}
-
-});
-
-var methods = {};
-['get', 'post', 'put', 'delete', 'patch', 'head', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'].each(function(method){
-	methods[method] = function(data){
-		var object = {
-			method: method
-		};
-		if (data != null) object.data = data;
-		return this.send(object);
-	};
-});
-
-Request.implement(methods);
-
-Element.Properties.send = {
-
-	set: function(options){
-		var send = this.get('send').cancel();
-		send.setOptions(options);
-		return this;
-	},
-
-	get: function(){
-		var send = this.retrieve('send');
-		if (!send){
-			send = new Request({
-				data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
-			});
-			this.store('send', send);
-		}
-		return send;
-	}
-
-};
-
-Element.implement({
-
-	send: function(url){
-		var sender = this.get('send');
-		sender.send({data: this, url: url || sender.options.url});
-		return this;
-	}
-
-});
-
-})();
-/*
----
-
-name: Event
-
-description: Contains the Event Type, to make the event object cross-browser.
-
-license: MIT-style license.
-
-requires: [Window, Document, Array, Function, String, Object]
-
-provides: Event
-
-...
-*/
-
-(function(){
-
-var _keys = {};
-var normalizeWheelSpeed = function(event){
-	var normalized;
-	if (event.wheelDelta){
-		normalized = event.wheelDelta % 120 == 0 ? event.wheelDelta / 120 : event.wheelDelta / 12;
-	} else {
-		var rawAmount = event.deltaY || event.detail || 0;
-		normalized = -(rawAmount % 3 == 0 ? rawAmount / 3 : rawAmount * 10);
-	}
-	return normalized;
-};
-
-var DOMEvent = this.DOMEvent = new Type('DOMEvent', function(event, win){
-	if (!win) win = window;
-	event = event || win.event;
-	if (event.$extended) return event;
-	this.event = event;
-	this.$extended = true;
-	this.shift = event.shiftKey;
-	this.control = event.ctrlKey;
-	this.alt = event.altKey;
-	this.meta = event.metaKey;
-	var type = this.type = event.type;
-	var target = event.target || event.srcElement;
-	while (target && target.nodeType == 3) target = target.parentNode;
-	this.target = document.id(target);
-
-	if (type.indexOf('key') == 0){
-		var code = this.code = (event.which || event.keyCode);
-		if (!this.shift || type != 'keypress') this.key = _keys[code];
-		if (type == 'keydown' || type == 'keyup'){
-			if (code > 111 && code < 124) this.key = 'f' + (code - 111);
-			else if (code > 95 && code < 106) this.key = code - 96;
-		}
-		if (this.key == null) this.key = String.fromCharCode(code).toLowerCase();
-	} else if (type == 'click' || type == 'dblclick' || type == 'contextmenu' || type == 'wheel' || type == 'DOMMouseScroll' || type.indexOf('mouse') == 0){
-		var doc = win.document;
-		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
-		this.page = {
-			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
-			y: (event.pageY != null) ? event.pageY : event.clientY + doc.scrollTop
-		};
-		this.client = {
-			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
-			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
-		};
-		if (type == 'DOMMouseScroll' || type == 'wheel' || type == 'mousewheel') this.wheel = normalizeWheelSpeed(event);
-		this.rightClick = (event.which == 3 || event.button == 2);
-		if (type == 'mouseover' || type == 'mouseout' || type == 'mouseenter' || type == 'mouseleave'){
-			var overTarget = type == 'mouseover' || type == 'mouseenter';
-			var related = event.relatedTarget || event[(overTarget ? 'from' : 'to') + 'Element'];
-			while (related && related.nodeType == 3) related = related.parentNode;
-			this.relatedTarget = document.id(related);
-		}
-	} else if (type.indexOf('touch') == 0 || type.indexOf('gesture') == 0){
-		this.rotation = event.rotation;
-		this.scale = event.scale;
-		this.targetTouches = event.targetTouches;
-		this.changedTouches = event.changedTouches;
-		var touches = this.touches = event.touches;
-		if (touches && touches[0]){
-			var touch = touches[0];
-			this.page = {x: touch.pageX, y: touch.pageY};
-			this.client = {x: touch.clientX, y: touch.clientY};
-		}
-	}
-
-	if (!this.client) this.client = {};
-	if (!this.page) this.page = {};
-});
-
-DOMEvent.implement({
-
-	stop: function(){
-		return this.preventDefault().stopPropagation();
-	},
-
-	stopPropagation: function(){
-		if (this.event.stopPropagation) this.event.stopPropagation();
-		else this.event.cancelBubble = true;
-		return this;
-	},
-
-	preventDefault: function(){
-		if (this.event.preventDefault) this.event.preventDefault();
-		else this.event.returnValue = false;
-		return this;
-	}
-
-});
-
-DOMEvent.defineKey = function(code, key){
-	_keys[code] = key;
-	return this;
-};
-
-DOMEvent.defineKeys = DOMEvent.defineKey.overloadSetter(true);
-
-DOMEvent.defineKeys({
-	'38': 'up', '40': 'down', '37': 'left', '39': 'right',
-	'27': 'esc', '32': 'space', '8': 'backspace', '9': 'tab',
-	'46': 'delete', '13': 'enter'
-});
-
-})();
-
-
-
-
-/*
----
-
-name: Element.Event
-
-description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events, if necessary.
-
-license: MIT-style license.
-
-requires: [Element, Event]
-
-provides: Element.Event
-
-...
-*/
-
-(function(){
-
-Element.Properties.events = {set: function(events){
-	this.addEvents(events);
-}};
-
-[Element, Window, Document].invoke('implement', {
-
-	addEvent: function(type, fn){
-		var events = this.retrieve('events', {});
-		if (!events[type]) events[type] = {keys: [], values: []};
-		if (events[type].keys.contains(fn)) return this;
-		events[type].keys.push(fn);
-		var realType = type,
-			custom = Element.Events[type],
-			condition = fn,
-			self = this;
-		if (custom){
-			if (custom.onAdd) custom.onAdd.call(this, fn, type);
-			if (custom.condition){
-				condition = function(event){
-					if (custom.condition.call(this, event, type)) return fn.call(this, event);
-					return true;
-				};
-			}
-			if (custom.base) realType = Function.convert(custom.base).call(this, type);
-		}
-		var defn = function(){
-			return fn.call(self);
-		};
-		var nativeEvent = Element.NativeEvents[realType];
-		if (nativeEvent){
-			if (nativeEvent == 2){
-				defn = function(event){
-					event = new DOMEvent(event, self.getWindow());
-					if (condition.call(self, event) === false) event.stop();
-				};
-			}
-			this.addListener(realType, defn, arguments[2]);
-		}
-		events[type].values.push(defn);
-		return this;
-	},
-
-	removeEvent: function(type, fn){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		var list = events[type];
-		var index = list.keys.indexOf(fn);
-		if (index == -1) return this;
-		var value = list.values[index];
-		delete list.keys[index];
-		delete list.values[index];
-		var custom = Element.Events[type];
-		if (custom){
-			if (custom.onRemove) custom.onRemove.call(this, fn, type);
-			if (custom.base) type = Function.convert(custom.base).call(this, type);
-		}
-		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
-	},
-
-	addEvents: function(events){
-		for (var event in events) this.addEvent(event, events[event]);
-		return this;
-	},
-
-	removeEvents: function(events){
-		var type;
-		if (typeOf(events) == 'object'){
-			for (type in events) this.removeEvent(type, events[type]);
-			return this;
-		}
-		var attached = this.retrieve('events');
-		if (!attached) return this;
-		if (!events){
-			for (type in attached) this.removeEvents(type);
-			this.eliminate('events');
-		} else if (attached[events]){
-			attached[events].keys.each(function(fn){
-				this.removeEvent(events, fn);
-			}, this);
-			delete attached[events];
-		}
-		return this;
-	},
-
-	fireEvent: function(type, args, delay){
-		var events = this.retrieve('events');
-		if (!events || !events[type]) return this;
-		args = Array.convert(args);
-
-		events[type].keys.each(function(fn){
-			if (delay) fn.delay(delay, this, args);
-			else fn.apply(this, args);
-		}, this);
-		return this;
-	},
-
-	cloneEvents: function(from, type){
-		from = document.id(from);
-		var events = from.retrieve('events');
-		if (!events) return this;
-		if (!type){
-			for (var eventType in events) this.cloneEvents(from, eventType);
-		} else if (events[type]){
-			events[type].keys.each(function(fn){
-				this.addEvent(type, fn);
-			}, this);
-		}
-		return this;
-	}
-
-});
-
-Element.NativeEvents = {
-	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
-	wheel: 2, mousewheel: 2, DOMMouseScroll: 2, //mouse wheel
-	mouseover: 2, mouseout: 2, mousemove: 2, selectstart: 2, selectend: 2, //mouse movement
-	keydown: 2, keypress: 2, keyup: 2, //keyboard
-	orientationchange: 2, // mobile
-	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
-	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
-	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
-	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
-	hashchange: 1, popstate: 2, pageshow: 2, pagehide: 2, // history
-	error: 1, abort: 1, scroll: 1, message: 2 //misc
-};
-
-Element.Events = {
-	mousewheel: {
-		base: 'onwheel' in document ? 'wheel' : 'onmousewheel' in document ? 'mousewheel' : 'DOMMouseScroll'
-	}
-};
-
-var check = function(event){
-	var related = event.relatedTarget;
-	if (related == null) return true;
-	if (!related) return false;
-	return (related != this && related.prefix != 'xul' && typeOf(this) != 'document' && !this.contains(related));
-};
-
-if ('onmouseenter' in document.documentElement){
-	Element.NativeEvents.mouseenter = Element.NativeEvents.mouseleave = 2;
-	Element.MouseenterCheck = check;
-} else {
-	Element.Events.mouseenter = {
-		base: 'mouseover',
-		condition: check
-	};
-
-	Element.Events.mouseleave = {
-		base: 'mouseout',
-		condition: check
-	};
-}
-
-/*<ltIE9>*/
-if (!window.addEventListener){
-	Element.NativeEvents.propertychange = 2;
-	Element.Events.change = {
-		base: function(){
-			var type = this.type;
-			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change';
-		},
-		condition: function(event){
-			return event.type != 'propertychange' || event.event.propertyName == 'checked';
-		}
-	};
-}
-/*</ltIE9>*/
-
-
 
 })();
 /*
@@ -5449,6 +5156,299 @@ Fx.Transitions.extend({
 		return Math.pow(p, i + 2);
 	});
 });
+/*
+---
+
+name: Request
+
+description: Powerful all purpose Request Class. Uses XMLHTTPRequest.
+
+license: MIT-style license.
+
+requires: [Object, Element, Chain, Events, Options, Class.Thenable, Browser]
+
+provides: Request
+
+...
+*/
+
+(function(){
+
+var empty = function(){},
+	progressSupport = ('onprogress' in new Browser.Request);
+
+var Request = this.Request = new Class({
+
+	Implements: [Chain, Events, Options, Class.Thenable],
+
+	options: {/*
+		onRequest: function(){},
+		onLoadstart: function(event, xhr){},
+		onProgress: function(event, xhr){},
+		onComplete: function(){},
+		onCancel: function(){},
+		onSuccess: function(responseText, responseXML){},
+		onFailure: function(xhr){},
+		onException: function(headerName, value){},
+		onTimeout: function(){},
+		user: '',
+		password: '',
+		withCredentials: false,*/
+		url: '',
+		data: '',
+		headers: {
+			'X-Requested-With': 'XMLHttpRequest',
+			'Accept': 'text/javascript, text/html, application/xml, text/xml, */*'
+		},
+		async: true,
+		format: false,
+		method: 'post',
+		link: 'ignore',
+		isSuccess: null,
+		emulation: true,
+		urlEncoded: true,
+		encoding: 'utf-8',
+		evalScripts: false,
+		evalResponse: false,
+		timeout: 0,
+		noCache: false
+	},
+
+	initialize: function(options){
+		this.xhr = new Browser.Request();
+		this.setOptions(options);
+		this.headers = this.options.headers;
+	},
+
+	onStateChange: function(){
+		var xhr = this.xhr;
+		if (xhr.readyState != 4 || !this.running) return;
+		this.running = false;
+		this.status = 0;
+		Function.attempt(function(){
+			var status = xhr.status;
+			this.status = (status == 1223) ? 204 : status;
+		}.bind(this));
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
+		if (this.timer){
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+
+		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
+		if (this.options.isSuccess.call(this, this.status))
+			this.success(this.response.text, this.response.xml);
+		else
+			this.failure();
+	},
+
+	isSuccess: function(){
+		var status = this.status;
+		return (status >= 200 && status < 300);
+	},
+
+	isRunning: function(){
+		return !!this.running;
+	},
+
+	processScripts: function(text){
+		if (this.options.evalResponse || (/(ecma|java)script/).test(this.getHeader('Content-type'))) return Browser.exec(text);
+		return text.stripScripts(this.options.evalScripts);
+	},
+
+	success: function(text, xml){
+		this.onSuccess(this.processScripts(text), xml);
+		this.resolve({text: text, xml: xml});
+	},
+
+	onSuccess: function(){
+		this.fireEvent('complete', arguments).fireEvent('success', arguments).callChain();
+	},
+
+	failure: function(){
+		this.onFailure();
+		this.reject({reason: 'failure', xhr: this.xhr});
+	},
+
+	onFailure: function(){
+		this.fireEvent('complete').fireEvent('failure', this.xhr);
+	},
+
+	loadstart: function(event){
+		this.fireEvent('loadstart', [event, this.xhr]);
+	},
+
+	progress: function(event){
+		this.fireEvent('progress', [event, this.xhr]);
+	},
+
+	timeout: function(){
+		this.fireEvent('timeout', this.xhr);
+		this.reject({reason: 'timeout', xhr: this.xhr});
+	},
+
+	setHeader: function(name, value){
+		this.headers[name] = value;
+		return this;
+	},
+
+	getHeader: function(name){
+		return Function.attempt(function(){
+			return this.xhr.getResponseHeader(name);
+		}.bind(this));
+	},
+
+	check: function(){
+		if (!this.running) return true;
+		switch (this.options.link){
+			case 'cancel': this.cancel(); return true;
+			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
+		}
+		return false;
+	},
+
+	send: function(options){
+		if (!this.check(options)) return this;
+
+		this.options.isSuccess = this.options.isSuccess || this.isSuccess;
+		this.running = true;
+
+		var type = typeOf(options);
+		if (type == 'string' || type == 'element') options = {data: options};
+
+		var old = this.options;
+		options = Object.append({data: old.data, url: old.url, method: old.method}, options);
+		var data = options.data, url = String(options.url), method = options.method.toLowerCase();
+
+		switch (typeOf(data)){
+			case 'element': data = document.id(data).toQueryString(); break;
+			case 'object': case 'hash': data = Object.toQueryString(data);
+		}
+
+		if (this.options.format){
+			var format = 'format=' + this.options.format;
+			data = (data) ? format + '&' + data : format;
+		}
+
+		if (this.options.emulation && !['get', 'post'].contains(method)){
+			var _method = '_method=' + method;
+			data = (data) ? _method + '&' + data : _method;
+			method = 'post';
+		}
+
+		if (this.options.urlEncoded && ['post', 'put'].contains(method)){
+			var encoding = (this.options.encoding) ? '; charset=' + this.options.encoding : '';
+			this.headers['Content-type'] = 'application/x-www-form-urlencoded' + encoding;
+		}
+
+		if (!url) url = document.location.pathname;
+
+		var trimPosition = url.lastIndexOf('/');
+		if (trimPosition > -1 && (trimPosition = url.indexOf('#')) > -1) url = url.substr(0, trimPosition);
+
+		if (this.options.noCache)
+			url += (url.indexOf('?') > -1 ? '&' : '?') + String.uniqueID();
+
+		if (data && (method == 'get' || method == 'delete')){
+			url += (url.indexOf('?') > -1 ? '&' : '?') + data;
+			data = null;
+		}
+
+		var xhr = this.xhr;
+		if (progressSupport){
+			xhr.onloadstart = this.loadstart.bind(this);
+			xhr.onprogress = this.progress.bind(this);
+		}
+
+		xhr.open(method.toUpperCase(), url, this.options.async, this.options.user, this.options.password);
+		if ((this.options.withCredentials) && 'withCredentials' in xhr) xhr.withCredentials = true;
+
+		xhr.onreadystatechange = this.onStateChange.bind(this);
+
+		Object.each(this.headers, function(value, key){
+			try {
+				xhr.setRequestHeader(key, value);
+			} catch (e){
+				this.fireEvent('exception', [key, value]);
+				this.reject({reason: 'exception', xhr: xhr, exception: e});
+			}
+		}, this);
+
+		if (this.getThenableState() !== 'pending'){
+			this.resetThenable({reason: 'send'});
+		}
+		this.fireEvent('request');
+		xhr.send(data);
+		if (!this.options.async) this.onStateChange();
+		else if (this.options.timeout) this.timer = this.timeout.delay(this.options.timeout, this);
+		return this;
+	},
+
+	cancel: function(){
+		if (!this.running) return this;
+		this.running = false;
+		var xhr = this.xhr;
+		xhr.abort();
+		if (this.timer){
+			clearTimeout(this.timer);
+			delete this.timer;
+		}
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
+		this.xhr = new Browser.Request();
+		this.fireEvent('cancel');
+		this.reject({reason: 'cancel', xhr: xhr});
+		return this;
+	}
+
+});
+
+var methods = {};
+['get', 'post', 'put', 'delete', 'patch', 'head', 'GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'].each(function(method){
+	methods[method] = function(data){
+		var object = {
+			method: method
+		};
+		if (data != null) object.data = data;
+		return this.send(object);
+	};
+});
+
+Request.implement(methods);
+
+Element.Properties.send = {
+
+	set: function(options){
+		var send = this.get('send').cancel();
+		send.setOptions(options);
+		return this;
+	},
+
+	get: function(){
+		var send = this.retrieve('send');
+		if (!send){
+			send = new Request({
+				data: this, link: 'cancel', method: this.get('method') || 'post', url: this.get('action')
+			});
+			this.store('send', send);
+		}
+		return send;
+	}
+
+};
+
+Element.implement({
+
+	send: function(url){
+		var sender = this.get('send');
+		sender.send({data: this, url: url || sender.options.url});
+		return this;
+	}
+
+});
+
+})();
 /*
 ---
 
@@ -6467,6 +6467,868 @@ Element.implement({
 	}
 
 });
+/*
+---
+
+script: Object.Extras.js
+
+name: Object.Extras
+
+description: Extra Object generics, like getFromPath which allows a path notation to child elements.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+
+requires:
+  - Core/Object
+  - MooTools.More
+
+provides: [Object.Extras]
+
+...
+*/
+
+(function(){
+
+var defined = function(value){
+	return value != null;
+};
+
+var hasOwnProperty = Object.prototype.hasOwnProperty;
+
+Object.extend({
+
+	getFromPath: function(source, parts){
+		if (typeof parts == 'string') parts = parts.split('.');
+		for (var i = 0, l = parts.length; i < l; i++){
+			if (hasOwnProperty.call(source, parts[i])) source = source[parts[i]];
+			else return null;
+		}
+		return source;
+	},
+
+	cleanValues: function(object, method){
+		method = method || defined;
+		for (var key in object) if (!method(object[key])){
+			delete object[key];
+		}
+		return object;
+	},
+
+	erase: function(object, key){
+		if (hasOwnProperty.call(object, key)) delete object[key];
+		return object;
+	},
+
+	run: function(object){
+		var args = Array.slice(arguments, 1);
+		for (var key in object) if (object[key].apply){
+			object[key].apply(object, args);
+		}
+		return object;
+	}
+
+});
+
+})();
+/*
+---
+
+script: Locale.js
+
+name: Locale
+
+description: Provides methods for localization.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+  - Arian Stolwijk
+
+requires:
+  - Core/Events
+  - Object.Extras
+  - MooTools.More
+
+provides: [Locale, Lang]
+
+...
+*/
+
+(function(){
+
+var current = null,
+	locales = {},
+	inherits = {};
+
+var getSet = function(set){
+	if (instanceOf(set, Locale.Set)) return set;
+	else return locales[set];
+};
+
+var Locale = this.Locale = {
+
+	define: function(locale, set, key, value){
+		var name;
+		if (instanceOf(locale, Locale.Set)){
+			name = locale.name;
+			if (name) locales[name] = locale;
+		} else {
+			name = locale;
+			if (!locales[name]) locales[name] = new Locale.Set(name);
+			locale = locales[name];
+		}
+
+		if (set) locale.define(set, key, value);
+
+		
+
+		if (!current) current = locale;
+
+		return locale;
+	},
+
+	use: function(locale){
+		locale = getSet(locale);
+
+		if (locale){
+			current = locale;
+
+			this.fireEvent('change', locale);
+
+			
+		}
+
+		return this;
+	},
+
+	getCurrent: function(){
+		return current;
+	},
+
+	get: function(key, args){
+		return (current) ? current.get(key, args) : '';
+	},
+
+	inherit: function(locale, inherits, set){
+		locale = getSet(locale);
+
+		if (locale) locale.inherit(inherits, set);
+		return this;
+	},
+
+	list: function(){
+		return Object.keys(locales);
+	}
+
+};
+
+Object.append(Locale, new Events);
+
+Locale.Set = new Class({
+
+	sets: {},
+
+	inherits: {
+		locales: [],
+		sets: {}
+	},
+
+	initialize: function(name){
+		this.name = name || '';
+	},
+
+	define: function(set, key, value){
+		var defineData = this.sets[set];
+		if (!defineData) defineData = {};
+
+		if (key){
+			if (typeOf(key) == 'object') defineData = Object.merge(defineData, key);
+			else defineData[key] = value;
+		}
+		this.sets[set] = defineData;
+
+		return this;
+	},
+
+	get: function(key, args, _base){
+		var value = Object.getFromPath(this.sets, key);
+		if (value != null){
+			var type = typeOf(value);
+			if (type == 'function') value = value.apply(null, Array.convert(args));
+			else if (type == 'object') value = Object.clone(value);
+			return value;
+		}
+
+		// get value of inherited locales
+		var index = key.indexOf('.'),
+			set = index < 0 ? key : key.substr(0, index),
+			names = (this.inherits.sets[set] || []).combine(this.inherits.locales).include('en-US');
+		if (!_base) _base = [];
+
+		for (var i = 0, l = names.length; i < l; i++){
+			if (_base.contains(names[i])) continue;
+			_base.include(names[i]);
+
+			var locale = locales[names[i]];
+			if (!locale) continue;
+
+			value = locale.get(key, args, _base);
+			if (value != null) return value;
+		}
+
+		return '';
+	},
+
+	inherit: function(names, set){
+		names = Array.convert(names);
+
+		if (set && !this.inherits.sets[set]) this.inherits.sets[set] = [];
+
+		var l = names.length;
+		while (l--) (set ? this.inherits.sets[set] : this.inherits.locales).unshift(names[l]);
+
+		return this;
+	}
+
+});
+
+
+
+})();
+/*
+---
+
+name: Locale.en-US.Date
+
+description: Date messages for US English.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+
+requires:
+  - Locale
+
+provides: [Locale.en-US.Date]
+
+...
+*/
+
+Locale.define('en-US', 'Date', {
+
+	months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+	months_abbr: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+	days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+	days_abbr: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+
+	// Culture's date order: MM/DD/YYYY
+	dateOrder: ['month', 'date', 'year'],
+	shortDate: '%m/%d/%Y',
+	shortTime: '%I:%M%p',
+	AM: 'AM',
+	PM: 'PM',
+	firstDayOfWeek: 0,
+
+	// Date.Extras
+	ordinal: function(dayOfMonth){
+		// 1st, 2nd, 3rd, etc.
+		return (dayOfMonth > 3 && dayOfMonth < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th'][Math.min(dayOfMonth % 10, 4)];
+	},
+
+	lessThanMinuteAgo: 'less than a minute ago',
+	minuteAgo: 'about a minute ago',
+	minutesAgo: '{delta} minutes ago',
+	hourAgo: 'about an hour ago',
+	hoursAgo: 'about {delta} hours ago',
+	dayAgo: '1 day ago',
+	daysAgo: '{delta} days ago',
+	weekAgo: '1 week ago',
+	weeksAgo: '{delta} weeks ago',
+	monthAgo: '1 month ago',
+	monthsAgo: '{delta} months ago',
+	yearAgo: '1 year ago',
+	yearsAgo: '{delta} years ago',
+
+	lessThanMinuteUntil: 'less than a minute from now',
+	minuteUntil: 'about a minute from now',
+	minutesUntil: '{delta} minutes from now',
+	hourUntil: 'about an hour from now',
+	hoursUntil: 'about {delta} hours from now',
+	dayUntil: '1 day from now',
+	daysUntil: '{delta} days from now',
+	weekUntil: '1 week from now',
+	weeksUntil: '{delta} weeks from now',
+	monthUntil: '1 month from now',
+	monthsUntil: '{delta} months from now',
+	yearUntil: '1 year from now',
+	yearsUntil: '{delta} years from now'
+
+});
+/*
+---
+
+script: Date.js
+
+name: Date
+
+description: Extends the Date native object to include methods useful in managing dates.
+
+license: MIT-style license
+
+authors:
+  - Aaron Newton
+  - Nicholas Barthelemy - https://svn.nbarthelemy.com/date-js/
+  - Harald Kirshner - mail [at] digitarald.de; http://digitarald.de
+  - Scott Kyle - scott [at] appden.com; http://appden.com
+
+requires:
+  - Core/Array
+  - Core/String
+  - Core/Number
+  - MooTools.More
+  - Locale
+  - Locale.en-US.Date
+
+provides: [Date]
+
+...
+*/
+
+(function(){
+
+var Date = this.Date;
+
+var DateMethods = Date.Methods = {
+	ms: 'Milliseconds',
+	year: 'FullYear',
+	min: 'Minutes',
+	mo: 'Month',
+	sec: 'Seconds',
+	hr: 'Hours'
+};
+
+[
+	'Date', 'Day', 'FullYear', 'Hours', 'Milliseconds', 'Minutes', 'Month', 'Seconds', 'Time', 'TimezoneOffset',
+	'Week', 'Timezone', 'GMTOffset', 'DayOfYear', 'LastMonth', 'LastDayOfMonth', 'UTCDate', 'UTCDay', 'UTCFullYear',
+	'AMPM', 'Ordinal', 'UTCHours', 'UTCMilliseconds', 'UTCMinutes', 'UTCMonth', 'UTCSeconds', 'UTCMilliseconds'
+].each(function(method){
+	Date.Methods[method.toLowerCase()] = method;
+});
+
+var pad = function(n, digits, string){
+	if (digits == 1) return n;
+	return n < Math.pow(10, digits - 1) ? (string || '0') + pad(n, digits - 1, string) : n;
+};
+
+Date.implement({
+
+	set: function(prop, value){
+		prop = prop.toLowerCase();
+		var method = DateMethods[prop] && 'set' + DateMethods[prop];
+		if (method && this[method]) this[method](value);
+		return this;
+	}.overloadSetter(),
+
+	get: function(prop){
+		prop = prop.toLowerCase();
+		var method = DateMethods[prop] && 'get' + DateMethods[prop];
+		if (method && this[method]) return this[method]();
+		return null;
+	}.overloadGetter(),
+
+	clone: function(){
+		return new Date(this.get('time'));
+	},
+
+	increment: function(interval, times){
+		interval = interval || 'day';
+		times = times != null ? times : 1;
+
+		switch (interval){
+			case 'year':
+				return this.increment('month', times * 12);
+			case 'month':
+				var d = this.get('date');
+				this.set('date', 1).set('mo', this.get('mo') + times);
+				return this.set('date', d.min(this.get('lastdayofmonth')));
+			case 'week':
+				return this.increment('day', times * 7);
+			case 'day':
+				return this.set('date', this.get('date') + times);
+		}
+
+		if (!Date.units[interval]) throw new Error(interval + ' is not a supported interval');
+
+		return this.set('time', this.get('time') + times * Date.units[interval]());
+	},
+
+	decrement: function(interval, times){
+		return this.increment(interval, -1 * (times != null ? times : 1));
+	},
+
+	isLeapYear: function(){
+		return Date.isLeapYear(this.get('year'));
+	},
+
+	clearTime: function(){
+		return this.set({hr: 0, min: 0, sec: 0, ms: 0});
+	},
+
+	diff: function(date, resolution){
+		if (typeOf(date) == 'string') date = Date.parse(date);
+
+		return ((date - this) / Date.units[resolution || 'day'](3, 3)).round(); // non-leap year, 30-day month
+	},
+
+	getLastDayOfMonth: function(){
+		return Date.daysInMonth(this.get('mo'), this.get('year'));
+	},
+
+	getDayOfYear: function(){
+		return (Date.UTC(this.get('year'), this.get('mo'), this.get('date') + 1)
+			- Date.UTC(this.get('year'), 0, 1)) / Date.units.day();
+	},
+
+	setDay: function(day, firstDayOfWeek){
+		if (firstDayOfWeek == null){
+			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
+			if (firstDayOfWeek === '') firstDayOfWeek = 1;
+		}
+
+		day = (7 + Date.parseDay(day, true) - firstDayOfWeek) % 7;
+		var currentDay = (7 + this.get('day') - firstDayOfWeek) % 7;
+
+		return this.increment('day', day - currentDay);
+	},
+
+	getWeek: function(firstDayOfWeek){
+		if (firstDayOfWeek == null){
+			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
+			if (firstDayOfWeek === '') firstDayOfWeek = 1;
+		}
+
+		var date = this,
+			dayOfWeek = (7 + date.get('day') - firstDayOfWeek) % 7,
+			dividend = 0,
+			firstDayOfYear;
+
+		if (firstDayOfWeek == 1){
+			// ISO-8601, week belongs to year that has the most days of the week (i.e. has the thursday of the week)
+			var month = date.get('month'),
+				startOfWeek = date.get('date') - dayOfWeek;
+
+			if (month == 11 && startOfWeek > 28) return 1; // Week 1 of next year
+
+			if (month == 0 && startOfWeek < -2){
+				// Use a date from last year to determine the week
+				date = new Date(date).decrement('day', dayOfWeek);
+				dayOfWeek = 0;
+			}
+
+			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day') || 7;
+			if (firstDayOfYear > 4) dividend = -7; // First week of the year is not week 1
+		} else {
+			// In other cultures the first week of the year is always week 1 and the last week always 53 or 54.
+			// Days in the same week can have a different weeknumber if the week spreads across two years.
+			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day');
+		}
+
+		dividend += date.get('dayofyear');
+		dividend += 6 - dayOfWeek; // Add days so we calculate the current date's week as a full week
+		dividend += (7 + firstDayOfYear - firstDayOfWeek) % 7; // Make up for first week of the year not being a full week
+
+		return (dividend / 7);
+	},
+
+	getOrdinal: function(day){
+		return Date.getMsg('ordinal', day || this.get('date'));
+	},
+
+	getTimezone: function(){
+		return this.toString()
+			.replace(/^.*? ([A-Z]{3}).[0-9]{4}.*$/, '$1')
+			.replace(/^.*?\(([A-Z])[a-z]+ ([A-Z])[a-z]+ ([A-Z])[a-z]+\)$/, '$1$2$3');
+	},
+
+	getGMTOffset: function(){
+		var off = this.get('timezoneOffset');
+		return ((off > 0) ? '-' : '+') + pad((off.abs() / 60).floor(), 2) + pad(off % 60, 2);
+	},
+
+	setAMPM: function(ampm){
+		ampm = ampm.toUpperCase();
+		var hr = this.get('hr');
+		if (hr > 11 && ampm == 'AM') return this.decrement('hour', 12);
+		else if (hr < 12 && ampm == 'PM') return this.increment('hour', 12);
+		return this;
+	},
+
+	getAMPM: function(){
+		return (this.get('hr') < 12) ? 'AM' : 'PM';
+	},
+
+	parse: function(str){
+		this.set('time', Date.parse(str));
+		return this;
+	},
+
+	isValid: function(date){
+		if (!date) date = this;
+		return typeOf(date) == 'date' && !isNaN(date.valueOf());
+	},
+
+	format: function(format){
+		if (!this.isValid()) return 'invalid date';
+
+		if (!format) format = '%x %X';
+		if (typeof format == 'string') format = formats[format.toLowerCase()] || format;
+		if (typeof format == 'function') return format(this);
+
+		var d = this;
+		return format.replace(/%([a-z%])/gi,
+			function($0, $1){
+				switch ($1){
+					case 'a': return Date.getMsg('days_abbr')[d.get('day')];
+					case 'A': return Date.getMsg('days')[d.get('day')];
+					case 'b': return Date.getMsg('months_abbr')[d.get('month')];
+					case 'B': return Date.getMsg('months')[d.get('month')];
+					case 'c': return d.format('%a %b %d %H:%M:%S %Y');
+					case 'd': return pad(d.get('date'), 2);
+					case 'e': return pad(d.get('date'), 2, ' ');
+					case 'H': return pad(d.get('hr'), 2);
+					case 'I': return pad((d.get('hr') % 12) || 12, 2);
+					case 'j': return pad(d.get('dayofyear'), 3);
+					case 'k': return pad(d.get('hr'), 2, ' ');
+					case 'l': return pad((d.get('hr') % 12) || 12, 2, ' ');
+					case 'L': return pad(d.get('ms'), 3);
+					case 'm': return pad((d.get('mo') + 1), 2);
+					case 'M': return pad(d.get('min'), 2);
+					case 'o': return d.get('ordinal');
+					case 'p': return Date.getMsg(d.get('ampm'));
+					case 's': return Math.round(d / 1000);
+					case 'S': return pad(d.get('seconds'), 2);
+					case 'T': return d.format('%H:%M:%S');
+					case 'U': return pad(d.get('week'), 2);
+					case 'w': return d.get('day');
+					case 'x': return d.format(Date.getMsg('shortDate'));
+					case 'X': return d.format(Date.getMsg('shortTime'));
+					case 'y': return d.get('year').toString().substr(2);
+					case 'Y': return d.get('year');
+					case 'z': return d.get('GMTOffset');
+					case 'Z': return d.get('Timezone');
+				}
+				return $1;
+			}
+		);
+	},
+
+	toISOString: function(){
+		return this.format('iso8601');
+	}
+
+}).alias({
+	toJSON: 'toISOString',
+	compare: 'diff',
+	strftime: 'format'
+});
+
+// The day and month abbreviations are standardized, so we cannot use simply %a and %b because they will get localized
+var rfcDayAbbr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+	rfcMonthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+var formats = {
+	db: '%Y-%m-%d %H:%M:%S',
+	compact: '%Y%m%dT%H%M%S',
+	'short': '%d %b %H:%M',
+	'long': '%B %d, %Y %H:%M',
+	rfc822: function(date){
+		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %Z');
+	},
+	rfc2822: function(date){
+		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %z');
+	},
+	iso8601: function(date){
+		return (
+			date.getUTCFullYear() + '-' +
+			pad(date.getUTCMonth() + 1, 2) + '-' +
+			pad(date.getUTCDate(), 2) + 'T' +
+			pad(date.getUTCHours(), 2) + ':' +
+			pad(date.getUTCMinutes(), 2) + ':' +
+			pad(date.getUTCSeconds(), 2) + '.' +
+			pad(date.getUTCMilliseconds(), 3) + 'Z'
+		);
+	}
+};
+
+var parsePatterns = [],
+	nativeParse = Date.parse;
+
+var parseWord = function(type, word, num){
+	var ret = -1,
+		translated = Date.getMsg(type + 's');
+	switch (typeOf(word)){
+		case 'object':
+			ret = translated[word.get(type)];
+			break;
+		case 'number':
+			ret = translated[word];
+			if (!ret) throw new Error('Invalid ' + type + ' index: ' + word);
+			break;
+		case 'string':
+			var match = translated.filter(function(name){
+				return this.test(name);
+			}, new RegExp('^' + word, 'i'));
+			if (!match.length) throw new Error('Invalid ' + type + ' string');
+			if (match.length > 1) throw new Error('Ambiguous ' + type);
+			ret = match[0];
+	}
+
+	return (num) ? translated.indexOf(ret) : ret;
+};
+
+var startCentury = 1900,
+	startYear = 70;
+
+Date.extend({
+
+	getMsg: function(key, args){
+		return Locale.get('Date.' + key, args);
+	},
+
+	units: {
+		ms: Function.convert(1),
+		second: Function.convert(1000),
+		minute: Function.convert(60000),
+		hour: Function.convert(3600000),
+		day: Function.convert(86400000),
+		week: Function.convert(608400000),
+		month: function(month, year){
+			var d = new Date;
+			return Date.daysInMonth(month != null ? month : d.get('mo'), year != null ? year : d.get('year')) * 86400000;
+		},
+		year: function(year){
+			year = year || new Date().get('year');
+			return Date.isLeapYear(year) ? 31622400000 : 31536000000;
+		}
+	},
+
+	daysInMonth: function(month, year){
+		return [31, Date.isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
+	},
+
+	isLeapYear: function(year){
+		return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
+	},
+
+	parse: function(from){
+		var t = typeOf(from);
+		if (t == 'number') return new Date(from);
+		if (t != 'string') return from;
+		from = from.clean();
+		if (!from.length) return null;
+
+		var parsed;
+		parsePatterns.some(function(pattern){
+			var bits = pattern.re.exec(from);
+			return (bits) ? (parsed = pattern.handler(bits)) : false;
+		});
+
+		if (!(parsed && parsed.isValid())){
+			parsed = new Date(nativeParse(from));
+			if (!(parsed && parsed.isValid())) parsed = new Date(from.toInt());
+		}
+		return parsed;
+	},
+
+	parseDay: function(day, num){
+		return parseWord('day', day, num);
+	},
+
+	parseMonth: function(month, num){
+		return parseWord('month', month, num);
+	},
+
+	parseUTC: function(value){
+		var localDate = new Date(value);
+		var utcSeconds = Date.UTC(
+			localDate.get('year'),
+			localDate.get('mo'),
+			localDate.get('date'),
+			localDate.get('hr'),
+			localDate.get('min'),
+			localDate.get('sec'),
+			localDate.get('ms')
+		);
+		return new Date(utcSeconds);
+	},
+
+	orderIndex: function(unit){
+		return Date.getMsg('dateOrder').indexOf(unit) + 1;
+	},
+
+	defineFormat: function(name, format){
+		formats[name] = format;
+		return this;
+	},
+
+	
+
+	defineParser: function(pattern){
+		parsePatterns.push((pattern.re && pattern.handler) ? pattern : build(pattern));
+		return this;
+	},
+
+	defineParsers: function(){
+		Array.flatten(arguments).each(Date.defineParser);
+		return this;
+	},
+
+	define2DigitYearStart: function(year){
+		startYear = year % 100;
+		startCentury = year - startYear;
+		return this;
+	}
+
+}).extend({
+	defineFormats: Date.defineFormat.overloadSetter()
+});
+
+var regexOf = function(type){
+	return new RegExp('(?:' + Date.getMsg(type).map(function(name){
+		return name.substr(0, 3);
+	}).join('|') + ')[a-z]*');
+};
+
+var replacers = function(key){
+	switch (key){
+		case 'T':
+			return '%H:%M:%S';
+		case 'x': // iso8601 covers yyyy-mm-dd, so just check if month is first
+			return ((Date.orderIndex('month') == 1) ? '%m[-./]%d' : '%d[-./]%m') + '([-./]%y)?';
+		case 'X':
+			return '%H([.:]%M)?([.:]%S([.:]%s)?)? ?%p? ?%z?';
+	}
+	return null;
+};
+
+var keys = {
+	d: /[0-2]?[0-9]|3[01]/,
+	H: /[01]?[0-9]|2[0-3]/,
+	I: /0?[1-9]|1[0-2]/,
+	M: /[0-5]?\d/,
+	s: /\d+/,
+	o: /[a-z]*/,
+	p: /[ap]\.?m\.?/,
+	y: /\d{2}|\d{4}/,
+	Y: /\d{4}/,
+	z: /Z|[+-]\d{2}(?::?\d{2})?/
+};
+
+keys.m = keys.I;
+keys.S = keys.M;
+
+var currentLanguage;
+
+var recompile = function(language){
+	currentLanguage = language;
+
+	keys.a = keys.A = regexOf('days');
+	keys.b = keys.B = regexOf('months');
+
+	parsePatterns.each(function(pattern, i){
+		if (pattern.format) parsePatterns[i] = build(pattern.format);
+	});
+};
+
+var build = function(format){
+	if (!currentLanguage) return {format: format};
+
+	var parsed = [];
+	var re = (format.source || format) // allow format to be regex
+	.replace(/%([a-z])/gi,
+		function($0, $1){
+			return replacers($1) || $0;
+		}
+	).replace(/\((?!\?)/g, '(?:') // make all groups non-capturing
+	.replace(/ (?!\?|\*)/g, ',? ') // be forgiving with spaces and commas
+	.replace(/%([a-z%])/gi,
+		function($0, $1){
+			var p = keys[$1];
+			if (!p) return $1;
+			parsed.push($1);
+			return '(' + p.source + ')';
+		}
+	).replace(/\[a-z\]/gi, '[a-z\\u00c0-\\uffff;\&]'); // handle unicode words
+
+	return {
+		format: format,
+		re: new RegExp('^' + re + '$', 'i'),
+		handler: function(bits){
+			bits = bits.slice(1).associate(parsed);
+			var date = new Date().clearTime(),
+				year = bits.y || bits.Y;
+
+			if (year != null) handle.call(date, 'y', year); // need to start in the right year
+			if ('d' in bits) handle.call(date, 'd', 1);
+			if ('m' in bits || bits.b || bits.B) handle.call(date, 'm', 1);
+
+			for (var key in bits) handle.call(date, key, bits[key]);
+			return date;
+		}
+	};
+};
+
+var handle = function(key, value){
+	if (!value) return this;
+
+	switch (key){
+		case 'a': case 'A': return this.set('day', Date.parseDay(value, true));
+		case 'b': case 'B': return this.set('mo', Date.parseMonth(value, true));
+		case 'd': return this.set('date', value);
+		case 'H': case 'I': return this.set('hr', value);
+		case 'm': return this.set('mo', value - 1);
+		case 'M': return this.set('min', value);
+		case 'p': return this.set('ampm', value.replace(/\./g, ''));
+		case 'S': return this.set('sec', value);
+		case 's': return this.set('ms', ('0.' + value) * 1000);
+		case 'w': return this.set('day', value);
+		case 'Y': return this.set('year', value);
+		case 'y':
+			value = +value;
+			if (value < 100) value += startCentury + (value < startYear ? 100 : 0);
+			return this.set('year', value);
+		case 'z':
+			if (value == 'Z') value = '+00';
+			var offset = value.match(/([+-])(\d{2}):?(\d{2})?/);
+			offset = (offset[1] + '1') * (offset[2] * 60 + (+offset[3] || 0)) + this.getTimezoneOffset();
+			return this.set('time', this - offset * 60000);
+	}
+
+	return this;
+};
+
+Date.defineParsers(
+	'%Y([-./]%m([-./]%d((T| )%X)?)?)?', // "1999-12-31", "1999-12-31 11:59pm", "1999-12-31 23:59:59", ISO8601
+	'%Y%m%d(T%H(%M%S?)?)?', // "19991231", "19991231T1159", compact
+	'%x( %X)?', // "12/31", "12.31.99", "12-31-1999", "12/31/2008 11:59 PM"
+	'%d%o( %b( %Y)?)?( %X)?', // "31st", "31st December", "31 Dec 1999", "31 Dec 1999 11:59pm"
+	'%b( %d%o)?( %Y)?( %X)?', // Same as above with month and day switched
+	'%Y %b( %d%o( %X)?)?', // Same as above with year coming first
+	'%o %b %d %X %z %Y', // "Thu Oct 22 08:11:23 +0000 2009"
+	'%T', // %H:%M:%S
+	'%H:%M( ?%p)?' // "11:05pm", "11:05 am" and "11:05"
+);
+
+Locale.addEvent('change', function(language){
+	if (Locale.get('Date')) recompile(language);
+}).fireEvent('change', Locale.getCurrent());
+
+})();
 /*
 ---
 
@@ -7811,238 +8673,6 @@ var Sortables = this.Sortables = new Class({
 /*
 ---
 
-script: Object.Extras.js
-
-name: Object.Extras
-
-description: Extra Object generics, like getFromPath which allows a path notation to child elements.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-
-requires:
-  - Core/Object
-  - MooTools.More
-
-provides: [Object.Extras]
-
-...
-*/
-
-(function(){
-
-var defined = function(value){
-	return value != null;
-};
-
-var hasOwnProperty = Object.prototype.hasOwnProperty;
-
-Object.extend({
-
-	getFromPath: function(source, parts){
-		if (typeof parts == 'string') parts = parts.split('.');
-		for (var i = 0, l = parts.length; i < l; i++){
-			if (hasOwnProperty.call(source, parts[i])) source = source[parts[i]];
-			else return null;
-		}
-		return source;
-	},
-
-	cleanValues: function(object, method){
-		method = method || defined;
-		for (var key in object) if (!method(object[key])){
-			delete object[key];
-		}
-		return object;
-	},
-
-	erase: function(object, key){
-		if (hasOwnProperty.call(object, key)) delete object[key];
-		return object;
-	},
-
-	run: function(object){
-		var args = Array.slice(arguments, 1);
-		for (var key in object) if (object[key].apply){
-			object[key].apply(object, args);
-		}
-		return object;
-	}
-
-});
-
-})();
-/*
----
-
-script: Locale.js
-
-name: Locale
-
-description: Provides methods for localization.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-  - Arian Stolwijk
-
-requires:
-  - Core/Events
-  - Object.Extras
-  - MooTools.More
-
-provides: [Locale, Lang]
-
-...
-*/
-
-(function(){
-
-var current = null,
-	locales = {},
-	inherits = {};
-
-var getSet = function(set){
-	if (instanceOf(set, Locale.Set)) return set;
-	else return locales[set];
-};
-
-var Locale = this.Locale = {
-
-	define: function(locale, set, key, value){
-		var name;
-		if (instanceOf(locale, Locale.Set)){
-			name = locale.name;
-			if (name) locales[name] = locale;
-		} else {
-			name = locale;
-			if (!locales[name]) locales[name] = new Locale.Set(name);
-			locale = locales[name];
-		}
-
-		if (set) locale.define(set, key, value);
-
-		
-
-		if (!current) current = locale;
-
-		return locale;
-	},
-
-	use: function(locale){
-		locale = getSet(locale);
-
-		if (locale){
-			current = locale;
-
-			this.fireEvent('change', locale);
-
-			
-		}
-
-		return this;
-	},
-
-	getCurrent: function(){
-		return current;
-	},
-
-	get: function(key, args){
-		return (current) ? current.get(key, args) : '';
-	},
-
-	inherit: function(locale, inherits, set){
-		locale = getSet(locale);
-
-		if (locale) locale.inherit(inherits, set);
-		return this;
-	},
-
-	list: function(){
-		return Object.keys(locales);
-	}
-
-};
-
-Object.append(Locale, new Events);
-
-Locale.Set = new Class({
-
-	sets: {},
-
-	inherits: {
-		locales: [],
-		sets: {}
-	},
-
-	initialize: function(name){
-		this.name = name || '';
-	},
-
-	define: function(set, key, value){
-		var defineData = this.sets[set];
-		if (!defineData) defineData = {};
-
-		if (key){
-			if (typeOf(key) == 'object') defineData = Object.merge(defineData, key);
-			else defineData[key] = value;
-		}
-		this.sets[set] = defineData;
-
-		return this;
-	},
-
-	get: function(key, args, _base){
-		var value = Object.getFromPath(this.sets, key);
-		if (value != null){
-			var type = typeOf(value);
-			if (type == 'function') value = value.apply(null, Array.convert(args));
-			else if (type == 'object') value = Object.clone(value);
-			return value;
-		}
-
-		// get value of inherited locales
-		var index = key.indexOf('.'),
-			set = index < 0 ? key : key.substr(0, index),
-			names = (this.inherits.sets[set] || []).combine(this.inherits.locales).include('en-US');
-		if (!_base) _base = [];
-
-		for (var i = 0, l = names.length; i < l; i++){
-			if (_base.contains(names[i])) continue;
-			_base.include(names[i]);
-
-			var locale = locales[names[i]];
-			if (!locale) continue;
-
-			value = locale.get(key, args, _base);
-			if (value != null) return value;
-		}
-
-		return '';
-	},
-
-	inherit: function(names, set){
-		names = Array.convert(names);
-
-		if (set && !this.inherits.sets[set]) this.inherits.sets[set] = [];
-
-		var l = names.length;
-		while (l--) (set ? this.inherits.sets[set] : this.inherits.locales).unshift(names[l]);
-
-		return this;
-	}
-
-});
-
-
-
-})();
-/*
----
-
 name: Element.Delegation
 
 description: Extends the Element native object to include the delegate method for more efficient event management.
@@ -8281,636 +8911,6 @@ Class.Mutators.initialize = function(initialize){
 		return initialize.apply(this, arguments);
 	};
 };
-/*
----
-
-name: Locale.en-US.Date
-
-description: Date messages for US English.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-
-requires:
-  - Locale
-
-provides: [Locale.en-US.Date]
-
-...
-*/
-
-Locale.define('en-US', 'Date', {
-
-	months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-	months_abbr: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-	days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
-	days_abbr: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-
-	// Culture's date order: MM/DD/YYYY
-	dateOrder: ['month', 'date', 'year'],
-	shortDate: '%m/%d/%Y',
-	shortTime: '%I:%M%p',
-	AM: 'AM',
-	PM: 'PM',
-	firstDayOfWeek: 0,
-
-	// Date.Extras
-	ordinal: function(dayOfMonth){
-		// 1st, 2nd, 3rd, etc.
-		return (dayOfMonth > 3 && dayOfMonth < 21) ? 'th' : ['th', 'st', 'nd', 'rd', 'th'][Math.min(dayOfMonth % 10, 4)];
-	},
-
-	lessThanMinuteAgo: 'less than a minute ago',
-	minuteAgo: 'about a minute ago',
-	minutesAgo: '{delta} minutes ago',
-	hourAgo: 'about an hour ago',
-	hoursAgo: 'about {delta} hours ago',
-	dayAgo: '1 day ago',
-	daysAgo: '{delta} days ago',
-	weekAgo: '1 week ago',
-	weeksAgo: '{delta} weeks ago',
-	monthAgo: '1 month ago',
-	monthsAgo: '{delta} months ago',
-	yearAgo: '1 year ago',
-	yearsAgo: '{delta} years ago',
-
-	lessThanMinuteUntil: 'less than a minute from now',
-	minuteUntil: 'about a minute from now',
-	minutesUntil: '{delta} minutes from now',
-	hourUntil: 'about an hour from now',
-	hoursUntil: 'about {delta} hours from now',
-	dayUntil: '1 day from now',
-	daysUntil: '{delta} days from now',
-	weekUntil: '1 week from now',
-	weeksUntil: '{delta} weeks from now',
-	monthUntil: '1 month from now',
-	monthsUntil: '{delta} months from now',
-	yearUntil: '1 year from now',
-	yearsUntil: '{delta} years from now'
-
-});
-/*
----
-
-script: Date.js
-
-name: Date
-
-description: Extends the Date native object to include methods useful in managing dates.
-
-license: MIT-style license
-
-authors:
-  - Aaron Newton
-  - Nicholas Barthelemy - https://svn.nbarthelemy.com/date-js/
-  - Harald Kirshner - mail [at] digitarald.de; http://digitarald.de
-  - Scott Kyle - scott [at] appden.com; http://appden.com
-
-requires:
-  - Core/Array
-  - Core/String
-  - Core/Number
-  - MooTools.More
-  - Locale
-  - Locale.en-US.Date
-
-provides: [Date]
-
-...
-*/
-
-(function(){
-
-var Date = this.Date;
-
-var DateMethods = Date.Methods = {
-	ms: 'Milliseconds',
-	year: 'FullYear',
-	min: 'Minutes',
-	mo: 'Month',
-	sec: 'Seconds',
-	hr: 'Hours'
-};
-
-[
-	'Date', 'Day', 'FullYear', 'Hours', 'Milliseconds', 'Minutes', 'Month', 'Seconds', 'Time', 'TimezoneOffset',
-	'Week', 'Timezone', 'GMTOffset', 'DayOfYear', 'LastMonth', 'LastDayOfMonth', 'UTCDate', 'UTCDay', 'UTCFullYear',
-	'AMPM', 'Ordinal', 'UTCHours', 'UTCMilliseconds', 'UTCMinutes', 'UTCMonth', 'UTCSeconds', 'UTCMilliseconds'
-].each(function(method){
-	Date.Methods[method.toLowerCase()] = method;
-});
-
-var pad = function(n, digits, string){
-	if (digits == 1) return n;
-	return n < Math.pow(10, digits - 1) ? (string || '0') + pad(n, digits - 1, string) : n;
-};
-
-Date.implement({
-
-	set: function(prop, value){
-		prop = prop.toLowerCase();
-		var method = DateMethods[prop] && 'set' + DateMethods[prop];
-		if (method && this[method]) this[method](value);
-		return this;
-	}.overloadSetter(),
-
-	get: function(prop){
-		prop = prop.toLowerCase();
-		var method = DateMethods[prop] && 'get' + DateMethods[prop];
-		if (method && this[method]) return this[method]();
-		return null;
-	}.overloadGetter(),
-
-	clone: function(){
-		return new Date(this.get('time'));
-	},
-
-	increment: function(interval, times){
-		interval = interval || 'day';
-		times = times != null ? times : 1;
-
-		switch (interval){
-			case 'year':
-				return this.increment('month', times * 12);
-			case 'month':
-				var d = this.get('date');
-				this.set('date', 1).set('mo', this.get('mo') + times);
-				return this.set('date', d.min(this.get('lastdayofmonth')));
-			case 'week':
-				return this.increment('day', times * 7);
-			case 'day':
-				return this.set('date', this.get('date') + times);
-		}
-
-		if (!Date.units[interval]) throw new Error(interval + ' is not a supported interval');
-
-		return this.set('time', this.get('time') + times * Date.units[interval]());
-	},
-
-	decrement: function(interval, times){
-		return this.increment(interval, -1 * (times != null ? times : 1));
-	},
-
-	isLeapYear: function(){
-		return Date.isLeapYear(this.get('year'));
-	},
-
-	clearTime: function(){
-		return this.set({hr: 0, min: 0, sec: 0, ms: 0});
-	},
-
-	diff: function(date, resolution){
-		if (typeOf(date) == 'string') date = Date.parse(date);
-
-		return ((date - this) / Date.units[resolution || 'day'](3, 3)).round(); // non-leap year, 30-day month
-	},
-
-	getLastDayOfMonth: function(){
-		return Date.daysInMonth(this.get('mo'), this.get('year'));
-	},
-
-	getDayOfYear: function(){
-		return (Date.UTC(this.get('year'), this.get('mo'), this.get('date') + 1)
-			- Date.UTC(this.get('year'), 0, 1)) / Date.units.day();
-	},
-
-	setDay: function(day, firstDayOfWeek){
-		if (firstDayOfWeek == null){
-			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
-			if (firstDayOfWeek === '') firstDayOfWeek = 1;
-		}
-
-		day = (7 + Date.parseDay(day, true) - firstDayOfWeek) % 7;
-		var currentDay = (7 + this.get('day') - firstDayOfWeek) % 7;
-
-		return this.increment('day', day - currentDay);
-	},
-
-	getWeek: function(firstDayOfWeek){
-		if (firstDayOfWeek == null){
-			firstDayOfWeek = Date.getMsg('firstDayOfWeek');
-			if (firstDayOfWeek === '') firstDayOfWeek = 1;
-		}
-
-		var date = this,
-			dayOfWeek = (7 + date.get('day') - firstDayOfWeek) % 7,
-			dividend = 0,
-			firstDayOfYear;
-
-		if (firstDayOfWeek == 1){
-			// ISO-8601, week belongs to year that has the most days of the week (i.e. has the thursday of the week)
-			var month = date.get('month'),
-				startOfWeek = date.get('date') - dayOfWeek;
-
-			if (month == 11 && startOfWeek > 28) return 1; // Week 1 of next year
-
-			if (month == 0 && startOfWeek < -2){
-				// Use a date from last year to determine the week
-				date = new Date(date).decrement('day', dayOfWeek);
-				dayOfWeek = 0;
-			}
-
-			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day') || 7;
-			if (firstDayOfYear > 4) dividend = -7; // First week of the year is not week 1
-		} else {
-			// In other cultures the first week of the year is always week 1 and the last week always 53 or 54.
-			// Days in the same week can have a different weeknumber if the week spreads across two years.
-			firstDayOfYear = new Date(date.get('year'), 0, 1).get('day');
-		}
-
-		dividend += date.get('dayofyear');
-		dividend += 6 - dayOfWeek; // Add days so we calculate the current date's week as a full week
-		dividend += (7 + firstDayOfYear - firstDayOfWeek) % 7; // Make up for first week of the year not being a full week
-
-		return (dividend / 7);
-	},
-
-	getOrdinal: function(day){
-		return Date.getMsg('ordinal', day || this.get('date'));
-	},
-
-	getTimezone: function(){
-		return this.toString()
-			.replace(/^.*? ([A-Z]{3}).[0-9]{4}.*$/, '$1')
-			.replace(/^.*?\(([A-Z])[a-z]+ ([A-Z])[a-z]+ ([A-Z])[a-z]+\)$/, '$1$2$3');
-	},
-
-	getGMTOffset: function(){
-		var off = this.get('timezoneOffset');
-		return ((off > 0) ? '-' : '+') + pad((off.abs() / 60).floor(), 2) + pad(off % 60, 2);
-	},
-
-	setAMPM: function(ampm){
-		ampm = ampm.toUpperCase();
-		var hr = this.get('hr');
-		if (hr > 11 && ampm == 'AM') return this.decrement('hour', 12);
-		else if (hr < 12 && ampm == 'PM') return this.increment('hour', 12);
-		return this;
-	},
-
-	getAMPM: function(){
-		return (this.get('hr') < 12) ? 'AM' : 'PM';
-	},
-
-	parse: function(str){
-		this.set('time', Date.parse(str));
-		return this;
-	},
-
-	isValid: function(date){
-		if (!date) date = this;
-		return typeOf(date) == 'date' && !isNaN(date.valueOf());
-	},
-
-	format: function(format){
-		if (!this.isValid()) return 'invalid date';
-
-		if (!format) format = '%x %X';
-		if (typeof format == 'string') format = formats[format.toLowerCase()] || format;
-		if (typeof format == 'function') return format(this);
-
-		var d = this;
-		return format.replace(/%([a-z%])/gi,
-			function($0, $1){
-				switch ($1){
-					case 'a': return Date.getMsg('days_abbr')[d.get('day')];
-					case 'A': return Date.getMsg('days')[d.get('day')];
-					case 'b': return Date.getMsg('months_abbr')[d.get('month')];
-					case 'B': return Date.getMsg('months')[d.get('month')];
-					case 'c': return d.format('%a %b %d %H:%M:%S %Y');
-					case 'd': return pad(d.get('date'), 2);
-					case 'e': return pad(d.get('date'), 2, ' ');
-					case 'H': return pad(d.get('hr'), 2);
-					case 'I': return pad((d.get('hr') % 12) || 12, 2);
-					case 'j': return pad(d.get('dayofyear'), 3);
-					case 'k': return pad(d.get('hr'), 2, ' ');
-					case 'l': return pad((d.get('hr') % 12) || 12, 2, ' ');
-					case 'L': return pad(d.get('ms'), 3);
-					case 'm': return pad((d.get('mo') + 1), 2);
-					case 'M': return pad(d.get('min'), 2);
-					case 'o': return d.get('ordinal');
-					case 'p': return Date.getMsg(d.get('ampm'));
-					case 's': return Math.round(d / 1000);
-					case 'S': return pad(d.get('seconds'), 2);
-					case 'T': return d.format('%H:%M:%S');
-					case 'U': return pad(d.get('week'), 2);
-					case 'w': return d.get('day');
-					case 'x': return d.format(Date.getMsg('shortDate'));
-					case 'X': return d.format(Date.getMsg('shortTime'));
-					case 'y': return d.get('year').toString().substr(2);
-					case 'Y': return d.get('year');
-					case 'z': return d.get('GMTOffset');
-					case 'Z': return d.get('Timezone');
-				}
-				return $1;
-			}
-		);
-	},
-
-	toISOString: function(){
-		return this.format('iso8601');
-	}
-
-}).alias({
-	toJSON: 'toISOString',
-	compare: 'diff',
-	strftime: 'format'
-});
-
-// The day and month abbreviations are standardized, so we cannot use simply %a and %b because they will get localized
-var rfcDayAbbr = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-	rfcMonthAbbr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-var formats = {
-	db: '%Y-%m-%d %H:%M:%S',
-	compact: '%Y%m%dT%H%M%S',
-	'short': '%d %b %H:%M',
-	'long': '%B %d, %Y %H:%M',
-	rfc822: function(date){
-		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %Z');
-	},
-	rfc2822: function(date){
-		return rfcDayAbbr[date.get('day')] + date.format(', %d ') + rfcMonthAbbr[date.get('month')] + date.format(' %Y %H:%M:%S %z');
-	},
-	iso8601: function(date){
-		return (
-			date.getUTCFullYear() + '-' +
-			pad(date.getUTCMonth() + 1, 2) + '-' +
-			pad(date.getUTCDate(), 2) + 'T' +
-			pad(date.getUTCHours(), 2) + ':' +
-			pad(date.getUTCMinutes(), 2) + ':' +
-			pad(date.getUTCSeconds(), 2) + '.' +
-			pad(date.getUTCMilliseconds(), 3) + 'Z'
-		);
-	}
-};
-
-var parsePatterns = [],
-	nativeParse = Date.parse;
-
-var parseWord = function(type, word, num){
-	var ret = -1,
-		translated = Date.getMsg(type + 's');
-	switch (typeOf(word)){
-		case 'object':
-			ret = translated[word.get(type)];
-			break;
-		case 'number':
-			ret = translated[word];
-			if (!ret) throw new Error('Invalid ' + type + ' index: ' + word);
-			break;
-		case 'string':
-			var match = translated.filter(function(name){
-				return this.test(name);
-			}, new RegExp('^' + word, 'i'));
-			if (!match.length) throw new Error('Invalid ' + type + ' string');
-			if (match.length > 1) throw new Error('Ambiguous ' + type);
-			ret = match[0];
-	}
-
-	return (num) ? translated.indexOf(ret) : ret;
-};
-
-var startCentury = 1900,
-	startYear = 70;
-
-Date.extend({
-
-	getMsg: function(key, args){
-		return Locale.get('Date.' + key, args);
-	},
-
-	units: {
-		ms: Function.convert(1),
-		second: Function.convert(1000),
-		minute: Function.convert(60000),
-		hour: Function.convert(3600000),
-		day: Function.convert(86400000),
-		week: Function.convert(608400000),
-		month: function(month, year){
-			var d = new Date;
-			return Date.daysInMonth(month != null ? month : d.get('mo'), year != null ? year : d.get('year')) * 86400000;
-		},
-		year: function(year){
-			year = year || new Date().get('year');
-			return Date.isLeapYear(year) ? 31622400000 : 31536000000;
-		}
-	},
-
-	daysInMonth: function(month, year){
-		return [31, Date.isLeapYear(year) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month];
-	},
-
-	isLeapYear: function(year){
-		return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
-	},
-
-	parse: function(from){
-		var t = typeOf(from);
-		if (t == 'number') return new Date(from);
-		if (t != 'string') return from;
-		from = from.clean();
-		if (!from.length) return null;
-
-		var parsed;
-		parsePatterns.some(function(pattern){
-			var bits = pattern.re.exec(from);
-			return (bits) ? (parsed = pattern.handler(bits)) : false;
-		});
-
-		if (!(parsed && parsed.isValid())){
-			parsed = new Date(nativeParse(from));
-			if (!(parsed && parsed.isValid())) parsed = new Date(from.toInt());
-		}
-		return parsed;
-	},
-
-	parseDay: function(day, num){
-		return parseWord('day', day, num);
-	},
-
-	parseMonth: function(month, num){
-		return parseWord('month', month, num);
-	},
-
-	parseUTC: function(value){
-		var localDate = new Date(value);
-		var utcSeconds = Date.UTC(
-			localDate.get('year'),
-			localDate.get('mo'),
-			localDate.get('date'),
-			localDate.get('hr'),
-			localDate.get('min'),
-			localDate.get('sec'),
-			localDate.get('ms')
-		);
-		return new Date(utcSeconds);
-	},
-
-	orderIndex: function(unit){
-		return Date.getMsg('dateOrder').indexOf(unit) + 1;
-	},
-
-	defineFormat: function(name, format){
-		formats[name] = format;
-		return this;
-	},
-
-	
-
-	defineParser: function(pattern){
-		parsePatterns.push((pattern.re && pattern.handler) ? pattern : build(pattern));
-		return this;
-	},
-
-	defineParsers: function(){
-		Array.flatten(arguments).each(Date.defineParser);
-		return this;
-	},
-
-	define2DigitYearStart: function(year){
-		startYear = year % 100;
-		startCentury = year - startYear;
-		return this;
-	}
-
-}).extend({
-	defineFormats: Date.defineFormat.overloadSetter()
-});
-
-var regexOf = function(type){
-	return new RegExp('(?:' + Date.getMsg(type).map(function(name){
-		return name.substr(0, 3);
-	}).join('|') + ')[a-z]*');
-};
-
-var replacers = function(key){
-	switch (key){
-		case 'T':
-			return '%H:%M:%S';
-		case 'x': // iso8601 covers yyyy-mm-dd, so just check if month is first
-			return ((Date.orderIndex('month') == 1) ? '%m[-./]%d' : '%d[-./]%m') + '([-./]%y)?';
-		case 'X':
-			return '%H([.:]%M)?([.:]%S([.:]%s)?)? ?%p? ?%z?';
-	}
-	return null;
-};
-
-var keys = {
-	d: /[0-2]?[0-9]|3[01]/,
-	H: /[01]?[0-9]|2[0-3]/,
-	I: /0?[1-9]|1[0-2]/,
-	M: /[0-5]?\d/,
-	s: /\d+/,
-	o: /[a-z]*/,
-	p: /[ap]\.?m\.?/,
-	y: /\d{2}|\d{4}/,
-	Y: /\d{4}/,
-	z: /Z|[+-]\d{2}(?::?\d{2})?/
-};
-
-keys.m = keys.I;
-keys.S = keys.M;
-
-var currentLanguage;
-
-var recompile = function(language){
-	currentLanguage = language;
-
-	keys.a = keys.A = regexOf('days');
-	keys.b = keys.B = regexOf('months');
-
-	parsePatterns.each(function(pattern, i){
-		if (pattern.format) parsePatterns[i] = build(pattern.format);
-	});
-};
-
-var build = function(format){
-	if (!currentLanguage) return {format: format};
-
-	var parsed = [];
-	var re = (format.source || format) // allow format to be regex
-	.replace(/%([a-z])/gi,
-		function($0, $1){
-			return replacers($1) || $0;
-		}
-	).replace(/\((?!\?)/g, '(?:') // make all groups non-capturing
-	.replace(/ (?!\?|\*)/g, ',? ') // be forgiving with spaces and commas
-	.replace(/%([a-z%])/gi,
-		function($0, $1){
-			var p = keys[$1];
-			if (!p) return $1;
-			parsed.push($1);
-			return '(' + p.source + ')';
-		}
-	).replace(/\[a-z\]/gi, '[a-z\\u00c0-\\uffff;\&]'); // handle unicode words
-
-	return {
-		format: format,
-		re: new RegExp('^' + re + '$', 'i'),
-		handler: function(bits){
-			bits = bits.slice(1).associate(parsed);
-			var date = new Date().clearTime(),
-				year = bits.y || bits.Y;
-
-			if (year != null) handle.call(date, 'y', year); // need to start in the right year
-			if ('d' in bits) handle.call(date, 'd', 1);
-			if ('m' in bits || bits.b || bits.B) handle.call(date, 'm', 1);
-
-			for (var key in bits) handle.call(date, key, bits[key]);
-			return date;
-		}
-	};
-};
-
-var handle = function(key, value){
-	if (!value) return this;
-
-	switch (key){
-		case 'a': case 'A': return this.set('day', Date.parseDay(value, true));
-		case 'b': case 'B': return this.set('mo', Date.parseMonth(value, true));
-		case 'd': return this.set('date', value);
-		case 'H': case 'I': return this.set('hr', value);
-		case 'm': return this.set('mo', value - 1);
-		case 'M': return this.set('min', value);
-		case 'p': return this.set('ampm', value.replace(/\./g, ''));
-		case 'S': return this.set('sec', value);
-		case 's': return this.set('ms', ('0.' + value) * 1000);
-		case 'w': return this.set('day', value);
-		case 'Y': return this.set('year', value);
-		case 'y':
-			value = +value;
-			if (value < 100) value += startCentury + (value < startYear ? 100 : 0);
-			return this.set('year', value);
-		case 'z':
-			if (value == 'Z') value = '+00';
-			var offset = value.match(/([+-])(\d{2}):?(\d{2})?/);
-			offset = (offset[1] + '1') * (offset[2] * 60 + (+offset[3] || 0)) + this.getTimezoneOffset();
-			return this.set('time', this - offset * 60000);
-	}
-
-	return this;
-};
-
-Date.defineParsers(
-	'%Y([-./]%m([-./]%d((T| )%X)?)?)?', // "1999-12-31", "1999-12-31 11:59pm", "1999-12-31 23:59:59", ISO8601
-	'%Y%m%d(T%H(%M%S?)?)?', // "19991231", "19991231T1159", compact
-	'%x( %X)?', // "12/31", "12.31.99", "12-31-1999", "12/31/2008 11:59 PM"
-	'%d%o( %b( %Y)?)?( %X)?', // "31st", "31st December", "31 Dec 1999", "31 Dec 1999 11:59pm"
-	'%b( %d%o)?( %Y)?( %X)?', // Same as above with month and day switched
-	'%Y %b( %d%o( %X)?)?', // Same as above with year coming first
-	'%o %b %d %X %z %Y', // "Thu Oct 22 08:11:23 +0000 2009"
-	'%T', // %H:%M:%S
-	'%H:%M( ?%p)?' // "11:05pm", "11:05 am" and "11:05"
-);
-
-Locale.addEvent('change', function(language){
-	if (Locale.get('Date')) recompile(language);
-}).fireEvent('change', Locale.getCurrent());
-
-})();
 /*
 ---
 
@@ -10510,6 +10510,60 @@ Swiff.remote = function(obj, fn){
 	var rs = obj.CallFunction('<invoke name="' + fn + '" returntype="javascript">' + __flash__argumentsToXML(arguments, 2) + '</invoke>');
 	return eval(rs);
 };
+
+})();
+/*
+---
+
+script: Group.js
+
+name: Group
+
+description: Class for monitoring collections of events
+
+license: MIT-style license
+
+authors:
+  - Valerio Proietti
+
+requires:
+  - Core/Events
+  - MooTools.More
+
+provides: [Group]
+
+...
+*/
+
+(function(){
+
+var Group = this.Group = new Class({
+
+	initialize: function(){
+		this.instances = Array.flatten(arguments);
+	},
+
+	addEvent: function(type, fn){
+		var instances = this.instances,
+			len = instances.length,
+			togo = len,
+			args = new Array(len),
+			self = this;
+
+		instances.each(function(instance, i){
+			instance.addEvent(type, function(){
+				if (!args[i]) togo--;
+				args[i] = arguments;
+				if (!togo){
+					fn.call(self, instances, instance, args);
+					togo = len;
+					args = new Array(len);
+				}
+			});
+		});
+	}
+
+});
 
 })();
 /*
@@ -16321,3 +16375,698 @@ Ngn.Admin.UsersGrid = new Class({
   }
 
 });
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdGrid.js|--*/
+Ngn.DdGrid = new Class({
+  Extends: Ngn.Grid,
+
+  options: {
+    reloadOnDelete: false
+  },
+
+  fieldNames: [],
+
+  initInterface: function(data, fromAjax) {
+    this.fieldNames = data.fieldNames;
+    this.parent(data, fromAjax);
+  },
+
+  selectChange: function() {
+    new Ngn.Request.Loading({
+      url: this.getLink() + '?a=ajax_updateField&field=' + el.get('name') + '&value=' + el.get('value') + '&' + this.options.idParam + '=' + itemId,
+      onComplete: function() {
+        this.reload(itemId);
+      }.bind(this)
+    }).send();
+  },
+
+  initItems: function() {
+    this.options.eItems.getElements('select').each(function(el) {
+      var itemId = el.getParent('.item').get('data-id');
+      el.addEvent('change', function() {
+        this.selectChange(el, itemId);
+      }.bind(this));
+    }.bind(this));
+
+
+    /*
+     this.options.eItems.getElements('.iconFlag').each(function(el) {
+     var itemId = el.getParent('.item').get('data-id');
+     var field = this.fieldNames[el.getParent('.' + this.options.valueContainerClass).get('data-n')];
+     var title = el.get('title');
+     if (title.test('/')) {
+     var r = title.split('/');
+     var titleOn = r[0];
+     var titleOff = r[1];
+     } else {
+     var titleOn = title + ' (включить)';
+     var titleOff = title + ' (выключить)';
+     }
+     new Ngn.SwitcherLink(el, {
+     classOn: 'flagOn',
+     classOff: 'flagOff',
+     titleOn: titleOn,
+     titleOff: titleOff,
+     linkOn: this.getLink() + '?a=ajax_changeState&field=' + field + '&state=1&' + this.options.idParam + '=' + itemId,
+     linkOff: this.getLink() + '?a=ajax_changeState&field=' + field + '&state=0&' + this.options.idParam + '=' + itemId,
+     onComplete: function(enabled) {
+     this.loading(itemId, false);
+     this.fireEvent('reloadComplete', itemId);
+     }.bind(this),
+     onClick: function() {
+     this.loading(itemId, true);
+     }.bind(this)
+     });
+     }.bind(this));
+     */
+    this.parent();
+  },
+
+  initMenu: function() {
+    this.parent();
+    var timeoutId = 0;
+    var eSearch = new Element('input').inject(this.eMenu.getElement('.clear'), 'before');
+    eSearch.addEvent('keyup', function() {
+      clearTimeout(timeoutId);
+      timeoutId = this.loadSearchResults.delay(1000, this, eSearch.get('value'));
+    }.bind(this));
+  },
+
+  word: null,
+
+  loadSearchResults: function(word) {
+    if (this.word == word) return;
+    this.word = word;
+    Ngn.Request.Iface.loading(true);
+    new Ngn.Request.JSON({
+      url: this.options.basePath + '/json_search?word=' + word,
+      onComplete: function(r) {
+        this.initInterface(r, true);
+        Ngn.Request.Iface.loading(false);
+      }.bind(this)
+    }).send();
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
+Locale.define("en-US", "Dd", []);
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdFilterPath.js|--*/
+// @requiresBefore s2/js/locale?key=dd
+
+Ngn.DdFilterPath = new Class({
+
+  // "/path/to/page/param1/param2" - здесь n=3
+  initialize: function(n) {
+    this.n = n;
+    this.setPg(window.location.pathname);
+    this.chunks = [];
+    this.filters = {};
+    var p = window.location.pathname.split('/');
+    var chunks = p.slice(this.n + 1, p.length);
+    for (var i = 0; i < chunks.length; i++) {
+      if (!chunks[i].contains('.')) continue;
+      this.chunks.push(chunks[i]);
+    }
+    for (i = 0; i < this.chunks.length; i++) {
+      p = this.chunks[i].split('.');
+      if (p.length == 3) {
+        this._addFilter(p[0], p[1], p[2]);
+      } else if (p.length == 2) {
+        this._addFilter(p[0], 'default', p[1]);
+      } else {
+        // ignore
+      }
+    }
+  },
+
+  reset: function() {
+    this.filters = {};
+  },
+
+  _addFilter: function(type, name, value, multiple) {
+    if (!this.filters[type]) this.filters[type] = {};
+    this.filters[type][name] = value;
+  },
+
+  toPathString: function(path) {
+    var s = '';
+    for (var type in this.filters) {
+      for (var name in this.filters[type]) {
+        s += '/' + type + '.' + (name == 'default' ? '' : name + '.') + this.filters[type][name];
+      }
+    }
+    if (this.pg > 1) s += '/pg' + this.pg;
+    return s;
+  },
+
+  addFilter: function(type, name, value) {
+    if (!type) throw new Error('type not defined');
+    if (value === '' || value === false) {
+      delete this.filters[type][name];
+    } else {
+      this._addFilter(type, name, value);
+    }
+  },
+
+  removeFilter: function(type, name) {
+    if (!this.filters[type][name]) return;
+    this.addFilter(type, name, '');
+  },
+
+  setPg: function(path) {
+    this.pg = path.test(/\/pg\d+/) ? parseInt(path.replace(/.*\/pg(\d+).*/, '$1')) : 1;
+  }
+
+});
+
+Ngn.DdFilterPath.date = {};
+Ngn.DdFilterPath.date.toObj = function(str) {
+  var m = str.match(/(\d+);(\d+);(\d+)-(\d+);(\d+);(\d+)/);
+  if (!m) return false;
+  return {
+    from: [m[1], m[2], m[3]],
+    to: [m[4], m[5], m[6]]
+  };
+};
+Ngn.DdFilterPath.date.toStr = function(obj) {
+  return obj.from.join(';') + '-' + obj.to.join(';');
+};
+
+Ngn.DdFilterPath.Interface = new Class({
+  Implements: [Options],
+
+  options: {
+    groupToggler: true
+  },
+
+  /**
+   * @param Ngn.Grid
+   * @param Ngn.DdForm
+   */
+  initialize: function(grid, filtersForm, options) {
+    this.setOptions(options);
+    this.translate = {};
+    this.grid = grid;
+    if (!this.grid.options.filterPath) throw new Error('Grid must be initialized with filterPath option');
+    this.filterPath = this.grid.options.filterPath;
+    this.filtersForm = filtersForm;
+    new Element('input', {
+      type: 'reset',
+      value: Ngn.Locale.get('Dd.clearFilters'),
+      'class': 'resetAll'
+    }).inject(this.filtersForm.eForm, 'top').addEvent('click', function(e) {
+      this.filterPath.reset();
+      this.grid.reload();
+      this.resetMarkers();
+    }.bind(this));
+    if (this.options.groupToggler) this.groupToggler = new Ngn.GroupToggler(this.filtersForm.eForm);
+    this.initFromPath();
+    this.initEvents(this.filtersForm.eForm);
+    this.filtersForm.addEvent('newElement', this.initEvents.bind(this));
+  },
+
+  initFromPath: function() {
+    var pathType, name, value;
+    for (pathType in this.filterPath.filters) {
+      for (name in this.filterPath.filters[pathType]) {
+        value = this.filterPath.filters[pathType][name];
+        if (pathType == 'd') {
+          this.filtersForm.els.dateCreate.setValue(Ngn.DdFilterPath.date.toObj(value));
+          this.addMarker('dateCreate');
+        } else {
+          value = value.split(',');
+          var els = Ngn.Frm.getElements(name);
+          for (var i = 0; i < els.length; i++) {
+            if (els[i].get('type') == 'checkbox') {
+              if (Ngn.Arr.inn(els[i].get('value'), value)) els[i].set('checked', true);
+            } else {
+              els[i].set('value', value);
+            }
+          }
+          this.addMarker(name);
+        }
+      }
+    }
+  },
+
+  initEvents: function(eParent) {
+    eParent.getElements('select.allowReload,input[type=checkbox]').each(function(el) {
+      el.addEvent('change', function() {
+        var name, value;
+        if (el.get('type') == 'checkbox' && el.getParent('.tagsTreeSelect')) {
+          var pathFilterTypeDataEl = el.getParent('.tagsTreeSelect');
+          var values = Ngn.Frm.toObj(pathFilterTypeDataEl);
+          name = pathFilterTypeDataEl.get('data-name');
+          value = values[name] ? values[name].join(',') : false;
+        } else {
+          pathFilterTypeDataEl = el;
+          name = el.get('data-name') || el.get('name');
+          value = el.get('value');
+        }
+        value ? this.addMarker(name) : this.removeMarker(name);
+        this.filterPath.addFilter(pathFilterTypeDataEl.get('data-pathFilterType'), name, value);
+        this.grid.reload();
+      }.bind(this));
+    }.bind(this));
+    eParent.getElements('.type_dateRange input').each(function(eInput) {
+      eInput.addEvent('change', function() {
+        this.filterPath.addFilter('d', 'default', eInput.get('value'));
+        this.addMarker('dateCreate');
+        this.grid.reload();
+      }.bind(this));
+      /*
+       return;
+       el.getElement('.ok').addEvent('click', function() {
+       var d = Ngn.Frm.toObj(el);
+       console.debug(d);
+
+       return;
+       if (Object.eq(d.from, d.to)) {
+       if (Object.isEmpty(d.from)) {
+       this.filterPath.removeFilter('d', 'default');
+       } else {
+       this.filterPath.addFilter('d', 'default', d.from.join(';'));
+       }
+       } else {
+       this.filterPath.addFilter('d', 'default', d.from.join(';') + '-' + d.to.join(';'));
+       }
+       this.addMarker('dateCreate');
+       this.grid.reload();
+       }.bind(this));
+       el.getElement('.reset').addEvent('click', function() {
+       Ngn.Frm.getElements('from').each(function(el) {
+       el.set('value', '');
+       });
+       Ngn.Frm.getElements('to').each(function(el) {
+       el.set('value', '');
+       });
+       this.filterPath.removeFilter('d', 'default');
+       this.removeMarker('dateCreate');
+       this.grid.reload();
+       }.bind(this));
+       el.getElement('.today').addEvent('click', function() {
+       var d = new Date();
+       var today = [d.getDate(), d.getMonth() + 1, d.getFullYear()];
+       Ngn.Frm.getElements('from').each(function(el, n) {
+       el.set('value', today[n]);
+       });
+       Ngn.Frm.getElements('to').each(function(el, n) {
+       el.set('value', today[n]);
+       });
+       });
+       */
+    }.bind(this));
+    eParent.getElements('.type_num input').each(function(el) {
+      new Element('input', { type: 'button', value: 'ok' }).inject(el, 'after').addEvent('click', function() {
+        this.filterPath.addFilter('v', el.get('name'), el.get('value'));
+        this.grid.reload();
+      }.bind(this));
+    }.bind(this));
+  },
+
+  initPagination: function() {
+    if (!this.grid.ePagination) return;
+    this.grid.ePagination.getElements('a').each(function(el) {
+      el.addEvent('click', function(e) {
+        e.preventDefault();
+        this.filterPath.setPg(el.get('href'));
+        this.grid.reload();
+      }.bind(this));
+    }.bind(this));
+    this.grid.addEvent('reloadComplete', function(r) {
+      this.grid.ePagination.set('html', '');
+      if (r.pNums) {
+        this.grid.ePagination.set('html', r.pNums);
+        this.initPagination();
+      }
+    }.bind(this));
+  },
+
+  resetMarkers: function() {
+    this.filtersForm.eForm.getElements('.element .label').each(function(el) {
+      el.removeClass('sel');
+    });
+  },
+
+  addMarker: function(name) {
+    if (!name) throw new Error('name not defined');
+    this.filtersForm.eForm.getElement('.element.name_' + name).getElement('.label').addClass('sel');
+  },
+
+  removeMarker: function(name) {
+    this.filtersForm.eForm.getElement('.element.name_' + name).getElement('.label').removeClass('sel');
+  }
+
+});
+
+Ngn.DdFilterPath.getUrl = function() {
+  return window.location.pathname.replace(/(.*)\/pg\d+/, '$1');
+};
+/*--|/home/user/ngn-env/ngn/i/js/ngn/core/controls/Ngn.GroupToggler.js|--*/
+Ngn.GroupToggler = new Class({
+  Implements: [Options],
+
+  options: {
+    groupId: 'default',
+    itemIdParam: function(eItem) {
+      return eItem.get('class').replace(/.*name_(\w+).*/, '$1');
+    },
+    itemSelector: '.element',
+    btnSelector: '.label',
+    bodySelector: '.field-wrapper',
+    //storage: true,
+    openForever: false,
+    displayValue: 'block'
+  },
+
+  initialize: function(eCont, options) {
+    this.setOptions(options);
+    eCont.getElements(this.options.itemSelector).each(function(eItem) {
+      var eBtn = eItem.getElement(this.options.btnSelector);
+      if (!eBtn) return;
+      eBtn.addClass('pseudoLink').addClass('dgray');
+      var eBody = eItem.getElement(this.options.bodySelector);
+      if (this.options.openForever) {
+        eBody.setStyle('display', 'none');
+      } else {
+        var id = this.options.itemIdParam(eItem);
+        eBody.setStyle('display', this.display(id));
+      }
+      eBtn.addEvent('click', function(e) {
+        e.preventDefault();
+        if (this.options.openForever) {
+          eBody.setStyle('display', this.options.displayValue);
+          eBtn.dispose();
+          eItem.getElements('.temp').each(function(el){
+            el.dispose();
+          })
+        } else {
+          eBody.setStyle('display', this.display(id, true));
+          Ngn.Storage.set(this.id(id), !this.get(id));
+        }
+      }.bind(this));
+    }.bind(this));
+  },
+
+  get: function(id) {
+    return Ngn.Storage.get(this.id(id)) ? true : false;
+  },
+
+  display: function(id, invert) {
+    return this.get(id) ? (invert ? 'none' : this.options.displayValue) : (invert ? this.options.displayValue : 'none');
+  },
+
+  id: function(id) {
+    return this.options.groupId + id;
+  }
+
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdGrid.Admin.js|--*/
+// @requiresBefore Ngn.DdFilterPath, Ngn.Url
+
+Ngn.DdGrid.Admin = new Class({
+  Extends: Ngn.DdGrid,
+  options: {
+    resizeble: true,
+    basePath: Ngn.Url.getPath(3),
+    filterPath: new Ngn.DdFilterPath(4),
+    listAction: 'editContent',
+    // idParam: 'itemId',
+    toolActions: {
+      edit: function(row) {
+        new Ngn.Dialog.RequestForm({
+          url: Ngn.Url.getPath(4) + '?a=json_edit&itemId=' + row.id,
+          reduceHeight: true,
+          title: false,
+          onOkClose: function() {
+            this.reload(row.id);
+          }.bind(this)
+        });
+      }
+    },
+    toolLinks: {
+      edit: function(row) {
+        return Ngn.Url.getPath(4) + '?a=edit&itemId=' + row.id;
+      }
+    }
+  }
+  //initPagination: function(data, fromAjax) {
+  //  this.parent(data, fromAjax);
+  //  this.ePagination.inject(document.getElement('.pagePath'), 'top').addClass('pNumsTop');
+  //}
+});
+
+/**
+ * @param strName
+ * @param options
+ * @returns Ngn.DdGrid.Admin
+ */
+Ngn.DdGrid.Admin.factory = function(strName, options) {
+  var cls = eval('Ngn.DdGrid.Admin.' + Ngn.String.ucfirst(strName));
+  return cls ? new cls(options) : new Ngn.DdGrid.Admin(options);
+};
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dd/Ngn.DdForm.js|--*/
+Ngn.DdForm = new Class({
+  Extends: Ngn.Form,
+  
+  eForm: null,
+  
+  initialize: function(eForm, options) {
+    this.strName = eForm.get('data-strName');
+    if (!this.strName) throw new Error('"data-strName" is empty in form #' + eForm.get('id'));
+    this.parent(eForm, options);
+  }
+
+  /*
+  initDatePickers: function() {
+    // Дата, дата-время
+    this.eForm.getElements('.type_date, .type_datetime').each(function(el) {
+      var hasTime = el.hasClass('type_datetime');
+      new DatePicker(el.getElement('input'), {
+        pickerClass: 'datepicker_jqui',
+        positionOffset: { x: 0, y: 5 },
+        format: hasTime ? 'd.m.Y H:i' : 'd.m.Y',
+        inputOutputFormat: hasTime ? 'd.m.Y H:i' : 'd.m.Y',
+        timePicker: hasTime
+      });
+    });
+
+    // Дата рождения
+    this.eForm.getElements('.type_birthDate').each(function(el) {
+      new DatePicker(el.getElement('input'), {
+        pickerClass: 'datepicker_jqui',
+        positionOffset: { x: 0, y: 5 },
+        format: 'd.m.Y',
+        inputOutputFormat: 'd.m.Y',
+        timePicker: false,
+        allowEmpty: true,
+        minDate: {
+          //date: date('d.m.Y', mktime(0,0,0, 1, 1, new Date().getFullYear()-110)),
+          //format: 'd.m.Y'
+          date: Date.today().add({ years: -110 }).toString('dd.MM.yyyy'),
+          format: 'd.m.Y'
+        },
+        maxDate: {
+          date: Date.today().add({ years: -7 }).toString('dd.MM.yyyy'),
+          format: 'd.m.Y'
+        }
+      });
+    });
+ 
+    // Время
+    this.eForm.getElements('.type_time').each(function(el) {
+      new DatePicker(el.getElement('input'), {
+        pickerClass: 'datepicker_jqui',
+        positionOffset: { x: 0, y: -5 },
+        timePickerOnly: true,
+        format: 'H:i',
+        inputOutputFormat: 'H:i'
+      });
+    });
+  }
+  */
+  
+});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/Ngn.Form.El.DialogSelect.js|--*/
+Ngn.Form.El.DialogSelect = new Class({
+  Extends: Ngn.Form.El,
+  options: {
+    selectTitle: Locale.get('Core.change'),
+    selectClass: ''
+  },
+  baseName: 'defualt',
+  getInitField: function() {
+    return this.eRow.getElement('input') || this.eRow.getElement('select');
+  },
+  getSelectDialogEl: function() {
+    return new Element('a', {
+      'class': 'pseudoLink dgray' + (this.options.selectClass ? ' ' + this.options.selectClass : ''),
+      html: this.options.selectTitle
+    }).inject(this.eInitField, 'after');
+  },
+  makeHiddenField: function() {
+    this.eInput = new Element('input', { type: 'hidden', name: this.eInitField.get('name') }).inject(this.eInitField, 'after');
+  },
+  init: function() {
+    this.eInitField = this.getInitField();
+    this.value = this.eInitField.get('value');
+    this.makeHiddenField();
+    this.eSelectDialog = this.getSelectDialogEl();
+    new Element('div', {'class': 'rightFading'}).inject(this.eSelectDialog);
+    this.eInitField.dispose();
+    this.initControlDefault();
+    this.setValue(this.value);
+  },
+  setValue: function(value) {
+    this.setVisibleValue(value);
+    this._setValue(value);
+  },
+  setVisibleValue: function(value) {
+    this.eSelectDialog.set('html', value || 'not defined');
+  },
+  _setValue: function(value) {
+    if (!value) return;
+    this.value = value;
+    this.eInput.set('value', value);
+  },
+  initControl: function() {
+    this.eSelectDialog.addEvent('click', function() {
+      var cls = this.getDialogClass();
+      if (!cls) throw new Error('class not found');
+      new cls(Object.merge({
+        value: this.value
+      }, this.getDialogOptions()));
+    }.bind(this));
+  },
+  initControlDefault: function() {
+    this.initControl();
+  },
+  getDialogClass: function() {
+    throw new Error('Create abstract method getDialogClass()');
+  },
+  getDialogOptions: function() {
+    return {
+      onChangeValue: function(value) {
+        this.setValue(value);
+        if (this.form && this.form.options.dialog) {
+          this.form.options.dialog.fireEvent('change' + this.baseName.capitalize(), value);
+        }
+      }.bind(this)
+    };
+  }
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/dateRange/Ngn.Form.El.DateRange.js|--*/
+Ngn.Form.El.DateRange = new Class({
+  Extends: Ngn.Form.El.DialogSelect,
+
+  getDialogClass: function() {
+    return Ngn.DateRangeDialog;
+  },
+  setVisibleValue: function(value) {
+    if (!value) return;
+    var v;
+    var d = new Date();
+    if (value.from[2] == value.to[2]) {
+      if (value.to[2] == d.getFullYear()) {
+        if (value.from[0] == value.to[0] && value.from[1] == value.to[1]) {
+          v = value.to[0] + ' ' + Ngn.config.ruMonths2[value.to[1]];
+        } else {
+          v = value.from[0] + ' ' + Ngn.config.ruMonths2[value.from[1]] + ' — ' + value.to[0] + ' ' + Ngn.config.ruMonths2[value.to[1]];
+        }
+      } else {
+        v = value.from[0] + ' ' + Ngn.config.ruMonths2[value.from[1]] + ' — ' + value.to[0] + ' ' + Ngn.config.ruMonths2[value.to[1]] + ' ' + value.to[2];
+      }
+    } else {
+      v = value.from[0] + ' ' + Ngn.config.ruMonths2[value.from[1]] + ' ' + value.to[2] + ' — ' + value.to[0] + ' ' + Ngn.config.ruMonths2[value.to[1]] + ' ' + value.to[2];
+    }
+    this.parent(v);
+  },
+  _setValue: function(value) {
+    if (!value) return;
+    this.parent(Ngn.DdFilterPath.date.toStr(value));
+  }
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.ElSelectDialog.js|--*/
+Ngn.ElSelectDialog = new Class({
+  Extends: Ngn.Dialog,
+  options: {
+    dialogClass: 'dialog selectDialog',
+    noPadding: false
+  },
+  okClose: function() {
+    //this.formEl.setVisibleValue(this.getValue());
+    this.fireEvent('changeValue', this.getValue());
+    this.parent();
+  },
+  getValue: function() {
+    throw new Error('Abstract');
+  }
+});
+/*--|/home/user/ngn-env/ngn/i/js/ngn/form/dateRange/Ngn.DateRangeDialog.js|--*/
+Ngn.DateRangeDialog = new Class({
+  Extends: Ngn.ElSelectDialog,
+  options: {
+    width: 270,
+    bindBuildMessageFunction: true,
+    title: 'Выберите дату',
+    dialogClass: 'dialog dateRangeDialog'
+  },
+  buildMessage: function() {
+    return Ngn.tpls.dateRange;
+  },
+  init: function() {
+    var from, to;
+    if (!this.options.value) {
+      var d = new Date();
+      from = to = [d.getDate(), d.getMonth() + 1, d.getFullYear()];
+    } else {
+      //throw new Error('can not use Ngn.DdFilterPath here');
+      var o = Ngn.DdFilterPath.date.toObj(this.options.value);
+      from = o.from;
+      to = o.to;
+    }
+    Ngn.Frm.getElements('from', this.message).each(function(el, n) {
+      el.set('value', from[n]);
+    });
+    Ngn.Frm.getElements('to', this.message).each(function(el, n) {
+      el.set('value', to[n]);
+    });
+    //new Element('a', { class: 'gray pseudoLink', html: 'Сегодня' }).inject(this.message);
+    //new Element('a', { class: 'gray pseudoLink', html: 'Последняя неделя' }).inject(this.message);
+    //Ngn.Btn.btn1('Сегодня', 'btn ok').inject(this.message).addEvent('click', function() {
+    //});
+  },
+  getValue: function() {
+    var value = {
+      from: [],
+      to: []
+    };
+    Ngn.Frm.getElements('from', this.message).each(function(el, n) {
+      value.from.push(el.get('value'));
+    });
+    Ngn.Frm.getElements('to', this.message).each(function(el, n) {
+      value.to.push(el.get('value'));
+    });
+    return value;
+  }
+});
+/*--|/home/user/ngn-env/ngn/more/scripts/js/common/config.php| (with request data)--*/
+// @requiresBefore Ngn.Object
+Ngn.Object.fromString("Ngn.config.ruMonths2", {"1":"\u042f\u043d\u0432\u0430\u0440\u044f","2":"\u0424\u0435\u0432\u0440\u0430\u043b\u044f","3":"\u041c\u0430\u0440\u0442\u0430","4":"\u0410\u043f\u0440\u0435\u043b\u044f","5":"\u041c\u0430\u044f","6":"\u0418\u044e\u043d\u044f","7":"\u0418\u044e\u043b\u044f","8":"\u0410\u0432\u0433\u0443\u0441\u0442\u0430","9":"\u0421\u0435\u043d\u0442\u044f\u0431\u0440\u044f","10":"\u041e\u043a\u0442\u044f\u0431\u0440\u044f","11":"\u041d\u043e\u044f\u0431\u0440\u044f","12":"\u0414\u0435\u043a\u0430\u0431\u0440\u044f"});
+
+/*--|/home/user/ngn-env/ngn/i/js/ngn/Ngn.js|--*/
+Ngn.toObj = function(s, value) {
+  var a = s.split('.');
+  for (var i = 0; i < a.length; i++) {
+    var ss = a.slice(0, i + 1).join('.');
+    eval('var def = ' + ss + ' === undefined');
+    if (def) eval((i == 0 ? 'var ' : '') + ss + ' = {}');
+  }
+  if (value) eval(s + ' = value');
+};
+
+if (!Ngn.tpls) Ngn.tpls = {};
+
+/*--|/home/user/ngn-env/ngn/more/scripts/js/common/tpl.php| (with request data)--*/
+Ngn.toObj('Ngn.tpls.dateRange', '<div>\n<select name="from[]">\n	<option value="" selected>—</option>\n	<option value="1">1</option>\n	<option value="2">2</option>\n	<option value="3">3</option>\n	<option value="4">4</option>\n	<option value="5">5</option>\n	<option value="6">6</option>\n	<option value="7">7</option>\n	<option value="8">8</option>\n	<option value="9">9</option>\n	<option value="10">10</option>\n	<option value="11">11</option>\n	<option value="12">12</option>\n	<option value="13">13</option>\n	<option value="14">14</option>\n	<option value="15">15</option>\n	<option value="16">16</option>\n	<option value="17">17</option>\n	<option value="18">18</option>\n	<option value="19">19</option>\n	<option value="20">20</option>\n	<option value="21">21</option>\n	<option value="22">22</option>\n	<option value="23">23</option>\n	<option value="24">24</option>\n	<option value="25">25</option>\n	<option value="26">26</option>\n	<option value="27">27</option>\n	<option value="28">28</option>\n	<option value="29">29</option>\n	<option value="30">30</option>\n	<option value="31">31</option>\n</select>\n\n<select name="from[]">\n	<option value="" selected>—</option>\n	<option value="1">Январь</option>\n	<option value="2">Февраль</option>\n	<option value="3">Март</option>\n	<option value="4">Апрель</option>\n	<option value="5">Май</option>\n	<option value="6">Июнь</option>\n	<option value="7">Июль</option>\n	<option value="8">Август</option>\n	<option value="9">Сентябрь</option>\n	<option value="10">Октябрь</option>\n	<option value="11">Ноябрь</option>\n	<option value="12">Декабрь</option>\n</select>\n\n<select name="from[]">\n	<option value="" selected>—</option>\n	<option value="2016">2016</option>\n	<option value="2015">2015</option>\n	<option value="2014">2014</option>\n	<option value="2013">2013</option>\n	<option value="2012">2012</option>\n	<option value="2011">2011</option>\n	<option value="2010">2010</option>\n	<option value="2009">2009</option>\n	<option value="2008">2008</option>\n	<option value="2007">2007</option>\n	<option value="2006">2006</option>\n	<option value="2005">2005</option>\n	<option value="2004">2004</option>\n	<option value="2003">2003</option>\n	<option value="2002">2002</option>\n	<option value="2001">2001</option>\n	<option value="2000">2000</option>\n	<option value="1999">1999</option>\n	<option value="1998">1998</option>\n	<option value="1997">1997</option>\n	<option value="1996">1996</option>\n	<option value="1995">1995</option>\n	<option value="1994">1994</option>\n	<option value="1993">1993</option>\n	<option value="1992">1992</option>\n	<option value="1991">1991</option>\n	<option value="1990">1990</option>\n	<option value="1989">1989</option>\n	<option value="1988">1988</option>\n	<option value="1987">1987</option>\n	<option value="1986">1986</option>\n	<option value="1985">1985</option>\n	<option value="1984">1984</option>\n	<option value="1983">1983</option>\n	<option value="1982">1982</option>\n	<option value="1981">1981</option>\n	<option value="1980">1980</option>\n	<option value="1979">1979</option>\n	<option value="1978">1978</option>\n	<option value="1977">1977</option>\n	<option value="1976">1976</option>\n	<option value="1975">1975</option>\n	<option value="1974">1974</option>\n	<option value="1973">1973</option>\n	<option value="1972">1972</option>\n	<option value="1971">1971</option>\n	<option value="1970">1970</option>\n	<option value="1969">1969</option>\n	<option value="1968">1968</option>\n	<option value="1967">1967</option>\n	<option value="1966">1966</option>\n	<option value="1965">1965</option>\n	<option value="1964">1964</option>\n	<option value="1963">1963</option>\n	<option value="1962">1962</option>\n	<option value="1961">1961</option>\n	<option value="1960">1960</option>\n	<option value="1959">1959</option>\n	<option value="1958">1958</option>\n	<option value="1957">1957</option>\n	<option value="1956">1956</option>\n	<option value="1955">1955</option>\n	<option value="1954">1954</option>\n	<option value="1953">1953</option>\n	<option value="1952">1952</option>\n	<option value="1951">1951</option>\n	<option value="1950">1950</option>\n	<option value="1949">1949</option>\n	<option value="1948">1948</option>\n	<option value="1947">1947</option>\n	<option value="1946">1946</option>\n	<option value="1945">1945</option>\n	<option value="1944">1944</option>\n	<option value="1943">1943</option>\n	<option value="1942">1942</option>\n	<option value="1941">1941</option>\n	<option value="1940">1940</option>\n	<option value="1939">1939</option>\n	<option value="1938">1938</option>\n	<option value="1937">1937</option>\n	<option value="1936">1936</option>\n	<option value="1935">1935</option>\n	<option value="1934">1934</option>\n	<option value="1933">1933</option>\n	<option value="1932">1932</option>\n	<option value="1931">1931</option>\n	<option value="1930">1930</option>\n	<option value="1929">1929</option>\n	<option value="1928">1928</option>\n	<option value="1927">1927</option>\n	<option value="1926">1926</option>\n	<option value="1925">1925</option>\n	<option value="1924">1924</option>\n	<option value="1923">1923</option>\n	<option value="1922">1922</option>\n	<option value="1921">1921</option>\n	<option value="1920">1920</option>\n	<option value="1919">1919</option>\n	<option value="1918">1918</option>\n	<option value="1917">1917</option>\n	<option value="1916">1916</option>\n	<option value="1915">1915</option>\n	<option value="1914">1914</option>\n	<option value="1913">1913</option>\n	<option value="1912">1912</option>\n	<option value="1911">1911</option>\n	<option value="1910">1910</option>\n	<option value="1909">1909</option>\n	<option value="1908">1908</option>\n	<option value="1907">1907</option>\n	<option value="1906">1906</option>\n	<option value="1905">1905</option>\n	<option value="1904">1904</option>\n	<option value="1903">1903</option>\n	<option value="1902">1902</option>\n	<option value="1901">1901</option>\n	<option value="1900">1900</option>\n</select>\n</div><div>\n<select name="to[]">\n	<option value="" selected>—</option>\n	<option value="1">1</option>\n	<option value="2">2</option>\n	<option value="3">3</option>\n	<option value="4">4</option>\n	<option value="5">5</option>\n	<option value="6">6</option>\n	<option value="7">7</option>\n	<option value="8">8</option>\n	<option value="9">9</option>\n	<option value="10">10</option>\n	<option value="11">11</option>\n	<option value="12">12</option>\n	<option value="13">13</option>\n	<option value="14">14</option>\n	<option value="15">15</option>\n	<option value="16">16</option>\n	<option value="17">17</option>\n	<option value="18">18</option>\n	<option value="19">19</option>\n	<option value="20">20</option>\n	<option value="21">21</option>\n	<option value="22">22</option>\n	<option value="23">23</option>\n	<option value="24">24</option>\n	<option value="25">25</option>\n	<option value="26">26</option>\n	<option value="27">27</option>\n	<option value="28">28</option>\n	<option value="29">29</option>\n	<option value="30">30</option>\n	<option value="31">31</option>\n</select>\n\n<select name="to[]">\n	<option value="" selected>—</option>\n	<option value="1">Январь</option>\n	<option value="2">Февраль</option>\n	<option value="3">Март</option>\n	<option value="4">Апрель</option>\n	<option value="5">Май</option>\n	<option value="6">Июнь</option>\n	<option value="7">Июль</option>\n	<option value="8">Август</option>\n	<option value="9">Сентябрь</option>\n	<option value="10">Октябрь</option>\n	<option value="11">Ноябрь</option>\n	<option value="12">Декабрь</option>\n</select>\n\n<select name="to[]">\n	<option value="" selected>—</option>\n	<option value="2016">2016</option>\n	<option value="2015">2015</option>\n	<option value="2014">2014</option>\n	<option value="2013">2013</option>\n	<option value="2012">2012</option>\n	<option value="2011">2011</option>\n	<option value="2010">2010</option>\n	<option value="2009">2009</option>\n	<option value="2008">2008</option>\n	<option value="2007">2007</option>\n	<option value="2006">2006</option>\n	<option value="2005">2005</option>\n	<option value="2004">2004</option>\n	<option value="2003">2003</option>\n	<option value="2002">2002</option>\n	<option value="2001">2001</option>\n	<option value="2000">2000</option>\n	<option value="1999">1999</option>\n	<option value="1998">1998</option>\n	<option value="1997">1997</option>\n	<option value="1996">1996</option>\n	<option value="1995">1995</option>\n	<option value="1994">1994</option>\n	<option value="1993">1993</option>\n	<option value="1992">1992</option>\n	<option value="1991">1991</option>\n	<option value="1990">1990</option>\n	<option value="1989">1989</option>\n	<option value="1988">1988</option>\n	<option value="1987">1987</option>\n	<option value="1986">1986</option>\n	<option value="1985">1985</option>\n	<option value="1984">1984</option>\n	<option value="1983">1983</option>\n	<option value="1982">1982</option>\n	<option value="1981">1981</option>\n	<option value="1980">1980</option>\n	<option value="1979">1979</option>\n	<option value="1978">1978</option>\n	<option value="1977">1977</option>\n	<option value="1976">1976</option>\n	<option value="1975">1975</option>\n	<option value="1974">1974</option>\n	<option value="1973">1973</option>\n	<option value="1972">1972</option>\n	<option value="1971">1971</option>\n	<option value="1970">1970</option>\n	<option value="1969">1969</option>\n	<option value="1968">1968</option>\n	<option value="1967">1967</option>\n	<option value="1966">1966</option>\n	<option value="1965">1965</option>\n	<option value="1964">1964</option>\n	<option value="1963">1963</option>\n	<option value="1962">1962</option>\n	<option value="1961">1961</option>\n	<option value="1960">1960</option>\n	<option value="1959">1959</option>\n	<option value="1958">1958</option>\n	<option value="1957">1957</option>\n	<option value="1956">1956</option>\n	<option value="1955">1955</option>\n	<option value="1954">1954</option>\n	<option value="1953">1953</option>\n	<option value="1952">1952</option>\n	<option value="1951">1951</option>\n	<option value="1950">1950</option>\n	<option value="1949">1949</option>\n	<option value="1948">1948</option>\n	<option value="1947">1947</option>\n	<option value="1946">1946</option>\n	<option value="1945">1945</option>\n	<option value="1944">1944</option>\n	<option value="1943">1943</option>\n	<option value="1942">1942</option>\n	<option value="1941">1941</option>\n	<option value="1940">1940</option>\n	<option value="1939">1939</option>\n	<option value="1938">1938</option>\n	<option value="1937">1937</option>\n	<option value="1936">1936</option>\n	<option value="1935">1935</option>\n	<option value="1934">1934</option>\n	<option value="1933">1933</option>\n	<option value="1932">1932</option>\n	<option value="1931">1931</option>\n	<option value="1930">1930</option>\n	<option value="1929">1929</option>\n	<option value="1928">1928</option>\n	<option value="1927">1927</option>\n	<option value="1926">1926</option>\n	<option value="1925">1925</option>\n	<option value="1924">1924</option>\n	<option value="1923">1923</option>\n	<option value="1922">1922</option>\n	<option value="1921">1921</option>\n	<option value="1920">1920</option>\n	<option value="1919">1919</option>\n	<option value="1918">1918</option>\n	<option value="1917">1917</option>\n	<option value="1916">1916</option>\n	<option value="1915">1915</option>\n	<option value="1914">1914</option>\n	<option value="1913">1913</option>\n	<option value="1912">1912</option>\n	<option value="1911">1911</option>\n	<option value="1910">1910</option>\n	<option value="1909">1909</option>\n	<option value="1908">1908</option>\n	<option value="1907">1907</option>\n	<option value="1906">1906</option>\n	<option value="1905">1905</option>\n	<option value="1904">1904</option>\n	<option value="1903">1903</option>\n	<option value="1902">1902</option>\n	<option value="1901">1901</option>\n	<option value="1900">1900</option>\n</select>\n</div>');
