@@ -82,7 +82,8 @@ class CtrlAdminInvoices extends CtrlAdmin {
     return new InvoiceForm($this->userId);
   }
 
-
 }
 
-CtrlAdminInvoices::$properties['title'] = Locale::get('invoices', 'admin');
+CtrlAdminInvoices::setAdminModuleTitle(Locale::get('invoices', 'admin'));
+
+//CtrlAdminInvoices::$properties['title'] = Locale::get('invoices', 'admin');

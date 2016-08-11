@@ -16386,6 +16386,8 @@ Ngn.DdGrid = new Class({
   fieldNames: [],
 
   initInterface: function(data, fromAjax) {
+    console.trace(data);
+
     this.fieldNames = data.fieldNames;
     this.parent(data, fromAjax);
   },

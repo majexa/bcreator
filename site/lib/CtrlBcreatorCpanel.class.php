@@ -40,8 +40,8 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
   }
 
   function action_ajax_buttonSelect() {
-    foreach (BcCore::zukulDb()->select("SELECT * FROM bannerButton") as $v) {
-      print "<img src='/u/bcImagesCache/bannerButton/{$v['filename']}'>\n";
+    foreach (db()->selectCol("SELECT image FROM dd_i_buttons") as $v) {
+      print "<img src='/".UPLOAD_DIR.'/'.$v."'>\n";
     }
   }
 
