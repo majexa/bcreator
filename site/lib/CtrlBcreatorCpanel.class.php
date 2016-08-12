@@ -46,8 +46,8 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
   }
 
   function action_ajax_clipartSelect() {
-    foreach (glob(UPLOAD_PATH.'/bcImagesCache/bannerImage/*') as $file) {
-      print '<img src="/u/bcImagesCache/bannerImage/'.basename($file).'">';
+    foreach (db()->selectCol("SELECT image FROM dd_i_clipart") as $v) {
+      print "<img src='/".UPLOAD_DIR.'/'.$v."'>\n";
     }
   }
 
