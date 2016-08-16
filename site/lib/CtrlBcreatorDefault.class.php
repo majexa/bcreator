@@ -15,8 +15,8 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
     foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', self::HOMEPAGE_USER_ID) as $v) {
       $banner = new BcBanner($v);
       list($banner->r['w'], $banner->r['h']) = getimagesize($banner['downloadFile']);
-      if ($banner->r['h'] > 150) {
-        $banner->r['w'] = round($banner->r['w'] * 150 / $banner->r['h']);
+      if ($banner->r['h'] > 250) {
+        //$banner->r['w'] = round($banner->r['w'] * 150 / $banner->r['h']);
       }
       $this->d['banners'][] = $banner->r;
     }
