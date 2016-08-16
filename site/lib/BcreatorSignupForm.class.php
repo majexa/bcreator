@@ -19,6 +19,7 @@ class BcreatorSignupForm extends Form {
       [
         'title' => 'E-mail',
         'name' => 'email',
+        'type' => 'email',
         'required' => true,
         'autocomplete' => 'off'
       ],
