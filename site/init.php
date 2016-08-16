@@ -17,15 +17,15 @@ Sql::connectDatabase([
   'dbname' => DB_NAME
 ]);
 
-  Sflm::$debugPaths = [
-  'css' => [
-    'design.css',
-    'home.css',
-    'table.css',
-    'banners.css',
-  ],
-  'js' => [
-    'Ngn.Carousel'
-  ]
-];
-
+//Sflm::$debugPaths = [
+//  'css' => [
+//    'design.css',
+//    'home.css',
+//    'table.css',
+//    'banners.css',
+//  ],
+//  'js'  => [
+//    'Ngn.Carousel'
+//  ]
+//];
+//
