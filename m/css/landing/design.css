@@ -1,25 +1,23 @@
 .container {
-width: 950px;
+width: 960px;
+position: relative;
 }
-
-
+.block {
+}
 html,
 body {
 margin: 0;
 padding: 0;
 height: 100%;
+background: #fff;
+font-size: 15px;
 }
 .container {
 min-height: 100%;
 position: relative;
-background: #f2f2f2;
 }
 .container.home {
 background: #fff;
-}
-.head {
-background: #fff;
-padding: 10px;
 }
 .content {
 padding-bottom: 100px; /* Height of the footer element */
@@ -27,16 +25,18 @@ position: relative;
 }
 .footer {
 background: #33363B;
-height: 100px;
+height: 110px;
+font-size: 15px;
+/*
 position: absolute;
 bottom: 0;
 left: 0;
+*/
 text-align: center;
 }
 .footer .cont {
 text-align: left;
 display: inline-block;
-width: 330px;
 margin: 20px;
 background: url(/m/img/landing/zukul.png) no-repeat;
 color: #CACBCF;
@@ -44,18 +44,16 @@ min-height: 70px;
 }
 .footer .cont .body {
 padding: 8px 0 0 70px;
-
 }
 .footer .cont a {
 color: #E8E9EA;
 }
-
-
 .head .cont {
 padding: 20px 0;
 }
 .head {
 position: relative;
+font-size: 15px;
 }
 .head .auth {
 position: absolute;
@@ -103,13 +101,14 @@ background: #FF8A00;
 
 .btn {
 background: #FF8A00;
-padding: 6px 10px !important;
 font-weight: bold;
 color: #fff;
 text-decoration: none;
 display: inline-block;
-border: 0;
+border: 0 !important;
 cursor: pointer;
+padding: 10px 20px !important;
+font-size: 20px !important;
 }
 .btn:hover {
 background: #3A4452;
@@ -127,25 +126,13 @@ margin-bottom: 20px;
 .content h1 {
 font-size: 20px;
 margin: 20px 0;
-text-align: center;
 }
-.banners {
-position: absolute;
-top: 120px;
-}
-.banners.left {
-left: 20px;
-}
-.banners.right {
-right: 20px;
-}
-
 
 .menu ul ul {
 display: none;
 position: absolute;
-top: 31px;
-left: -20px;
+top: 34px;
+left: -22px;
 z-index: 200;
 }
 .menu ul ul li {

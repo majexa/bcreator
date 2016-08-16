@@ -1,0 +1,10 @@
+.banners {
+position: absolute;
+top: 60px;
+}
+.banners.left {
+left: -180px;
+}
+.banners.right {
+right: -180px;
+}

@@ -17,10 +17,15 @@ Sql::connectDatabase([
   'dbname' => DB_NAME
 ]);
 
-//Sflm::$debugUrl = 'http://'.SITE_DOMAIN;
-//Sflm::$debugPaths = [
-//  'js' => [
-//    'Ngn.sd.GlobalSlides',
-//  ]
-//];
+  Sflm::$debugPaths = [
+  'css' => [
+    'design.css',
+    'home.css',
+    'table.css',
+    'banners.css',
+  ],
+  'js' => [
+    'Ngn.Carousel'
+  ]
+];
 

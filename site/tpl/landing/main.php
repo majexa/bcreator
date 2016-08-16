@@ -15,58 +15,65 @@
 
 <body>
 
-<div class="container<?= ($d['ctrlName'] == 'bcreatorDefault' and $d['action'] == 'default') ? ' home' : '' ?>">
-  <div class="span-24 last head">
-    <div class="cont">
-      <a href="/" class="logo"><img src="/m/img/landing/logo.png"></a>
-    </div>
-    <div class="auth">
-      <? if (!Auth::get('id')) { ?>
-        <a href="/signin">SIGN IN</a>
-        &nbsp;|&nbsp;
-        <a href="/register">REGISTER</a>
-      <? } else { ?>
-        <a href="?logout=1" class="link">SIGN OUT</a>
+<div class="wrapper <?= ($d['ctrlName'] == 'bcreatorDefault' and $d['action'] == 'default') ? ' home' : '' ?>n_<?= $d['name'] ?>">
+  <div class="head">
+    <div class="container">
+      <div class="cont">
+        <a href="/" class="logo"><img src="/m/img/landing/logo.png"></a>
+      </div>
+      <div class="auth">
+        <? if (!Auth::get('id')) { ?>
+          <a href="/signin">SIGN IN</a>
+          &nbsp;|&nbsp;
+          <a href="/register">REGISTER</a>
+        <?
+        }
+        else {
+          ?>
+          <a href="?logout=1" class="link">SIGN OUT</a>
+        <? } ?>
+      </div>
+      <? if (Auth::get('id')) { ?>
+        <div class="menu">
+          <ul>
+            <? foreach ($d['menu'] as $i => $v) { ?>
+              <li id="m<?= $i + 1 ?>"<?= $v['active'] ? ' class="active"' : '' ?>>
+                <a href="<?= $v['link'] ?>"><?= $v['title'] ?></a>
+                <? if ($v['menu']) { ?>
+                  <ul>
+                    <? foreach ($v['menu'] as $ii => $vv) { ?>
+                      <li>
+                        <a href="<?= $vv['link'] ?>"><?= $vv['title'] ?></a>
+                      </li>
+                    <? } ?>
+                  </ul>
+                <? } ?>
+              </li>
+            <? } ?>
+          </ul>
+        </div>
       <? } ?>
     </div>
-    <? if (Auth::get('id')) { ?>
-    <div class="menu">
-      <ul>
-        <? foreach ($d['menu'] as $i => $v) { ?>
-          <li id="m<?= $i + 1 ?>"<?= $v['active'] ? ' class="active"' : '' ?>>
-            <a href="<?= $v['link'] ?>"><?= $v['title'] ?></a>
-            <? if ($v['menu']) { ?>
-              <ul>
-                <? foreach ($v['menu'] as $ii => $vv) { ?>
-                <li>
-                  <a href="<?= $vv['link'] ?>"><?= $vv['title'] ?></a>
-                </li>
-                <? } ?>
-              </ul>
-            <? } ?>
-          </li>
-        <? } ?>
-      </ul>
-    </div>
-    <? } ?>
   </div>
-  <div class="span-24 last content">
-    <? $this->tpl($d['tpl'], $d) ?>
-  </div>
-  <div class="span-24 last footer">
-    <div class="cont">
-      <div class="body">
-      <p>
-        <a href="/index/privacy">Privacy Policy</a> |
-        <a href="/index/terms">Terms of Service</a> |
-        <a href="/support">Contact Us</a>
-      </p>
-      <p>
-        &copy; 2016 Banner Creator, All rights reserved
-      </p>
+  <? $this->tpl($d['tpl'], $d) ?>
+
+  <div class="footer">
+    <div class="container">
+      <div class="cont">
+        <div class="body">
+          <p>
+            <a href="/index/privacy">Privacy Policy</a> |
+            <a href="/index/terms">Terms of Service</a> |
+            <a href="/support">Contact Us</a>
+          </p>
+          <p>
+            &copy; 2016 Banner Creator, All rights reserved
+          </p>
+        </div>
       </div>
     </div>
   </div>
+
 </div>
 </body>
 </html>

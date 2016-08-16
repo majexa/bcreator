@@ -1,35 +1,42 @@
 body {
 font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
+font-size: 20px;
 }
 .man {
-height: 331px;
-background: url(/m/img/landing/man.png) no-repeat;
+height: 660px;
+background: url(/m/img/landing/man-bg.png) no-repeat top center;
 position: relative;
 }
 .frame {
 position: absolute;
-top: 25px;
-left: 470px;
-width: 333px;
-height: 275px;
-}
-.frame .body {
-height: 170px;
-}
-.frame .foot {
-height: 105px;
-}
-.frame .foot p {
-font-size: 10px;
-}
-.frame .foot .btn {
-margin-bottom: 10px;
+top: 50px;
+right: 0;
+width: 645px;
+height: 549px;
+background: url(/m/img/landing/man-frame.png) no-repeat;
+font-size: 17px;
 }
 .frame .cont {
-padding: 15px;
+padding: 30px 20px 0 35px;
+}
+.frame .body {
+margin-left: 114px;
+height: 343px;
+}
+.frame .body p {
+margin-bottom: 20px;
+}
+.frame .foot {
+margin-left: 114px;
+height: 105px;
+font-size: 15px;
 }
 .frame .foot .cont {
-padding-top: 15px;
+padding-top: 30px;
+}
+.frame .foot .btn {
+margin-bottom: 30px;
+font-size: 25px;
 }
 a {
 color: #FF8A00;
@@ -39,26 +46,27 @@ color: #000;
 }
 .format {
 display: inline-block;
-width: 40px;
-height: 20px;
+width: 60px;
+height: 30px;
 background: url(/m/img/landing/format.png) no-repeat;
 }
 .format span {
 display: inline-block;
 color: #5E554E;
-padding: 4px 0 0 6px;
+padding: 6px 0 0 8px;
 }
 .icons {
 text-align: center;
 padding: 20px 0;
 margin-bottom: 15px;
+
 }
-.icons div {
+.icons .item {
 color: #3A4452;
 background: center top;
 display: inline-block;
 vertical-align: top;
-width: 250px;
+width: 310px;
 }
 .icons i {
 display: inline-block;
@@ -78,6 +86,15 @@ background-image: url(/m/img/landing/publish.png)
 }
 .icons h2 {
 font-weight: bold;
+}
+.examplesTitle h2 {
+margin: 0;
+margin-left: 75px;
+font-size: 20px;
+background: #3A4452;
+display: inline-block;
+color: #fff;
+padding: 10px 20px;
 }
 .examples, .responses {
 background: #3A4452;
@@ -110,7 +127,6 @@ display: block;
 float: left;
 }
 .examplesWrapper img {
-
 max-height: 150px;
 margin-right: 20px;
 }
@@ -129,42 +145,34 @@ font-weight: bold;
 }
 .features {
 text-align: center;
+padding-bottom: 30px;
 }
 .features .item {
 text-align: left;
 margin-right: 30px;
 background: url(/m/img/landing/li.png) no-repeat;
-width: 150px;
-padding-top: 7px;
-padding-left: 40px;
+width: 140px;
+padding-top: 0px;
+padding-left: 60px;
 display: inline-block;
 min-height: 60px;
+vertical-align: top;
 }
-.responses, .bg {
-width: 950px;
-height: 245px;
-}
-.responsesWrapper {
-width: 950px;
-z-index: 100;
-position: absolute;
-}
-.responses .bg {
-z-index: 10;
-position: absolute;
+.responses {
+height: 363px;
 background: url(/m/img/landing/responses-bg.png);
-opacity: 0.3;
 }
 .responses .left,.responses .right {
 z-index: 100;
-top: 90px;
+top: 150px;
 }
 .responses .item {
 text-align: center;
+width: 960px;
+float: left;
 }
 .responses .item .cont {
-padding: 30px 250px;
-
+padding: 50px 50px;
 }
 .responses .item img {
 border-radius: 100px;

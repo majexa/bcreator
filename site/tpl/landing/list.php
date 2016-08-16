@@ -1,11 +1,18 @@
-<div class="center">
+<?/*
   <div class="subtitle">
     Create your own banners, Build, publish.
     Try Banner Creator for free Check out features
   </div>
-  <div class="button">
-    <a href="/list/create" class=" btn">Create New Banner</a>
-  </div>
+  */
+?>
+<style>
+  .n_list .content h1 {
+    float: left;
+
+  }
+</style>
+<div class="tableButton">
+  <a href="/list/create" class="btn">Create New Banner</a>
 </div>
 
 <div class="banners left">
@@ -15,8 +22,7 @@
   <img src="http://zukulbannercreator.net/u/banner/animated/result/48.gif?qAVm2K0affRIK7a5ddbA">
 </div>
 
-<div class="center">
-  <? if ($d['banners']) { ?>
+<? if ($d['banners']) { ?>
   <div class="table">
     <table>
       <tr>
@@ -58,36 +64,35 @@
         </tr>
       <? } ?>
     </table>
-
-    <script>
-      document.getElements('.table .preview img').each(function(el) {
-        var timeoutId = null;
-        var eFullPreview = el.getParent().getElement('.fullPreview');
-        el.addEvent('mouseover', function(e) {
-          clearTimeout(timeoutId);
-          eFullPreview.set('html', '<img src="' + el.get('src') + '">');
-          eFullPreview.setStyle('display', 'block');
-        });
-        eFullPreview.addEvent('mouseover', function(e) {
-          clearTimeout(timeoutId);
-        });
-        eFullPreview.addEvent('mouseout', function(e) {
-          timeoutId = setTimeout(function() {
-            el.getParent().getElement('.fullPreview').setStyle('display', 'none');
-          }, 100);
-        });
-        el.addEvent('mouseout', function(e) {
-          timeoutId = setTimeout(function() {
-            el.getParent().getElement('.fullPreview').setStyle('display', 'none');
-          }, 100);
-        });
-      });
-      new Tips('.table img');
-    </script>
   </div>
-<? } else { ?>
+  <script>
+    document.getElements('.table .preview img').each(function(el) {
+      var timeoutId = null;
+      var eFullPreview = el.getParent().getElement('.fullPreview');
+      el.addEvent('mouseover', function(e) {
+        clearTimeout(timeoutId);
+        eFullPreview.set('html', '<img src="' + el.get('src') + '">');
+        eFullPreview.setStyle('display', 'block');
+      });
+      eFullPreview.addEvent('mouseover', function(e) {
+        clearTimeout(timeoutId);
+      });
+      eFullPreview.addEvent('mouseout', function(e) {
+        timeoutId = setTimeout(function() {
+          el.getParent().getElement('.fullPreview').setStyle('display', 'none');
+        }, 100);
+      });
+      el.addEvent('mouseout', function(e) {
+        timeoutId = setTimeout(function() {
+          el.getParent().getElement('.fullPreview').setStyle('display', 'none');
+        }, 100);
+      });
+    });
+    new Tips('.table img');
+  </script>
+<? }
+else { ?>
   <p>You have no banners</p>
 <? } ?>
-</div>
 
 

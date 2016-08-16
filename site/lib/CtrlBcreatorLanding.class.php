@@ -11,8 +11,10 @@ class CtrlBCreatorLanding extends CtrlBase {
     Sflm::frontend('css')->addPath('m/css/landing/home.css');
     Sflm::frontend('css')->addPath('m/css/landing/form.css');
     Sflm::frontend('css')->addPath('m/css/landing/table.css');
+    Sflm::frontend('css')->addPath('m/css/landing/banners.css');
     $this->d['mainTpl'] = 'landing/main';
     $this->d['tpl'] = 'landing/inner';
+    $this->d['name'] = lcfirst(Misc::removePrefix('CtrlBcreator', get_class($this)));
     $this->d['menu'] = [
       [
         'title' => 'HOME',
@@ -55,6 +57,22 @@ class CtrlBCreatorLanding extends CtrlBase {
         ]
       ]
     ];
+    $this->findAndSetTitle($this->d['menu']);
+  }
+
+  protected function findAndSetTitle($menu) {
+    foreach ($menu as $v) {
+      if ($v['link'] == '/'.$this->req->path) {
+        $this->setPageTitle($v['title']);
+        return true;
+      }
+      if (!empty($v['menu'])) {
+        if ($this->findAndSetTitle($v['menu'])) {
+          return;
+        }
+      }
+    }
+    return false;
   }
 
 }

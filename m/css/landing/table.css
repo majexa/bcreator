@@ -1,31 +1,12 @@
-.bannersList {
-padding-bottom: 20px;
-}
-.bannersList a {
-text-align: center;
-color: #555;
-font-size: 11px;
-display: inline-block;
-border: 1px solid #ccc;
-background: #fff;
-width: 100px;
-height: 100px;
-margin: 0 10px 10px 0;
-}
-.bannersList a:hover {
-border-color: #555;
-}
-.bannersList span {
-display: block;
-margin-top: 40px;
-}
 .dialog {
 background: #fff;
 }
-.table {
-display: inline-block;
-margin: auto;
-
+.tableButton {
+margin-top: 17px;
+float: right;
+}
+.table table {
+width: 100%;
 }
 .table th {
 background: #353535;
