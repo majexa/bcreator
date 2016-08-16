@@ -1253,6 +1253,10 @@ margin: 0 0 7px 0;
 font-weight: bold;
 }
 
+.table .tool a {
+color: #000;
+text-decoration: none;
+}
 /*--|/home/user/ngn-env/projects/bcreator/m/css/landing/banners.css|--*/
 .banners {
 position: absolute;

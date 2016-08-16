@@ -13343,7 +13343,7 @@ Ngn.RequiredOptions = new Class({
 });
 
 /*--|/home/user/ngn-env/ngn/more/scripts/js/locale.php| (with request data)--*/
-Locale.define("en-US", "Core", {"keepEmptyIfNotChanges":"Keep empty if you don't wish to change your password","add":"Add","clean":"Clean","delete":"Delete","cancel":"Cancel","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading","at":"at"});
+Locale.define("en-US", "Core", {"add":"Add","clean":"Clean","delete":"Delete","cancel":"Cancel","uploading":"Uploading","uploadComplete":"Upload complete","change":"Change","areYouSure":"Are you sure?","loading":"Loading","at":"at"});
 /*--|/home/user/ngn-env/ngn/i/js/ngn/dialog/Ngn.Dialog.js|--*/
 // @requiresBefore s2/js/locale?key=core
 Ngn.Dialog = new Class({

@@ -44,3 +44,8 @@ margin: 0 0 7px 0;
 .table b {
 font-weight: bold;
 }
+
+.table .tool a {
+color: #000;
+text-decoration: none;
+}

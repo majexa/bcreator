@@ -52,8 +52,12 @@
               Need to render
             <? } ?>
           </td>
-          <td>
-            <a href="<?= $v['downloadLink'] ?>"><img src="/m/img/landing/btn/download.png" title="Download"></a>
+          <td class="tool">
+            <? if ($v['downloadLink']) { ?>
+              <a href="<?= $v['downloadLink'] ?>"><img src="/m/img/landing/btn/download.png" title="Download"> Download</a>
+            <? } else { ?>
+              Never rendered
+            <? } ?>
           </td>
           <td>
             <a href="/cpanel/<?= $v['id'] ?>"><img src="/m/img/landing/btn/edit.png" title="Edit"></a>
