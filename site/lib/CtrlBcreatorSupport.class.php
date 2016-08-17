@@ -16,7 +16,7 @@ class CtrlBcreatorSupport extends CtrlBcreatorLanding {
 
   function action_complete() {
     $this->d['innerTpl'] = 'common/html';
-    $this->d['html'] = '<p>Your message has been sent and will be reviewed in the next 48 hours. Thanks for your patience</p>';
+    $this->d['html'] = '<p>Your message has been sent and will be reviewed within 48 hours. Thank you for your patience!</p>';
   }
 
 }
