@@ -18,6 +18,7 @@ class BcreatorSupportForm extends Form {
       [
         'name' => 'email',
         'title' => 'Email',
+        'type' => 'email',
         'required' => true
       ],
       [
