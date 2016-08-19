@@ -4024,6 +4024,7 @@ height: 16px;
 .iconsSet .xls i, .icon_xls i, a.iconBtn.xls i, a.icon.xls i { background-position: -367px -494px }
 .iconsSet .money i, .icon_money i, a.iconBtn.money i, a.icon.money i { background-position: -66px -234px }
 .iconsSet .copy i, .icon_copy i, a.iconBtn.copy i, a.icon.copy i { background-position: 2px -54px }
+.iconsSet .guestAuth i, .icon_guestAuth i, a.iconBtn.guestAuth i, a.icon.guestAuth i { background-position: -296px 0px }
 .tools .folder i { background-position: -250px -103px }
 .tools .page i { background-position: -20px -442px }
 .tools .link i { background-position: -158px -234px }
@@ -4147,6 +4148,7 @@ height: 16px;
 .tools .xls i { background-position: -367px -494px }
 .tools .money i { background-position: -66px -234px }
 .tools .copy i { background-position: 2px -54px }
+.tools .guestAuth i { background-position: -296px 0px }
 
 .smIcons.drag i {
 background-image: none;
