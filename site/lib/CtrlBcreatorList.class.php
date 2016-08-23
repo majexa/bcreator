@@ -2,12 +2,16 @@
 
 class CtrlBcreatorList extends CtrlBcreatorLanding {
 
+  function checkUser() {
+      if (!Auth::get('id')) {
+          $this->redirect('/');
+          return;
+      }
+  }
+
   function action_default() {
+    self::checkUser();
     Sflm::frontend('css')->addLib('i/css/common/tips.css');
-    if (!Auth::get('id')) {
-      $this->redirect('/');
-      return;
-    }
     $this->setPageTitle('My Banners');
     $this->d['banners'] = [];
     foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', Auth::get('id')) as $v) {
@@ -18,6 +22,7 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
   }
 
   function action_create() {
+    self::checkUser();
     $this->setPageTitle('Create new');
     $this->d['menu'][1]['active'] = true;
     $form = new BannerSettingsCreationForm;
@@ -30,17 +35,20 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
   }
 
   function action_delete() {
+    self::checkUser();
     $this->d['banner'] = Misc::checkEmpty(db()->selectRow('SELECT * FROM bcBanners WHERE id=?d AND userId=?d', $this->req->param(2), Auth::get('id')));
     //$this->d['banner']['title'] = 'ID='.$this->d['banner']['id'];
     $this->d['innerTpl'] = 'landing/delete';
   }
 
   function action_deleteConfirmed() {
+    self::checkUser();
     db()->query('DELETE FROM bcBanners WHERE id=?d AND userId=?d', $this->req->param(2), Auth::get('id'));
     $this->redirect('/list');
   }
 
   function action_download() {
+    self::checkUser();
     $banner = new BcBanner(db()->selectRow('SELECT * FROM bcBanners WHERE id=?d AND userId=?d', $this->req->param(2), Auth::get('id')));
     Misc::checkEmpty($banner['downloadFile']);
     header('Content-Type: application/image');
