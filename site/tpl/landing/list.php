@@ -63,7 +63,7 @@
             <a href="/cpanel/<?= $v['id'] ?>"><img src="/m/img/landing/btn/edit.png" title="Edit"></a>
           </td>
           <td>
-            <a href="/list/delete/<?= $v['id'] ?>"><img src="/m/img/landing/btn/delete.png" title="Delete"></a>
+            <img src="/m/img/landing/btn/delete.png" class="del" title="Delete" data="<?= $v['id'] ?>">
           </td>
         </tr>
       <? } ?>
