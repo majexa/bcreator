@@ -69,6 +69,8 @@
       <? } ?>
     </table>
   </div>
+  <link rel="stylesheet" type="text/css" href="/i/css/common/dialog.css">
+  <link rel="stylesheet" type="text/css" href="/sd/css/list.css">
   <script>
     document.getElements('.table .preview img').each(function(el) {
       var timeoutId = null;
@@ -93,6 +95,18 @@
       });
     });
     new Tips('.table img');
+      window.addEvent('domready', function() {
+        $$('.del').addEvent('click', function(event) {
+          var btName = $(this).getParent().getParent().getFirst().getElement('p').get('text');
+          var dialog = new Ngn.Dialog.Confirm({
+            message: "Are you sure whant to delete banner <b>"+btName+"</b>?",
+            onOkClose: function () {
+              document.location.href="/list/deleteConfirmed/"+$(this).get('data');
+            }.bind(this)
+          });
+          $$('.dialog').setStyle('top', '35%');
+        });
+    });
   </script>
 <? }
 else { ?>
