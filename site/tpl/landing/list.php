@@ -95,7 +95,6 @@
       });
     });
     new Tips('.table img');
-      window.addEvent('domready', function() {
         $$('.del').addEvent('click', function(event) {
           var btName = $(this).getParent().getParent().getFirst().getElement('p').get('text');
           var dialog = new Ngn.Dialog.Confirm({
@@ -106,7 +105,6 @@
           });
           $$('.dialog').setStyle('top', '35%');
         });
-    });
   </script>
 <? }
 else { ?>
