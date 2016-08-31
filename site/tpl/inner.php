@@ -10,6 +10,8 @@
     <div style="margin-top: 8px; margin-left: 55px;">
       <!--<a href="/profile" class="profile"><i></i><span>My Profile</span></a>-->
       <a href="/list" class="list"><i></i><span>My Banners</span></a>
+      <br>
+      <br>
       <a href="/?logout=1" class="logout"><i></i><span>Logout</span></a>
     </div>
   </div>
