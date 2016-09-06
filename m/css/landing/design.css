@@ -48,6 +48,14 @@ padding: 8px 0 0 70px;
 .footer .cont a {
 color: #E8E9EA;
 }
+
+#trash_ctn {
+ background: #888;
+ -moz-border-radius: 50px;
+ -webkit-border-radius: 50px;
+ border-radius: 50px;
+}
+
 .head .cont {
 padding: 20px 0;
 }
