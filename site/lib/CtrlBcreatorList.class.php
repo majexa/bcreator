@@ -47,7 +47,7 @@ class CtrlBcreatorList extends CtrlBcreatorLanding {
               } else {
                   $img = "";
               }
-              echo "<tr><td><b id='name-$v[id]'>$v[title]</b><br>$img</td><td>$v[size]</td><td><span onclick='restoreTrash(\"$v[id]\");'>Restore</span> <span onclick='delTrash(\"$v[id]\");'>Delete</span></td></tr>";
+              echo "<tr><td><b id='name-$v[id]'>$v[title]</b><br>$img</td><td>$v[size]</td><td><a href='#'><img src='/m/img/landing/restore.png' style='width:25px' title='Restore' onclick='restoreTrash(\"$v[id]\");'></a> <a href='#'><img src='/m/img/landing/delete.png' style='width:20px' title='Delete'  onclick='delTrash(\"$v[id]\");'></a></td></tr>";
           }
           echo "</tbody></table>";
           exit;
