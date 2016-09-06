@@ -30,6 +30,13 @@ cursor: pointer;
 max-height: 50px;
 max-width: 200px;
 }
+
+img.thumb {
+cursor: pointer;
+max-height: 50px;
+max-width: 200px;
+}
+
 .table .fullPreview {
 cursor: pointer;
 top: 0;
