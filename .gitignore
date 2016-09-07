@@ -8,3 +8,5 @@ site/config/constants/more.php
 site/config/constants/database.php
 u/bcImagesCache/*
 u/banner/*
+u/js*
+u/css/*
