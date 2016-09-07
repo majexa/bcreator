@@ -14,9 +14,6 @@
     Ngn.sd.barsClass = Ngn.sd.BcreatorBars;
     Ngn.sd.isTrialUser = <?= BcreatorCore::isTrailUser() ? 'true' : 'false' ?>;
     Locale.use('en-US');
-    window.addEvent('sdAfterInit', function(bannerId) {
-      new Ngn.sd.BannersBar();
-    });
   </script>
 </head>
 
