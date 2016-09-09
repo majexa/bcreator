@@ -12,13 +12,15 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
     $this->d['tpl'] = 'landing/home';
     $this->d['menu'][0]['active'] = true;
     $this->d['banners'] = [];
-    foreach (db()->select('SELECT * FROM bcBanners WHERE userId=?d', self::HOMEPAGE_USER_ID) as $v) {
+    foreach (db()->select("SELECT bcBanners.* FROM bcBanners,users WHERE bcBanners.userId=users.id AND users.login LIKE 'template' AND bcBanners.title LIKE '%_main'") as $v) {
       $banner = new BcBanner($v);
-      list($banner->r['w'], $banner->r['h']) = getimagesize($banner['downloadFile']);
-      if ($banner->r['h'] > 250) {
-        //$banner->r['w'] = round($banner->r['w'] * 150 / $banner->r['h']);
+      if($banner['downloadFile']!=""){
+        list($banner->r['w'], $banner->r['h']) = getimagesize($banner['downloadFile']);
+        if ($banner->r['h'] > 250) {
+          //$banner->r['w'] = round($banner->r['w'] * 150 / $banner->r['h']);
+        }
+        $this->d['banners'][] = $banner->r;
       }
-      $this->d['banners'][] = $banner->r;
     }
     $this->setPageTitle('Home');
   }
