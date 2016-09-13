@@ -17,7 +17,8 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
     Sflm::frontend('js')->addPath('sd/js/plugins/undo.js');
     Sflm::frontend('js')->addPath('sd/js/plugins/redo.js');
     Sflm::frontend('js')->addPath('sd/js/plugins/urhkaeys.js');
-
+    Sflm::frontend('js')->addPath('sd/js/plugins/hopscotch.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/help_tour.js');
   }
 
   protected function editPageTitle() {
@@ -72,4 +73,11 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
     }
   }
 
+  function action_json_checkHelpNeed(){
+        return  $this->json["help"]=db()->selectCell("SELECT `help` FROM `users` WHERE id=?d", Auth::get('id'));
+    }
+
+  function action_json_setNoNeedHelp(){
+        return  $this->json["help"]=db()->query("UPDATE `users` SET `help` = '1' WHERE id=?d", Auth::get('id'));
+    }
 }
