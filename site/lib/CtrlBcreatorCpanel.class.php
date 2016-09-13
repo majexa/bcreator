@@ -14,6 +14,10 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
     Sflm::frontend('js')->addPath('sd/js/plugins/settings.js');
     Sflm::frontend('js')->addPath('m/js/bc/plugins/renderTrial.js');
     Sflm::frontend('js')->addPath('m/js/bc/plugins/download.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/undo.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/redo.js');
+    Sflm::frontend('js')->addPath('sd/js/plugins/urhkaeys.js');
+
   }
 
   protected function editPageTitle() {
