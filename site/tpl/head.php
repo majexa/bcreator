@@ -7,9 +7,6 @@
   <? if (strstr($d['ctrlName'], 'Default')) { ?>
     <link rel="stylesheet" type="text/css" href="/m/css/home.css" media="screen, projection"/>
   <? } ?>
-  <? if (strstr($d['ctrlName'], 'Cpanel')) { ?>
-    <link rel="stylesheet" type="text/css" href="/m/css/edit.css" media="screen, projection"/>
-  <? } ?>
   <script>
     Ngn.sd.barsClass = Ngn.sd.BcreatorBars;
     Ngn.sd.isTrialUser = <?= BcreatorCore::isTrailUser() ? 'true' : 'false' ?>;
