@@ -12,7 +12,7 @@ class CtrlBcreatorDefault extends CtrlBcreatorLanding {
     $this->d['tpl'] = 'landing/home';
     $this->d['menu'][0]['active'] = true;
     $this->d['banners'] = [];
-    foreach (db()->select("SELECT bcBanners.* FROM bcBanners,users WHERE bcBanners.userId=users.id AND users.login LIKE 'template' AND bcBanners.title LIKE '%_main'") as $v) {
+    foreach (db()->select("SELECT sdDocuments.* FROM sdDocuments,users WHERE sdDocuments.userId=users.id AND users.login LIKE 'template' AND sdDocuments.title LIKE '%_main'") as $v) {
       $banner = new BcBanner($v);
       if($banner['downloadFile']!=""){
         list($banner->r['w'], $banner->r['h']) = getimagesize($banner['downloadFile']);

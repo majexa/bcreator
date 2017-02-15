@@ -5,9 +5,6 @@
   </div>
   <div class="button">
     <a href="/list/create" class=" btn">Create New Banner</a>
-    <? if ($d['banners_trash_count']>0) { ?>
-      <a href="#" class="btn" id="trash">Restore from trash <span id="trash_ctn"><? echo $d["banners_trash_count"];?></span></a>
-    <?}?>
   </div>
 </div>
 
