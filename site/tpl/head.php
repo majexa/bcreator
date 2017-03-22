@@ -9,7 +9,6 @@
   <? } ?>
   <script>
     Ngn.sd.barsClass = Ngn.sd.BcreatorBars;
-    Ngn.sd.isTrialUser = <?= BcreatorCore::isTrailUser() ? 'true' : 'false' ?>;
     Locale.use('en-US');
   </script>
 </head>

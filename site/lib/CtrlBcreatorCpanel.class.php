@@ -5,23 +5,13 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
   protected function afterInit() {
     parent::afterInit();
     Sflm::frontend('js')->addPath('sd/js/plugins/new.js');
-    Sflm::frontend('js')->addPath('m/js/sd2/plugins/animatedText.js');
-    Sflm::frontend('js')->addPath('m/js/sd2/plugins/animatedImage.js');
-    Sflm::frontend('js')->addPath('m/js/sd2/plugins/background.js');
-    //Sflm::frontend('js')->addPath('m/js/sd2/plugins/button.js');
-    Sflm::frontend('js')->addPath('m/js/sd2/plugins/clipart.js');
-    //Sflm::frontend('js')->addPath('sd/js/plugins/fromTemplate.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/animatedText.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/animatedImage.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/background.js');
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/clipart.js');
     Sflm::frontend('js')->addPath('sd/js/plugins/settings.js');
-    Sflm::frontend('js')->addPath('m/js/sd2/plugins/renderTrial.js');
-    Sflm::frontend('js')->addPath('m/js/sd2/plugins/download.js');
-
+    Sflm::frontend('js')->addPath('m/js/bc/plugins/download.js');
     Sflm::frontend('css')->addPath('m/css/edit.css');
-
-//    Sflm::frontend('js')->addPath('sd/js/plugins/undo.js');
-//    Sflm::frontend('js')->addPath('sd/js/plugins/redo.js');
-//    Sflm::frontend('js')->addPath('sd/js/plugins/urhkaeys.js');
-//    Sflm::frontend('js')->addPath('sd/js/plugins/hopscotch.js');
-//    Sflm::frontend('js')->addPath('sd/js/plugins/help_tour.js');
   }
 
   protected function editPageTitle() {
