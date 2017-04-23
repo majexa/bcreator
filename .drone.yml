@@ -1,0 +1,43 @@
+pipeline:
+
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - sd2
+    volumes:
+      - /tmp/cache:/cache
+
+  build:
+    image: majexa/ngn
+    commands:
+      - bash sd2-download.sh
+
+  test:
+    image: majexa/ngn
+    commands:
+      # copy from cached place to location
+      - cp -ar sd2 /home/user/ngn-env/sd2
+      # run services
+      - /etc/init.d/mysql start
+      - /etc/init.d/nginx start
+      - /etc/init.d/php5.6-fpm start
+      # create empty project
+      - pm localServer createProject bcreator bcreator.local sd2
+      # merge with git repo
+      - cp -arf . /home/user/ngn-env/projects/bcreator
+      # update hosts
+      - pm localServer updateHosts
+      # run test
+      - cd /home/user/ngn-env/ngn && git pull origin master
+      - cd /home/user/ngn-env/tst && git pull origin master
+      - tst proj l bcreator
+
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - sd2
+    volumes:
+      - /tmp/cache:/cache
