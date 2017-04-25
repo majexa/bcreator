@@ -1,5 +1,16 @@
-<ul>
-<? foreach ($d['list'] as $v) { ?>
-    <li><a href="/cpanel/<?= $v['id'] ?>"><?= $v['title'] ?></a></li>
-<? } ?>
-</ul>
+<div id="table"></div>
+<script>
+  new Ngn.Grid({
+    basePath: '/list',
+    listPath: '/json_getItems',
+    tools: {
+      edit: 'Редактировать',
+      'delete': 'Удалить'
+    },
+    menu: [Ngn.Grid.menu['new']],
+    toolActions: {
+      edit: function(row, opt) {
+      }
+    }
+  }).reload();
+</script>

@@ -1,0 +1,26 @@
+{
+  "name": "bcreator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/majexa/bcreator.git"
+  },
+  "author": "Andrey Yartsev <andrey.yartsev.g.@gmail.com> (http://majexa.ru)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/majexa/bcreator/issues"
+  },
+  "homepage": "https://github.com/majexa/bcreator#readme",
+  "devDependencies": {
+    "browser-sync": "^2.18.8",
+    "dotenv": "^4.0.0",
+    "gulp": "^3.9.1",
+    "gulp-connect-php": "^1.0.0",
+    "require-dir": "^0.3.1"
+  }
+}
