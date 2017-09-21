@@ -1,3 +1,3 @@
 <?php
 
-setConstant('SITE_TITLE', 'Banner Creator');
+setConstant('SITE_TITLE', 'GIF Maker');

@@ -46,11 +46,7 @@ max-height: 50px;
 .settingsDialog .fieldSet_text {
 border-bottom: 1px solid #575757;
 }
-/* gray style */
-.mid-float-box {
-border: 1px solid #222;
-background: #888;
-}
+
 .dialog-footer .foot-wrap {
 background: #888;
 }

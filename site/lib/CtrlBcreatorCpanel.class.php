@@ -21,16 +21,15 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
   const TEMPLATE_USER_ID = 2;
 
   function action_ajax_backgroundSelect() {
-    $size = BcCore::getSize($this->d['bannerId']);
-    foreach (db()->selectCol("SELECT image FROM dd_i_backgrounds WHERE size=?", $size['w'].'x'.$size['h']) as $v) {
-      print "<img src='/".UPLOAD_DIR.'/'.$v."'>\n";
+    foreach (glob(WEBROOT_PATH.'/m/backgrounds/*') as $v) {
+      print "<img src='/m/backgrounds/".basename($v)."'>\n";
     }
   }
 
   function action_json_createBackgroundBlock() {
     $data = CtrlSdPageBlock::protoData('background');
     $data['data']['backgroundUrl'] = $this->req->rq('backgroundUrl');
-    $data['data']['size'] = BcCore::getSize($this->d['bannerId']);
+    $data['data']['size'] = Sd2Core::getSize($this->d['bannerId']);
     $data['data']['subType'] = 'image';
     $data['data']['bottom'] = true;
     $data['data']['single'] = true;
@@ -44,8 +43,8 @@ class CtrlBcreatorCpanel extends CtrlSdCpanel {
   }
 
   function action_ajax_clipartSelect() {
-    foreach (db()->selectCol("SELECT image FROM dd_i_clipart") as $v) {
-      print "<img src='/".UPLOAD_DIR.'/'.$v."'>\n";
+    foreach (glob(WEBROOT_PATH.'/m/cliparts/*') as $v) {
+      print "<img src='/m/cliparts/".basename($v)."'>\n";
     }
   }
 

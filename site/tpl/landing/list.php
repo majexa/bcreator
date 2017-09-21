@@ -1,16 +1,7 @@
-<div id="table"></div>
-<script>
-  new Ngn.Grid({
-    basePath: '/list',
-    listPath: '/json_getItems',
-    tools: {
-      edit: 'Редактировать',
-      'delete': 'Удалить'
-    },
-    menu: [Ngn.Grid.menu['new']],
-    toolActions: {
-      edit: function(row, opt) {
-      }
-    }
-  }).reload();
-</script>
+<a href="/list/add">Добавить документ</a>
+<? foreach ($d['items'] as $v) { ?>
+  <li>
+    <?= $v['title'] ?: 'unnamed' ?>
+    <a href="/cpanel/<?= $v['id'] ?>">Редактировать</a>
+  </li>
+<? } ?>
