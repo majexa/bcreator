@@ -3,10 +3,10 @@
 <div class="body">
   <? if (!strstr($d['ctrlName'], 'Cpanel')) { ?>
     <div style="padding: 10px 50px;">
-      Banner Creator Tool
+      Gif Creator Tool
       <? $this->tpl('auth/login') ?>
       <? if (Auth::get('id')) { ?>
-        <a href="/list">Мои баннеры</a>
+        <a href="/list">Мои документы</a>
       <? } ?>
       <? $this->tpl($d['tpl'], $d) ?>
     </div>
